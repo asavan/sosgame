@@ -22,9 +22,18 @@ test("canSet", () => {
 
 
 test("winning", () => {
-    const field = fieldObj.field([-1, -1, 5, 5, 2, 5, -1, -1]);
+    const field = fieldObj.field([-1, -1, 5, 5, 2, 5, 0, -1, -1]);
     assert.equal(fieldObj.NORMAL_MOVE, field.checkWinning(0));
     for (let i = 1; i < 4; ++i) {
         assert.equal(fieldObj.WINNING_MOVE, field.checkWinning(i), `error on ${i}`);
     }
 });
+
+test("drawing", () => {
+    const field = fieldObj.field([-1, -1, 5, 5, 2, 5, -1, -1]);
+    assert.equal(fieldObj.DRAW_MOVE, field.checkWinning(0));
+    for (let i = 1; i < 4; ++i) {
+        assert.equal(fieldObj.WINNING_MOVE, field.checkWinning(i), `error on ${i}`);
+    }
+});
+
