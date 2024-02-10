@@ -32,6 +32,7 @@ body {
 
 .content {
     flex: 1 0 auto;
+    padding: 10px;
 }
 
 footer {
@@ -112,26 +113,31 @@ footer {
 
 .red {
     --border-color: var(--color-red);
+
     color: var(--color-red);
 }
 
 .blue {
     --border-color: var(--color-blue);
+
     color: var(--color-blue);
 }
 
 .green {
     --border-color: var(--color-green);
+
     color: var(--color-green);
 }
 
 .yellow {
     --border-color: var(--color-yellow);
+
     color: var(--color-yellow);
 }
 
 .black {
     --border-color: var(--color-black);
+
     color: var(--color-black);
 }
 
@@ -196,4 +202,4 @@ footer {
 
 .disabled, .disabled * {
     cursor: not-allowed;
- }
+}
