@@ -49,17 +49,16 @@ export default function presenterFunc(settings) {
         if (settings.mode === "hotseat") {
             clientUserIdx = currentUserIdx;
         }
-        console.log("nextUser", clientUserIdx, currentUserIdx);
     };
 
     const setMove = function(position, digit, playerIdx) {
         if (!canMove(position, digit, playerIdx, currentUserIdx)) {
-            return fieldObj.IMPOSSIBLE_MOVE;
+            return {res: fieldObj.IMPOSSIBLE_MOVE, position: -1, digit: -1, playerId: currentUserIdx, clientId: playerIdx};
         }
 
         const res = field.setSafeByIndex(digit, position);
         if (res === fieldObj.IMPOSSIBLE_MOVE) {
-            return res;
+            return {res, position: -1, digit: -1, playerId: currentUserIdx, clientId: playerIdx};
         }
 
         activeCellIndex = -1;
@@ -82,7 +81,7 @@ export default function presenterFunc(settings) {
     };
 
     const setActiveDigitIndex = function (ind) {
-        if (clientUserIdx !== currentUserIdx && !gameover) {
+        if (clientUserIdx !== currentUserIdx || gameover) {
             return;
         }
         activeDigitIndex = ind;
@@ -92,7 +91,7 @@ export default function presenterFunc(settings) {
 
     const setActivePosition = function (pos) {
 
-        if (clientUserIdx !== currentUserIdx && !gameover) {
+        if (clientUserIdx !== currentUserIdx || gameover) {
             return;
         }
 

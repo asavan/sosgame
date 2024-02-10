@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 :root {
@@ -12,8 +13,10 @@
     --color-red: #F55;
     --color-yellow: #FA0;
     --color-blue: #55F;
+    --color-black: #000;
     --current-color: aliceblue;
     --inverted-color: white;
+    --border-color: gray;
 }
 
 
@@ -21,7 +24,6 @@ html,
 body {
     height: 100%;
 }
-
 
 body {
     display: flex;
@@ -39,10 +41,15 @@ footer {
 .field {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .box {
+    flex: var(--field-size);
     display: flex;
+    gap: 5px;
+    align-items: stretch;
 }
 
 .qrcode.big {
@@ -53,10 +60,10 @@ footer {
 }
 
 .buttons {
-    align-self: center;
     display: flex;
-    flex-wrap: wrap;
-    min-width: 350px;
+    flex: 2;
+    gap: 5px;
+    justify-content: center;
 }
 
 .qrcode {
@@ -64,28 +71,6 @@ footer {
     display: inline-block;
 }
 
-hr {
-    display: block;
-    height: 1px;
-    border: 0;
-    border-top: 1px solid #ccc;
-    margin: 5px 0;
-    padding: 0;
-}
-
-@media (width <= 700px) {
-    .field {
-        flex-wrap: wrap;
-    }
-
-    hr {
-        width: 100%;
-    }
-
-    .hidden2 {
-        display: none;
-    }
-}
 
 .install {
     background-color: var(--main-color);
@@ -102,60 +87,52 @@ hr {
     display: none;
 }
 
-.cell, .digit {
+.cell {
+    flex-grow: 1;
     aspect-ratio: 1 / 1;
-    width: 100px;
+    display: grid;
+    place-items: center;
+    min-width: 50px;
     max-width: 100px;
-    max-height: 100px;
-    border: solid 2px gray;
-    margin: 5px;
-    text-align: center;
-    font: bold 24px/100px Tahoma, sans-serif;
+    border: solid 2px;
+    border-color: var(--border-color);
+    font: bold 24px Tahoma, sans-serif;
     border-radius: 10px;
     background-color: var(--main-color);
     touch-action: none;
     user-select: none;
+    cursor: pointer;
 }
 
-.digit {
-    cursor: grab;
-}
-
-
-
-@media (width <= 450px) {
-    .field {
-        flex-wrap: wrap;
-    }
-
-    hr {
-        width: 100%;
-    }
-
+@media (width <= 700px) {
     .hidden2 {
         display: none;
     }
 }
 
-.hole {
-    color: transparent;
-    cursor: default;
-}
-
-
 .red {
-    border-color: var(--color-red);
+    --border-color: var(--color-red);
     color: var(--color-red);
 }
 
 .blue {
-    border-color: var(--color-blue);
+    --border-color: var(--color-blue);
     color: var(--color-blue);
 }
 
 .green {
-    border-color: var(--color-green);
+    --border-color: var(--color-green);
     color: var(--color-green);
+}
+
+.yellow {
+    --border-color: var(--color-yellow);
+    color: var(--color-yellow);
+}
+
+.black {
+    --border-color: var(--color-black);
+    color: var(--color-black);
 }
 
 .cell.last {
@@ -164,22 +141,7 @@ hr {
 
 .active {
     color: white;
-}
-
-.active.red {
-    background-color: var(--color-red);
-}
-
-.active.blue {
-    background-color: var(--color-blue);
-}
-
-.active.green {
-    background-color: var(--color-green);
-}
-
-.active.yellow {
-    background-color: var(--color-yellow);
+    background-color: var(--border-color);
 }
 
 .overlay {
@@ -232,3 +194,6 @@ hr {
     overflow: auto;
 }
 
+.disabled, .disabled * {
+    cursor: not-allowed;
+ }

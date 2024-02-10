@@ -4,8 +4,15 @@ import settings from "./settings.js";
 import gameFunction from "./game.js";
 import {parseSettings, assert} from "./utils/helper.js";
 
+function adjustSettings(settings) {
+    if (settings.colorOrder.length > settings.playerLimit) {
+        settings.colorOrder.splice(settings.playerLimit);
+    }
+}
+
 export default async function starter(window, document) {
     parseSettings(window, document, settings);
+    adjustSettings(settings);
 
     let mode = null;
     if (settings.mode === "net") {

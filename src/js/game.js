@@ -19,7 +19,7 @@ const handleClick = function (evt, parent) {
     };
 
     evt.preventDefault();
-    if (!(evt.target.classList.contains("cell") || evt.target.classList.contains("digit"))) {
+    if (!evt.target.classList.contains("cell") || evt.target.classList.contains("disabled")) {
         return -1;
     }
     return getIndex(evt, parent);
@@ -46,18 +46,22 @@ function draw(presenter, box) {
     for (const [i, obj] of iter) {
         const tile = box.childNodes[i];
         const val = obj.text;
+
         tile.textContent = val.toString();
+        if (tile.textContent === " ") {
+            // prevent cell shrinking
+            tile.innerHTML = "&nbsp;";
+        }
         if (val && val !== " ") {
             tile.className = "cell disabled";
         } else {
-            tile.className = "cell hole";
+            tile.className = "cell";
         }
 
         if (obj.isActive) {
             tile.classList.add("active");
             tile.classList.add(presenter.currentColor());
         }
-        // console.log("draw", obj);
         if (obj.color) {
             tile.classList.add(obj.color);
         }
@@ -65,22 +69,20 @@ function draw(presenter, box) {
             tile.classList.add("last");
         }
     }
-
 }
-
 
 export default function game(window, document, settings) {
 
+    const field = document.querySelector(".field");
     const box = document.getElementsByClassName("box")[0];
     const digits = document.getElementsByClassName("buttons")[0];
     const overlay = document.getElementsByClassName("overlay")[0];
     const close = document.getElementsByClassName("close")[0];
     const btnInstall = document.getElementsByClassName("install")[0];
+    const root = document.documentElement;
+    root.style.setProperty("--field-size", settings.size);
+    field.classList.remove("disabled");
 
-    if (settings.size !== 3) {
-        const root = document.documentElement;
-        root.style.setProperty("--field-size", settings.size);
-    }
 
     const presenter = presenterFunc(settings);
 
@@ -97,6 +99,7 @@ export default function game(window, document, settings) {
         content.textContent = presenter.endMessage2(res);
         overlay.classList.add("show");
         btnInstall.classList.remove("hidden2");
+        field.classList.add("disabled");
         handlers["gameover"]();
     }
 
@@ -109,6 +112,7 @@ export default function game(window, document, settings) {
     async function animate(result) {
         const res = result.res;
         if (res !== fieldObj.IMPOSSIBLE_MOVE) {
+            console.log("animate", result);
             draw(presenter, box);
             drawDigits(presenter, digits, settings);
             await handlers["message"](result);
@@ -126,13 +130,21 @@ export default function game(window, document, settings) {
     }
 
     const handleBox = function (evt) {
-        presenter.setActivePosition(handleClick(evt, box));
+        const ind = handleClick(evt, box);
+        if (ind < 0) {
+            return;
+        }
+        presenter.setActivePosition(ind);
         draw(presenter, box);
         doStep();
     };
 
     const handleClickDigits = function (evt) {
-        presenter.setActiveDigitIndex(handleClick(evt, digits));
+        const ind = handleClick(evt, digits);
+        if (ind < 0) {
+            return;
+        }
+        presenter.setActiveDigitIndex(ind);
         drawDigits(presenter, digits, settings);
         doStep();
     };

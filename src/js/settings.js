@@ -8,5 +8,6 @@ export default {
     externalId: "server",
     colorOrder: ["blue", "red", "green", "yellow"],
     color: "blue",
+    playerLimit: 2,
     size: 10
 };
