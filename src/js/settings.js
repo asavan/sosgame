@@ -9,5 +9,5 @@ export default {
     colorOrder: ["blue", "red", "green", "yellow"],
     color: "blue",
     playerLimit: 2,
-    size: 10
+    size: 14
 };

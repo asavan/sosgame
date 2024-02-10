@@ -105,7 +105,24 @@ footer {
     cursor: pointer;
 }
 
-@media (width <= 700px) {
+@media (width <= 750px) {
+    .cell {
+        max-width: calc((100vh - 30px)/var(--field-size) - 2px);
+        max-height: calc(100vh/var(--field-size));
+    }
+
+    .box {
+        flex-direction: column;
+        flex: 1;
+        gap: 2px;
+    }
+
+    .buttons {
+        flex-direction: column;
+        flex: 1;
+        align-self: center;
+    }
+
     .hidden2 {
         display: none;
     }

@@ -1,7 +1,7 @@
 const IMPOSSIBLE_MOVE = -1;
 const NORMAL_MOVE = 1;
-const WINNING_MOVE = 2;
-const DRAW_MOVE = 3;
+const DRAW_MOVE = 2;
+const WINNING_MOVE = 3;
 
 function valueToString(val) {
     switch(val) {
@@ -40,7 +40,7 @@ function init(fieldSize) {
 
 function field(arrInn) {
     const digits = [5, 2];
-    const arr = arrInn;
+    const arr = [...arrInn];
     const fieldSize = arr.length;
     const size = () => fieldSize;
     const inBounds = (pos) => pos >= 0 && pos < fieldSize;
@@ -62,15 +62,20 @@ function field(arrInn) {
     const isEmpty = (pos) => arr[2+pos] === 0;
     const canSet = (pos) => inBounds(pos) && isEmpty(pos);
     const setStr = (c, pos) => arr[2+pos] = stringToVal(c);
-    const setSafeByIndex = (ind, pos) => {
+    const setSafeByIndex = (ind, pos, needrestore = false) => {
         if (!canSet(pos)) {
             return IMPOSSIBLE_MOVE;
         }
         if (ind < 0 || ind >= digits.length) {
             return IMPOSSIBLE_MOVE;
         }
+        const oldVal = arr[2+pos];
         arr[2+pos] = digits[ind];
-        return checkWinning(pos);
+        const res = checkWinning(pos);
+        if (needrestore) {
+            arr[2+pos] = oldVal;
+        }
+        return res;
     };
     const setSafe = (c, pos) => {
         if (!canSet(pos)) {
@@ -86,12 +91,14 @@ function field(arrInn) {
         }
         return getChar(pos);
     };
+    const clone = () => field(arr);
     return {
         size,
         setSafe,
         setSafeByIndex,
         getCharSafe,
         canSet,
+        clone,
         // for tests
         isEmpty,
         inBounds,
