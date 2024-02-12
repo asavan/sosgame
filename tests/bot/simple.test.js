@@ -50,3 +50,11 @@ test("simple move4", () => {
     assert.equal(fieldObj.NORMAL_MOVE, result.res);
     assert.ok([1, 2].includes(result.position));
 });
+
+test("notLoosingMove", () => {
+    const field = fieldObj.field([-1, -1, 5, 0, 0, 5, 0, 2, 0, 0, -1, -1]);
+    const result = simplebot.notLoosingMove(field);
+    assert.equal(fieldObj.NORMAL_MOVE, result.res);
+    assert.equal(4, result.position);
+    assert.equal(1, result.digit);
+});

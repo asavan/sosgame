@@ -107,8 +107,9 @@ footer {
 
 @media (width <= 750px) {
     .cell {
+        min-width: 48px;
         max-width: calc((100vh - 30px)/var(--field-size) - 2px);
-        max-height: calc(100vh/var(--field-size));
+        max-height: calc((100vh - 30px)/var(--field-size) - 2px);
     }
 
     .box {
