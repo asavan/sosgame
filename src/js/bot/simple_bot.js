@@ -43,16 +43,6 @@ function notLoosingMove(field) {
     return ans;
 }
 
-function checkMoveNotLoose(field, position, digit) {
-    const clonedField = field.clone();
-    const res = clonedField.setSafeByIndex(digit, position);
-    if (res === fieldObj.IMPOSSIBLE_MOVE) {
-        return res;
-    }
-    const res1 = bestMove(clonedField, position - 2, position + 3);
-
-}
-
 function simpleMove(field) {
     const result = bestMove(field);
     if (result.res === fieldObj.WINNING_MOVE) {
