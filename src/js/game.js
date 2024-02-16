@@ -1,5 +1,5 @@
 import fieldObj from "./field.js";
-import {delay} from "./utils/helper.js";
+import {delay, assert} from "./utils/helper.js";
 import handlersFunc from "./utils/handlers.js";
 
 const handleClick = function (evt, parent) {
@@ -37,6 +37,11 @@ function drawDigits(presenter, digits, settings) {
 function drawField(presenter, box, digits, settings, overlay, btnInstall, field) {
     draw(presenter, box);
     drawDigits(presenter, digits, settings);
+    if (presenter.isMyMove()) {
+        field.classList.remove("disabled");
+    } else {
+        field.classList.add("disabled");
+    }
     if (presenter.isGameOver()) {
         const res = presenter.calcLastMoveRes();
         if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
@@ -44,6 +49,16 @@ function drawField(presenter, box, digits, settings, overlay, btnInstall, field)
         }
     }
 }
+
+function initField(document, fieldSize, className, elem) {
+    assert(elem);
+    for (let i = 0; i < fieldSize; i++) {
+        const cell = document.createElement("div");
+        cell.className = className;
+        elem.appendChild(cell);
+    }
+}
+
 
 function onGameEndDraw(res, presenter, overlay, btnInstall, field) {
     const message = presenter.endMessage(res);
@@ -87,23 +102,29 @@ function draw(presenter, box) {
     }
 }
 
+function setupOverlay(document) {
+    const overlay = document.querySelector(".overlay");
+    const close = document.querySelector(".close");
+    assert(overlay, "No overlay");
+    assert(close, "No close button");
+    close.addEventListener("click", function (e) {
+        e.preventDefault();
+        overlay.classList.remove("show");
+    }, false);
+    return overlay;
+}
+
 export default function game(window, document, settings, presenter) {
     const field = document.querySelector(".field");
     const box = document.getElementsByClassName("box")[0];
     const digits = document.getElementsByClassName("buttons")[0];
-    const overlay = document.getElementsByClassName("overlay")[0];
-    const close = document.getElementsByClassName("close")[0];
     const btnInstall = document.getElementsByClassName("install")[0];
+    const overlay = setupOverlay(document);
     const root = document.documentElement;
     root.style.setProperty("--field-size", presenter.size());
-    field.classList.remove("disabled");
+    // field.classList.remove("disabled");
 
     const handlers = handlersFunc(["message", "gameover", "started"]);
-
-    function onGameEnd(res) {
-        onGameEndDraw(res, presenter, overlay, btnInstall, field);
-        handlers.call("gameover");
-    }
 
     function on(name, f) {
         return handlers.on(name, f);
@@ -111,18 +132,19 @@ export default function game(window, document, settings, presenter) {
     const actionKeys = handlers.actionKeys;
     const makePresenter = presenter.toJson;
 
-    async function animate(result) {
+    async function animate(result, fromId) {
         const res = result.res;
         if (res !== fieldObj.IMPOSSIBLE_MOVE) {
-            console.log("animate", result);
-            draw(presenter, box);
-            drawDigits(presenter, digits, settings);
-            await handlers.call("message", result);
+            drawField(presenter, box, digits, settings, overlay, btnInstall, field);
+            let toSend = result;
+            if (fromId) {
+                toSend = {data: result, ignore: [fromId]};
+            }
+            await handlers.call("message", toSend);
             if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
-                onGameEnd(res);
+                await handlers.call("gameover", toSend);
             }
         }
-
     }
 
     async function doStep() {
@@ -151,30 +173,16 @@ export default function game(window, document, settings, presenter) {
         doStep();
     };
 
-    function initField(fieldSize, className, elem) {
-        for (let i = 0; i < fieldSize; i++) {
-            const cell = document.createElement("div");
-            cell.className = className;
-            elem.appendChild(cell);
-        }
-    }
 
-    function onMessage({res, position, digit, playerId}) {
+    function onMessage({res, position, digit, playerId}, fromId) {
         const result = presenter.setMove(position, digit, playerId);
-        console.log("onMessage", res === result.res);
-        return animate(result);
+        console.log("onMessage", res === result.res, fromId);
+        return animate(result, fromId);
     }
 
-    initField(presenter.size(), "cell", box);
-
-
-
+    initField(document, presenter.size(), "cell", box);
     box.addEventListener("click", handleBox, false);
     digits.addEventListener("click", handleClickDigits, false);
-    close.addEventListener("click", function (e) {
-        e.preventDefault();
-        overlay.classList.remove("show");
-    }, false);
 
     drawField(presenter, box, digits, settings, overlay, btnInstall, field);
 

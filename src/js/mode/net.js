@@ -90,12 +90,10 @@ function setupLogger(document, settings) {
 }
 
 function createGame(window, document, settings, connection, gameFunction, data, queue) {
-    console.log("createGame", data, data.presenter);
     const presenter = presenterObj.presenterFunc(data.presenter, settings);
     const game = gameFunction(window, document, settings, presenter);
     const actions = actionsFunc(game);
     setupProtocol(connection, actions, queue);
-
     return game;
 }
 
@@ -117,7 +115,15 @@ export default function gameMode(window, document, settings, gameFunction) {
                 const serverId = data.data.serverId;
                 const game = createGame(window, document, settings, connection, gameFunction, data.data, queue);
                 for (const handlerName of game.actionKeys()) {
-                    game.on(handlerName, (n) => con.sendTo(toObjJson(n, handlerName), serverId));
+                    game.on(handlerName, (n) => {
+                        if (n.ignore && Array.isArray(n.ignore)) {
+                            if (n.ignore.includes(serverId)) {
+                                networkLogger.log("ignore");
+                                return;
+                            }
+                        }
+                        con.sendTo(toObjJson(n, handlerName), serverId);
+                    });
                 }
                 resolve(game);
             });

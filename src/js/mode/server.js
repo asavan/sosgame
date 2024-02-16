@@ -134,7 +134,15 @@ export default function gameMode(window, document, settings, gameFunction) {
             setupProtocol(connection, actions, queue);
 
             for (const handlerName of game.actionKeys()) {
-                game.on(handlerName, (n) => con.sendAll(toObjJson(n, handlerName)));
+                game.on(handlerName, (n) => {
+                    let toSend = n;
+                    let ignore = null;
+                    if (n.ignore && Array.isArray(n.ignore)) {
+                        toSend = n.data;
+                        ignore = n.ignore;
+                    }
+                    con.sendAll(toObjJson(toSend, handlerName), ignore);
+                });
             }
             resolve(game);
         }).catch(e => {

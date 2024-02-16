@@ -35,6 +35,11 @@ export default function connectionFunc(id, logger) {
                     return;
                 }
 
+                if (json.ignore && Array.isArray(json.ignore) && json.ignore.includes(id)) {
+                    logger.log("user in ignore list");
+                    return;
+                }
+
                 if (json.action === "gamemessage") {
                     await handlers.call("gamemessage", json);
                 }
@@ -46,17 +51,16 @@ export default function connectionFunc(id, logger) {
                 }
             });
 
-            const sendAllExceptMe = (data) => {
+            const sendAll = (data, ignore) => {
                 logger.log(data);
-                return signaling.send("gamemessage", data, "all");
+                return signaling.send("gamemessage", data, "all", ignore);
             };
 
             const join = (data) => signaling.send("join", data, "all");
-            const sendAll = sendAllExceptMe;
 
             const sendTo = (data, to) => signaling.send("gamemessage", data, to);
             const init = (data, to) => signaling.send("gameinit", data, to);
-            signaling.on("open", () => resolve({sendTo, sendAllExceptMe, sendAll, join, init}));
+            signaling.on("open", () => resolve({sendTo, sendAll, join, init}));
         });
     }
     return {

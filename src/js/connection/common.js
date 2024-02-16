@@ -6,8 +6,8 @@ export default function createSignalingChannel(id, socketUrl, logger) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
     const ws = new WebSocket(socketUrl);
 
-    const send = (type, sdp, to) => {
-        const json = {from: id, to: to, action: type, data: sdp};
+    const send = (type, sdp, to, ignore) => {
+        const json = {from: id, to: to, action: type, data: sdp, ignore};
         logger.log("Sending [" + id + "] to [" + to + "]: " + JSON.stringify(sdp));
         return ws.send(JSON.stringify(json));
     };

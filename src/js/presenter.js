@@ -142,6 +142,8 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
             activeCellIndex, activeDigitIndex, lastMove, gameover, fieldArr: field.toArr(), movesIdx};
     };
 
+    const isMyMove = () => !gameover && currentUserIdx === clientUserIdx;
+
     const endMessage2 = (res) => {
         if (res === fieldObj.DRAW_MOVE) {
             return "Draw";
@@ -162,6 +164,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         endMessage2,
         toJson,
         isGameOver,
+        isMyMove,
         calcLastMoveRes
     };
 }
