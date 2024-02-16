@@ -1,27 +1,14 @@
-"use strict";
+import handlersFunc from "../utils/handlers.js";
+import createSignalingChannel from "./common.js";
 
-import commonConnection from "./common.js";
-
-function stub(message) {
-    console.trace("Stub " + message);
-}
-
-export default function connectionFunc(settings, location, id, logger) {
-    const handlers = {
-        "recv": stub,
-        "open": stub,
-        "socket_open": stub,
-        "socket_close": stub,
-        "close": stub,
-        "error": stub,
-        "disconnect": stub
-    };
+export default function connectionFunc(id, logger) {
+    const handlers = handlersFunc(["gamemessage", "close", "disconnect", "error", "join", "gameinit"]);
 
     function on(name, f) {
-        handlers[name] = f;
+        return handlers.on(name, f);
     }
 
-    function getWebSocketUrl() {
+    function getWebSocketUrl(settings, location) {
         if (settings.wh) {
             return settings.wh;
         }
@@ -31,14 +18,13 @@ export default function connectionFunc(settings, location, id, logger) {
         return "ws://" + location.hostname + ":" + settings.wsPort;
     }
 
-    function connect() {
+    function connect(socketUrl) {
         return new Promise((resolve, reject) => {
-            const socketUrl = getWebSocketUrl();
-            if (socketUrl == null) {
+            if (!socketUrl) {
                 reject("Can't determine ws address");
             }
-            const signaling = commonConnection.createSignalingChannel(id, socketUrl, logger, handlers, onOpen);
-            signaling.onmessage = async function(json) {
+            const signaling = createSignalingChannel(id, socketUrl, logger);
+            signaling.on("message", async function(json) {
                 if (json.from === id) {
                     logger.error("same user");
                     return;
@@ -50,25 +36,30 @@ export default function connectionFunc(settings, location, id, logger) {
                 }
 
                 if (json.action === "gamemessage") {
-                    await handlers["recv"](json.data, json.from);
+                    await handlers.call("gamemessage", json);
                 }
-            };
+                if (json.action === "gameinit") {
+                    await handlers.call("gameinit", json);
+                }
+                if (json.action === "join") {
+                    await handlers.call("join", json);
+                }
+            });
 
             const sendAllExceptMe = (data) => {
                 logger.log(data);
                 return signaling.send("gamemessage", data, "all");
             };
 
+            const join = (data) => signaling.send("join", data, "all");
             const sendAll = sendAllExceptMe;
 
-            const sendTo = stub;
-
-            function onOpen() {
-                resolve({sendTo, sendAllExceptMe, sendAll});
-            }
+            const sendTo = (data, to) => signaling.send("gamemessage", data, to);
+            const init = (data, to) => signaling.send("gameinit", data, to);
+            signaling.on("open", () => resolve({sendTo, sendAllExceptMe, sendAll, join, init}));
         });
     }
     return {
-        connect, on
+        connect, on, getWebSocketUrl
     };
 }

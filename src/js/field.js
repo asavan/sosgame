@@ -32,16 +32,13 @@ function stringToVal(str) {
 }
 
 function init(fieldSize) {
-    const arr = Array(fieldSize + 4).fill(0);
-    arr.fill(-1, fieldSize + 2);
-    arr.fill(-1, 0, 2);
-    return arr;
+    return Array(fieldSize).fill(0);
 }
 
 function field(arrInn) {
     const digits = [5, 2];
-    const arr = [...arrInn];
-    const fieldSize = arr.length;
+    const arr = [-1, -1, ...arrInn, -1, -1];
+    const fieldSize = arr.length - 4;
     const size = () => fieldSize;
     const inBounds = (pos) => pos >= 0 && pos < fieldSize;
     const checkWinning = (pos) => {
@@ -91,7 +88,8 @@ function field(arrInn) {
         }
         return getChar(pos);
     };
-    const clone = () => field(arr);
+    const clone = () => field(arrInn);
+    const toArr = () => arr.slice(2, -2);
     return {
         size,
         setSafe,
@@ -102,7 +100,8 @@ function field(arrInn) {
         // for tests
         isEmpty,
         inBounds,
-        checkWinning
+        checkWinning,
+        toArr
     };
 }
 

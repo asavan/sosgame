@@ -1,13 +1,9 @@
 "use strict"; // jshint ;_;
 
 
-import presenterFunc from "./presenter.js";
 import fieldObj from "./field.js";
 import {delay} from "./utils/helper.js";
-
-function stub(message) {
-    console.trace("Stub " + message);
-}
+import handlersFunc from "./utils/handlers.js";
 
 const handleClick = function (evt, parent) {
     const getIndex = function (e, parent) {
@@ -71,8 +67,7 @@ function draw(presenter, box) {
     }
 }
 
-export default function game(window, document, settings) {
-
+export default function game(window, document, settings, presenter) {
     const field = document.querySelector(".field");
     const box = document.getElementsByClassName("box")[0];
     const digits = document.getElementsByClassName("buttons")[0];
@@ -80,16 +75,10 @@ export default function game(window, document, settings) {
     const close = document.getElementsByClassName("close")[0];
     const btnInstall = document.getElementsByClassName("install")[0];
     const root = document.documentElement;
-    root.style.setProperty("--field-size", settings.size);
+    root.style.setProperty("--field-size", presenter.size());
     field.classList.remove("disabled");
 
-
-    const presenter = presenterFunc(settings);
-
-    const handlers = {
-        "message": stub,
-        "gameover": stub
-    };
+    const handlers = handlersFunc(["message", "gameover", "started"]);
 
     function onGameEnd(res) {
         const message = presenter.endMessage(res);
@@ -100,14 +89,14 @@ export default function game(window, document, settings) {
         overlay.classList.add("show");
         btnInstall.classList.remove("hidden2");
         field.classList.add("disabled");
-        handlers["gameover"]();
+        handlers.call("gameover");
     }
 
     function on(name, f) {
-        handlers[name] = f;
+        return handlers.on(name, f);
     }
-
-    const actionKeys = () => Object.keys(handlers);
+    const actionKeys = handlers.actionKeys;
+    const makePresenter = presenter.toJson;
 
     async function animate(result) {
         const res = result.res;
@@ -115,7 +104,7 @@ export default function game(window, document, settings) {
             console.log("animate", result);
             draw(presenter, box);
             drawDigits(presenter, digits, settings);
-            await handlers["message"](result);
+            await handlers.call("message", result);
         }
 
         if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
@@ -165,6 +154,8 @@ export default function game(window, document, settings) {
 
     initField(presenter.size(), "cell", box);
 
+
+
     box.addEventListener("click", handleBox, false);
     digits.addEventListener("click", handleClickDigits, false);
     close.addEventListener("click", function (e) {
@@ -175,6 +166,7 @@ export default function game(window, document, settings) {
     return {
         on,
         actionKeys,
-        onMessage
+        onMessage,
+        makePresenter
     };
 }

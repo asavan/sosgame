@@ -16,20 +16,27 @@ function cell(isLastMove, isActive, value, colors, playerIdx) {
     };
 }
 
-export default function presenterFunc(settings) {
-    let currentUserIdx = settings.colorOrder.indexOf(settings.color);
-    let clientUserIdx = settings.colorOrder.indexOf(settings.color);
-    const playersSize = settings.colorOrder.length;
-    let activeCellIndex = -1;
-    let activeDigitIndex = -1;
-    let lastMove = -1;
-    let gameover = false;
+function defaultPresenter(settings) {
+    return {
+        currentUserIdx : settings.colorOrder.indexOf(settings.color),
+        clientUserIdx : settings.colorOrder.indexOf(settings.color),
+        playersSize : settings.colorOrder.length,
+        activeCellIndex : -1,
+        activeDigitIndex : -1,
+        lastMove : -1,
+        gameover : false,
+        fieldArr : fieldObj.init(settings.size),
+        movesIdx : Array(settings.size).fill(-1)
+    };
+}
 
-    const field = fieldObj.defaultField(settings.size);
-    const movesIdx = Array(settings.size).fill(-1);
+export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
+    activeCellIndex, activeDigitIndex, lastMove, gameover, fieldArr, movesIdx}, settings) {
+
+    const field = fieldObj.field(fieldArr);
 
     function* enumerate() {
-        for (let i = 0; i < settings.size; ++i) {
+        for (let i = 0; i < field.size(); ++i) {
             yield [i, cell(lastMove === i, activeCellIndex === i, field.getCharSafe(i), settings.colorOrder, movesIdx[i])];
         }
     }
@@ -102,7 +109,7 @@ export default function presenterFunc(settings) {
         activeCellIndex = pos;
     };
 
-    const size = () => settings.size;
+    const size = field.size;
 
     const enum1 = () => {
         return enumerate();
@@ -119,6 +126,11 @@ export default function presenterFunc(settings) {
     };
 
     const currentColor = () => settings.colorOrder[currentUserIdx];
+
+    const toJson = (externalClientIndex) => {
+        return {currentUserIdx, clientUserIdx: externalClientIndex, playersSize,
+            activeCellIndex, activeDigitIndex, lastMove, gameover, fieldArr: field.toArr(), movesIdx};
+    };
 
     const endMessage2 = (res) => {
         if (res === fieldObj.DRAW_MOVE) {
@@ -137,6 +149,17 @@ export default function presenterFunc(settings) {
         currentColor,
         getActiveDigitIndex,
         endMessage,
-        endMessage2
+        endMessage2,
+        toJson
     };
 }
+
+function presenterFuncDefault(settings) {
+    return presenterFunc(defaultPresenter(settings), settings);
+}
+
+export default {
+    presenterFunc,
+    defaultPresenter,
+    presenterFuncDefault
+};

@@ -1,7 +1,8 @@
 "use strict";
 
-import {log, error} from "../utils/helper.js";
+import {removeElem, log, error} from "../utils/helper.js";
 import actionsFunc from "../actions.js";
+import qrRender from "../lib/qrcode.js";
 import Queue from "../utils/queue.js";
 import connectionFunc from "../connection/socket.js";
 import rngFunc from "../utils/random.js";
@@ -14,6 +15,13 @@ function toObjJson(v, method) {
         "data": v
     };
     return value;
+}
+
+function makeQr(window, document, settings) {
+    const staticHost = settings.sh || window.location.href;
+    const url = new URL(staticHost);
+    console.log("enemy url", url.toString());
+    return qrRender(url.toString(), document.querySelector(".qrcode"));
 }
 
 function loop(queue, window) {
@@ -33,7 +41,6 @@ function loop(queue, window) {
 
 function setupProtocol(connection, actions, queue) {
     connection.on("gamemessage", (data) => {
-        console.log("gamemessage", data);
         const obj = data.json;
         const id = data.from;
         const res = obj.data;
@@ -89,16 +96,6 @@ function setupLogger(document, settings) {
     return networkLogger;
 }
 
-function createGame(window, document, settings, connection, gameFunction, data, queue) {
-    console.log("createGame", data, data.presenter);
-    const presenter = presenterObj.presenterFunc(data.presenter, settings);
-    const game = gameFunction(window, document, settings, presenter);
-    const actions = actionsFunc(game);
-    setupProtocol(connection, actions, queue);
-
-    return game;
-}
-
 export default function gameMode(window, document, settings, gameFunction) {
 
     return new Promise((resolve, reject) => {
@@ -108,23 +105,36 @@ export default function gameMode(window, document, settings, gameFunction) {
         const queue = Queue();
 
         loop(queue, window);
+        const presenter = presenterObj.presenterFuncDefault(settings);
+        const game = gameFunction(window, document, settings, presenter);
 
 
         connection.connect(connection.getWebSocketUrl(settings, window.location)).then(con => {
-            console.log("connected");
-            connection.on("gameinit", (data) => {
-                console.log("gameinit", data);
-                const serverId = data.data.serverId;
-                const game = createGame(window, document, settings, connection, gameFunction, data.data, queue);
-                for (const handlerName of game.actionKeys()) {
-                    game.on(handlerName, (n) => con.sendTo(toObjJson(n, handlerName), serverId));
-                }
-                resolve(game);
+            const code = makeQr(window, document, settings);
+            game.on("started", () => {removeElem(code);});
+
+            connection.on("join", (data) => {
+                console.log("join", data);
+                const presenterObj = game.makePresenter(data.from);
+                const toSend = {
+                    serverId: myId,
+                    presenter: presenterObj
+                };
+                con.init(toSend, data.from);
             });
-            con.join();
+
+
+            const actions = actionsFunc(game);
+            setupProtocol(connection, actions, queue);
+
+            for (const handlerName of game.actionKeys()) {
+                game.on(handlerName, (n) => con.sendAll(toObjJson(n, handlerName)));
+            }
+            resolve(game);
         }).catch(e => {
             networkLogger.error(e);
             reject(e);
         });
+
     });
 }

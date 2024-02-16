@@ -1,8 +1,9 @@
-"use strict";
+import handlersFunc from "../utils/handlers.js";
 
 function stub() {}
 
-function createSignalingChannel(id, socketUrl, logger, handlers, onOpen) {
+export default function createSignalingChannel(id, socketUrl, logger) {
+    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
     const ws = new WebSocket(socketUrl);
 
     const send = (type, sdp, to) => {
@@ -11,28 +12,30 @@ function createSignalingChannel(id, socketUrl, logger, handlers, onOpen) {
         return ws.send(JSON.stringify(json));
     };
 
-    const close = () => {
+    const close = async () => {
         // iphone fires "onerror" on close socket
-        handlers["error"] = stub;
-        ws.close();
+        await handlers.call("beforeclose", id);
+        ws.onerror = stub;
+        return ws.close();
     };
 
-    const onmessage = stub;
-    const result = {onmessage, send, close};
+    const on = (name, f) => {
+        return handlers.on(name, f);
+    };
 
     function onMessageInner(text) {
         logger.log("Websocket message received: " + text);
         const json = JSON.parse(text);
-        return result.onmessage(json);
+        return handlers.call("message", json);
     }
 
     ws.onopen = function() {
-        return onOpen(id);
+        return handlers.call("open", id);
     };
 
     ws.onclose = function (e) {
         logger.log("Websocket closed " + e.code + " " + e.reason);
-        return handlers["socket_close"](id);
+        return handlers.call("close", id);
     };
 
     ws.onmessage = function (e) {
@@ -48,11 +51,7 @@ function createSignalingChannel(id, socketUrl, logger, handlers, onOpen) {
     };
     ws.onerror = function (e) {
         logger.error(e);
-        return handlers["error"]("ws error");
+        return handlers.call("error", id);
     };
-    return result;
+    return {on, send, close};
 }
-
-export default {
-    createSignalingChannel
-};
