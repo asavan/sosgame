@@ -15,8 +15,8 @@ export default async function starter(window, document) {
     adjustSettings(settings);
 
     let mode = null;
-    if (settings.mode === "net") {
-        mode = await import("./mode/net.js");
+    if (settings.mode === "client") {
+        mode = await import("./mode/client.js");
     } else if (settings.mode === "server") {
         mode = await import("./mode/server.js");
     } else if (settings.mode === "ai") {

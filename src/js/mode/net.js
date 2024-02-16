@@ -1,12 +1,7 @@
-"use strict";
-
 import {log, error} from "../utils/helper.js";
 import actionsFunc from "../actions.js";
 import Queue from "../utils/queue.js";
-import connectionFunc from "../connection/socket.js";
 import rngFunc from "../utils/random.js";
-import presenterObj from "../presenter.js";
-
 
 function toObjJson(v, method) {
     const value = {
@@ -29,6 +24,12 @@ function loop(queue, window) {
         window.requestAnimationFrame(step);
     }
     window.requestAnimationFrame(step);
+}
+
+function runLoop(window) {
+    const queue = Queue();
+    loop(queue, window);
+    return queue;
 }
 
 function setupProtocol(connection, actions, queue) {
@@ -63,16 +64,16 @@ function networkLoggerFunc(logger, settings) {
     };
 }
 
-//function setupMedia() {
-//    if (navigator.mediaDevices) {
-//        return navigator.mediaDevices.getUserMedia({
-//            audio: true,
-//            video: true
-//        });
-//    } else {
-//        console.log("No mediaDevices");
-//    }
-//}
+function setupMedia() {
+    if (navigator.mediaDevices) {
+        return navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true
+        });
+    } else {
+        console.log("No mediaDevices");
+    }
+}
 
 function getMyId(window, settings, rngEngine) {
     const data = window.sessionStorage.getItem(settings.idNameInStorage);
@@ -89,48 +90,17 @@ function setupLogger(document, settings) {
     return networkLogger;
 }
 
-function createGame(window, document, settings, connection, gameFunction, data, queue) {
-    const presenter = presenterObj.presenterFunc(data.presenter, settings);
-    const game = gameFunction(window, document, settings, presenter);
+function setupGame(game, connection, queue) {
     const actions = actionsFunc(game);
     setupProtocol(connection, actions, queue);
-    return game;
 }
 
-export default function gameMode(window, document, settings, gameFunction) {
-
-    return new Promise((resolve, reject) => {
-        const myId = getMyId(window, settings, Math.random);
-        const networkLogger = setupLogger(document, settings);
-        const connection = connectionFunc(myId, networkLogger);
-        const queue = Queue();
-
-        loop(queue, window);
-
-
-        connection.connect(connection.getWebSocketUrl(settings, window.location)).then(con => {
-            console.log("connected");
-            connection.on("gameinit", (data) => {
-                console.log("gameinit", data);
-                const serverId = data.data.serverId;
-                const game = createGame(window, document, settings, connection, gameFunction, data.data, queue);
-                for (const handlerName of game.actionKeys()) {
-                    game.on(handlerName, (n) => {
-                        if (n.ignore && Array.isArray(n.ignore)) {
-                            if (n.ignore.includes(serverId)) {
-                                networkLogger.log("ignore");
-                                return;
-                            }
-                        }
-                        con.sendTo(toObjJson(n, handlerName), serverId);
-                    });
-                }
-                resolve(game);
-            });
-            con.join();
-        }).catch(e => {
-            networkLogger.error(e);
-            reject(e);
-        });
-    });
-}
+export default {
+    setupGame,
+    setupLogger,
+    getMyId,
+    setupMedia,
+    runLoop,
+    setupProtocol,
+    toObjJson
+};
