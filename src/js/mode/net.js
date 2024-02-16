@@ -34,7 +34,7 @@ function loop(queue, window) {
 function setupProtocol(connection, actions, queue) {
     connection.on("gamemessage", (data) => {
         console.log("gamemessage", data);
-        const obj = data.json;
+        const obj = data.data;
         const id = data.from;
         const res = obj.data;
         const callback = actions[obj.method];
@@ -46,7 +46,7 @@ function setupProtocol(connection, actions, queue) {
 
 function networkLoggerFunc(logger, settings) {
     const logInner = (data) => {
-        if (!settings.networkDebug || !logger) {
+        if (!settings.networkDebug) {
             return;
         }
         return log(data, logger);

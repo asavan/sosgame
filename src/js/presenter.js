@@ -87,6 +87,8 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         return setMove(activeCellIndex, activeDigitIndex, currentUserIdx);
     };
 
+    const isGameOver = () => gameover;
+
     const setActiveDigitIndex = function (ind) {
         if (clientUserIdx !== currentUserIdx || gameover) {
             return;
@@ -113,6 +115,14 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
     const enum1 = () => {
         return enumerate();
+    };
+
+    const calcLastMoveRes = () => {
+        if (lastMove < 0) {
+            return fieldObj.IMPOSSIBLE_MOVE;
+        }
+        const res = field.checkWinning(lastMove);
+        return res;
     };
 
     const endMessage = (res) => {
@@ -150,7 +160,9 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         getActiveDigitIndex,
         endMessage,
         endMessage2,
-        toJson
+        toJson,
+        isGameOver,
+        calcLastMoveRes
     };
 }
 

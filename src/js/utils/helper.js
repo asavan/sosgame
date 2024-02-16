@@ -70,25 +70,8 @@ export function error(message, el) {
     console.error(message);
 }
 
-export function log(settings, message, el) {
-    if (settings.logger && el) {
-        if (typeof message == "object") {
-            el.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + "<br />";
-        } else {
-            el.innerHTML += message + "<br />";
-        }
-    }
-    console.log(message);
-}
-
-export function logHtml(message, el) {
-    if (el) {
-        if (typeof message == "object") {
-            el.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + "<br />";
-        } else {
-            el.innerHTML += message + "<br />";
-        }
-    }
+export function log(message, el) {
+    logToHtml(message, el);
     console.log(message);
 }
 

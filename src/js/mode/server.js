@@ -7,6 +7,7 @@ import Queue from "../utils/queue.js";
 import connectionFunc from "../connection/socket.js";
 import rngFunc from "../utils/random.js";
 import presenterObj from "../presenter.js";
+import lobbyFunc from "../lobby.js";
 
 
 function toObjJson(v, method) {
@@ -41,7 +42,7 @@ function loop(queue, window) {
 
 function setupProtocol(connection, actions, queue) {
     connection.on("gamemessage", (data) => {
-        const obj = data.json;
+        const obj = data.data;
         const id = data.from;
         const res = obj.data;
         const callback = actions[obj.method];
@@ -53,7 +54,7 @@ function setupProtocol(connection, actions, queue) {
 
 function networkLoggerFunc(logger, settings) {
     const logInner = (data) => {
-        if (!settings.networkDebug || !logger) {
+        if (!settings.networkDebug) {
             return;
         }
         return log(data, logger);
@@ -96,6 +97,8 @@ function setupLogger(document, settings) {
     return networkLogger;
 }
 
+
+
 export default function gameMode(window, document, settings, gameFunction) {
 
     return new Promise((resolve, reject) => {
@@ -103,11 +106,12 @@ export default function gameMode(window, document, settings, gameFunction) {
         const networkLogger = setupLogger(document, settings);
         const connection = connectionFunc(myId, networkLogger);
         const queue = Queue();
+        const lobby = lobbyFunc();
 
         loop(queue, window);
         const presenter = presenterObj.presenterFuncDefault(settings);
         const game = gameFunction(window, document, settings, presenter);
-
+        lobby.addClient(myId, myId);
 
         connection.connect(connection.getWebSocketUrl(settings, window.location)).then(con => {
             const code = makeQr(window, document, settings);
@@ -115,7 +119,9 @@ export default function gameMode(window, document, settings, gameFunction) {
 
             connection.on("join", (data) => {
                 console.log("join", data);
-                const presenterObj = game.makePresenter(data.from);
+                lobby.addClient(data.from, data.from);
+                const joinedInd = lobby.indById(data.from);
+                const presenterObj = game.makePresenter(joinedInd);
                 const toSend = {
                     serverId: myId,
                     presenter: presenterObj

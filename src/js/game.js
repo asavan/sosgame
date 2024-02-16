@@ -1,6 +1,3 @@
-"use strict"; // jshint ;_;
-
-
 import fieldObj from "./field.js";
 import {delay} from "./utils/helper.js";
 import handlersFunc from "./utils/handlers.js";
@@ -36,6 +33,29 @@ function drawDigits(presenter, digits, settings) {
         }
     }
 }
+
+function drawField(presenter, box, digits, settings, overlay, btnInstall, field) {
+    draw(presenter, box);
+    drawDigits(presenter, digits, settings);
+    if (presenter.isGameOver()) {
+        const res = presenter.calcLastMoveRes();
+        if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
+            onGameEndDraw(res, presenter, overlay, btnInstall, field);
+        }
+    }
+}
+
+function onGameEndDraw(res, presenter, overlay, btnInstall, field) {
+    const message = presenter.endMessage(res);
+    const h2 = overlay.querySelector("h2");
+    h2.textContent = message;
+    const content = overlay.querySelector(".content");
+    content.textContent = presenter.endMessage2(res);
+    overlay.classList.add("show");
+    btnInstall.classList.remove("hidden2");
+    field.classList.add("disabled");
+}
+
 
 function draw(presenter, box) {
     const iter = presenter.enum1();
@@ -81,14 +101,7 @@ export default function game(window, document, settings, presenter) {
     const handlers = handlersFunc(["message", "gameover", "started"]);
 
     function onGameEnd(res) {
-        const message = presenter.endMessage(res);
-        const h2 = overlay.querySelector("h2");
-        h2.textContent = message;
-        const content = overlay.querySelector(".content");
-        content.textContent = presenter.endMessage2(res);
-        overlay.classList.add("show");
-        btnInstall.classList.remove("hidden2");
-        field.classList.add("disabled");
+        onGameEndDraw(res, presenter, overlay, btnInstall, field);
         handlers.call("gameover");
     }
 
@@ -105,11 +118,11 @@ export default function game(window, document, settings, presenter) {
             draw(presenter, box);
             drawDigits(presenter, digits, settings);
             await handlers.call("message", result);
+            if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
+                onGameEnd(res);
+            }
         }
 
-        if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
-            onGameEnd(res);
-        }
     }
 
     async function doStep() {
@@ -162,6 +175,8 @@ export default function game(window, document, settings, presenter) {
         e.preventDefault();
         overlay.classList.remove("show");
     }, false);
+
+    drawField(presenter, box, digits, settings, overlay, btnInstall, field);
 
     return {
         on,
