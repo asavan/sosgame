@@ -1,16 +1,18 @@
 import {assert} from "./utils/helper.js";
 
-export default function lobby() {
-    const clients = {};
-    let index = 0;
+export default function lobby(clients) {
     const clientsArr = [];
+    for (const [key,] of Object.entries(clients)) {
+        clientsArr.push(key);
+    }
+    let index = clientsArr.length;
     const addClient = (id, name) => {
         const oldClient = clients[id];
         if (oldClient) {
             oldClient.name = name;
         } else {
             clients[id] = {index, name};
-            clientsArr.push(name);
+            clientsArr.push(id);
             ++index;
         }
         assert(index === clientsArr.length);

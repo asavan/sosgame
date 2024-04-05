@@ -22,7 +22,7 @@ export default function gameMode(window, document, settings, gameFunction) {
         const networkLogger = netObj.setupLogger(document, settings);
         const connection = connectionFunc(myId, networkLogger);
         const queue = netObj.runLoop(window);
-        const lobby = lobbyFunc();
+        const lobby = lobbyFunc({});
         lobby.addClient(myId, myId);
         const presenter = presenterObj.presenterFuncDefault(settings);
         const game = gameFunction(window, document, settings, presenter);

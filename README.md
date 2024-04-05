@@ -4,6 +4,9 @@
 
 [![Test covered](https://github.com/asavan/sosgame/actions/workflows/static.yml/badge.svg)](https://github.com/asavan/sosgame/actions/workflows/static.yml)
 
+[![google play](assets/google-play-badge.png)](https://play.google.com/store/apps/details?id=ru.asavan.sosgame)
+
+
 ### Rules
 Two players play a game on a line of N squares.  
 Each player in turn puts either S or O into an empty square.  
