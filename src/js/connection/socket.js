@@ -2,7 +2,7 @@ import handlersFunc from "../utils/handlers.js";
 import createSignalingChannel from "./common.js";
 
 export default function connectionFunc(id, logger) {
-    const handlers = handlersFunc(["gamemessage", "close", "disconnect", "error", "join", "gameinit"]);
+    const handlers = handlersFunc(["gamemessage", "close", "disconnect", "error", "join", "gameinit", "message", "gameover"]);
 
     function on(name, f) {
         return handlers.on(name, f);
@@ -39,16 +39,7 @@ export default function connectionFunc(id, logger) {
                     logger.log("user in ignore list");
                     return;
                 }
-
-                if (json.action === "gamemessage") {
-                    await handlers.call("gamemessage", json);
-                }
-                if (json.action === "gameinit") {
-                    await handlers.call("gameinit", json);
-                }
-                if (json.action === "join") {
-                    await handlers.call("join", json);
-                }
+                await handlers.call(json.action, json);
             });
 
             const sendAll = (data, ignore) => {
@@ -56,11 +47,17 @@ export default function connectionFunc(id, logger) {
                 return signaling.send("gamemessage", data, "all", ignore);
             };
 
+            const sendRawAll = (type, data, ignore) => {
+                logger.log(data);
+                return signaling.send(type, data, "all", ignore);
+            };
+
             const join = (data) => signaling.send("join", data, "all");
 
             const sendTo = (data, to) => signaling.send("gamemessage", data, to);
+            const sendRawTo = (type, data, to) => signaling.send(type, data, to);
             const init = (data, to) => signaling.send("gameinit", data, to);
-            signaling.on("open", () => resolve({sendTo, sendAll, join, init}));
+            signaling.on("open", () => resolve({sendTo, sendAll, join, init, sendRawAll, sendRawTo}));
         });
     }
     return {

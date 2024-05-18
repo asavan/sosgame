@@ -45,6 +45,21 @@ function setupProtocol(connection, actions, queue) {
     });
 }
 
+
+function setupProtocolRaw(connection, actions, queue) {
+    for (const [method, callback] of Object.entries(actions)) {
+        if (typeof callback !== "function") {
+            continue;
+        }
+        connection.on(method, (data) => {
+            const id = data.from;
+            const res = data.data;
+            queue.enqueue({callback, res, fName: method, id});
+        });
+    }
+}
+
+
 function networkLoggerFunc(logger, settings) {
     const logInner = (data) => {
         if (!settings.networkDebug) {
@@ -93,6 +108,7 @@ function setupLogger(document, settings) {
 function setupGame(game, connection, queue) {
     const actions = actionsFunc(game);
     setupProtocol(connection, actions, queue);
+    setupProtocolRaw(connection, actions, queue);
 }
 
 export default {

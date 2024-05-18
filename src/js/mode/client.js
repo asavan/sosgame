@@ -28,7 +28,7 @@ export default function gameMode(window, document, settings, gameFunction) {
                                 return;
                             }
                         }
-                        con.sendTo(netObj.toObjJson(n, handlerName), serverId);
+                        con.sendRawTo(handlerName, n, serverId);
                     });
                 }
                 resolve(game);

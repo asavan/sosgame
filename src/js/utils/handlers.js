@@ -15,20 +15,25 @@ export default function handlersFunc(arr) {
         return arr;
     };
     const on = (name, callback) => getSafe(name).push(callback);
-    const set = (f, arr) => handlers[f] = arr;
+    const reset = (name) => { delete handlers[name]};
+    const set = (f, arr1) => handlers[f] = arr1;
     const call = async (name, arg) => {
+        let promises = [];
         for (const f of getSafe(name)) {
             if (typeof f !== "function") {
                 console.error("bad ", name);
                 return;
             }
-            await f(arg);
+            promises.push(f(arg));
         }
+        await Promise.allSettled(promises);
     };
+
     return {
         on,
         set,
         call,
+        reset,
         actionKeys
     };
 }

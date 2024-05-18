@@ -19,6 +19,10 @@ export default async function starter(window, document) {
         mode = await import("./mode/client.js");
     } else if (settings.mode === "server") {
         mode = await import("./mode/server.js");
+    } else if (settings.mode === "servernew") {
+        mode = await import("./mode/server_new.js");
+    } else if (settings.mode === "clintnew") {
+        mode = await import("./mode/client_new.js");
     } else if (settings.mode === "ai") {
         mode = await import("./mode/ai.js");
     } else if (settings.mode === "hotseat") {
@@ -30,4 +34,6 @@ export default async function starter(window, document) {
     }
     mode.default(window, document, settings, gameFunction).
         catch((error) => {console.error(error);});
+
+    return mode;
 }
