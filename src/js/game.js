@@ -114,7 +114,7 @@ function setupOverlay(document) {
     return overlay;
 }
 
-export default function game(window, document, settings, presenter) {
+export default function game(_window, document, settings, presenter) {
     const field = document.querySelector(".field");
     const box = document.getElementsByClassName("box")[0];
     const digits = document.getElementsByClassName("buttons")[0];
@@ -185,6 +185,10 @@ export default function game(window, document, settings, presenter) {
     digits.addEventListener("click", handleClickDigits, false);
 
     drawField(presenter, box, digits, settings, overlay, btnInstall, field);
+
+    presenter.on("firstmove", (obj) => {
+        return handlers.call("started", obj);
+    });
 
     return {
         on,

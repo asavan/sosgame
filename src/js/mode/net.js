@@ -1,50 +1,12 @@
 import {log, error} from "../utils/helper.js";
 import actionsFunc from "../actions.js";
-import Queue from "../utils/queue.js";
+import PromiseQueue from "../utils/async-queue.js";
 import rngFunc from "../utils/random.js";
 
-function toObjJson(v, method) {
-    const value = {
-        "method": method,
-        "data": v
-    };
-    return value;
+
+function runLoop2(logger) {
+    return PromiseQueue(logger);
 }
-
-function loop(queue, window) {
-    let inProgress = false;
-
-    async function step() {
-        if (!queue.isEmpty() && !inProgress) {
-            const {callback, res, id} = queue.dequeue();
-            inProgress = true;
-            await callback(res, id);
-            inProgress = false;
-        }
-        window.requestAnimationFrame(step);
-    }
-    window.requestAnimationFrame(step);
-}
-
-function runLoop(window) {
-    const queue = Queue();
-    loop(queue, window);
-    return queue;
-}
-
-function setupProtocol(connection, actions, queue) {
-    connection.on("gamemessage", (data) => {
-        console.log("gamemessage", data);
-        const obj = data.data;
-        const id = data.from;
-        const res = obj.data;
-        const callback = actions[obj.method];
-        if (typeof callback === "function") {
-            queue.enqueue({callback, res, fName: obj.method, id});
-        }
-    });
-}
-
 
 function setupProtocolRaw(connection, actions, queue) {
     for (const [method, callback] of Object.entries(actions)) {
@@ -52,9 +14,7 @@ function setupProtocolRaw(connection, actions, queue) {
             continue;
         }
         connection.on(method, (data) => {
-            const id = data.from;
-            const res = data.data;
-            queue.enqueue({callback, res, fName: method, id});
+            queue.add(() => callback(data.data, data.from));
         });
     }
 }
@@ -107,7 +67,6 @@ function setupLogger(document, settings) {
 
 function setupGame(game, connection, queue) {
     const actions = actionsFunc(game);
-    setupProtocol(connection, actions, queue);
     setupProtocolRaw(connection, actions, queue);
 }
 
@@ -116,7 +75,5 @@ export default {
     setupLogger,
     getMyId,
     setupMedia,
-    runLoop,
-    setupProtocol,
-    toObjJson
+    runLoop2
 };

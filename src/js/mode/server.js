@@ -10,6 +10,7 @@ import netObj from "./net.js";
 function makeQr(window, document, settings) {
     const staticHost = settings.sh || window.location.href;
     const url = new URL(staticHost);
+    url.searchParams.set("mode", "client");
     console.log("enemy url", url.toString());
     return qrRender(url.toString(), document.querySelector(".qrcode"));
 }
@@ -21,7 +22,7 @@ export default function gameMode(window, document, settings, gameFunction) {
         const myId = netObj.getMyId(window, settings, Math.random);
         const networkLogger = netObj.setupLogger(document, settings);
         const connection = connectionFunc(myId, networkLogger);
-        const queue = netObj.runLoop(window);
+        const queue = netObj.runLoop2(networkLogger);
         const lobby = lobbyFunc({});
         lobby.addClient(myId, myId);
         const presenter = presenterObj.presenterFuncDefault(settings);
@@ -50,7 +51,7 @@ export default function gameMode(window, document, settings, gameFunction) {
                         toSend = n.data;
                         ignore = n.ignore;
                     }
-                    con.sendAll(netObj.toObjJson(toSend, handlerName), ignore);
+                    con.sendRawAll(handlerName, toSend, ignore);
                 });
             }
             resolve(game);

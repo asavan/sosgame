@@ -11,7 +11,7 @@ export default function gameMode(window, document, settings, gameFunction) {
         const networkLogger = netObj.setupLogger(document, settings);
         const connection = connectionFunc(myId, networkLogger);
 
-        const queue = netObj.runLoop(window);
+        const queue = netObj.runLoop2(networkLogger);
         connection.connect(connection.getWebSocketUrl(settings, window.location)).then(con => {
             networkLogger.log("connected");
             connection.on("gameinit", (data) => {

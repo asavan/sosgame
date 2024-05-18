@@ -2,11 +2,14 @@ import handlersFunc from "../utils/handlers.js";
 import createSignalingChannel from "./common.js";
 
 export default function connectionFunc(id, logger) {
-    const handlers = handlersFunc(["gamemessage", "close", "disconnect", "error", "join", "gameinit", "message", "gameover"]);
+    const handlers = handlersFunc(["close", "disconnect", "error", "join", "gameinit", "message", "gameover", "started"]);
 
     function on(name, f) {
         return handlers.on(name, f);
     }
+
+    let currentHandler = {};
+    let queue = null;
 
     function getWebSocketUrl(settings, location) {
         if (settings.wh) {
@@ -16,6 +19,24 @@ export default function connectionFunc(id, logger) {
             return null;
         }
         return "ws://" + location.hostname + ":" + settings.wsPort;
+    }
+
+    function registerHandler(handler, q) {
+        queue = q;
+        currentHandler = handler;
+    }
+
+    function callCurrentHandler(method, data) {    
+        const callback = currentHandler[method];  
+        if (typeof callback !== "function") {
+            logger.log("Not function");
+            return;
+        }
+        if (queue == null) {
+            logger.log("No queue");
+            return;
+        }
+        queue.add(() => callback(data.data, data.from));        
     }
 
     function connect(socketUrl) {
@@ -39,13 +60,14 @@ export default function connectionFunc(id, logger) {
                     logger.log("user in ignore list");
                     return;
                 }
-                await handlers.call(json.action, json);
+                if (handlers.actionKeys().includes(json.action)) {
+                    return handlers.call(json.action, json);
+                }
+                if (Object.keys(currentHandler).includes(json.action)) {
+                    return callCurrentHandler(json.action, json);
+                }
+                logger.log("Unknown action " + json.action);
             });
-
-            const sendAll = (data, ignore) => {
-                logger.log(data);
-                return signaling.send("gamemessage", data, "all", ignore);
-            };
 
             const sendRawAll = (type, data, ignore) => {
                 logger.log(data);
@@ -54,13 +76,12 @@ export default function connectionFunc(id, logger) {
 
             const join = (data) => signaling.send("join", data, "all");
 
-            const sendTo = (data, to) => signaling.send("gamemessage", data, to);
             const sendRawTo = (type, data, to) => signaling.send(type, data, to);
             const init = (data, to) => signaling.send("gameinit", data, to);
-            signaling.on("open", () => resolve({sendTo, sendAll, join, init, sendRawAll, sendRawTo}));
+            signaling.on("open", () => resolve({join, init, sendRawAll, sendRawTo}));
         });
     }
     return {
-        connect, on, getWebSocketUrl
+        connect, on, getWebSocketUrl, registerHandler
     };
 }

@@ -1,6 +1,7 @@
 "use strict";
 
 import fieldObj from "./field.js";
+import handlersFunc from "./utils/handlers.js";
 
 function cell(isLastMove, isActive, value, colors, playerIdx) {
     let text = value;
@@ -25,15 +26,23 @@ function defaultPresenter(settings) {
         activeDigitIndex : -1,
         lastMove : -1,
         gameover : false,
+        gamestarted : false,
         fieldArr : fieldObj.init(settings.size),
         movesIdx : Array(settings.size).fill(-1)
     };
 }
 
 export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
-    activeCellIndex, activeDigitIndex, lastMove, gameover, fieldArr, movesIdx}, settings) {
+    activeCellIndex, activeDigitIndex, lastMove, gameover, gamestarted, fieldArr, movesIdx}, settings) {
 
     const field = fieldObj.field(fieldArr);
+
+    const handlers = handlersFunc(["firstmove", "gameover"]);
+
+    function on(name, f) {
+        return handlers.on(name, f);
+    }
+
 
     function* enumerate() {
         for (let i = 0; i < field.size(); ++i) {
@@ -70,6 +79,11 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
         activeCellIndex = -1;
         activeDigitIndex = -1;
+        if (!gamestarted) {
+            // need await here
+            handlers.call("firstmove", {});
+        }
+        gamestarted = true;
         movesIdx[position] = playerIdx;
         lastMove = position;
         const playerId = currentUserIdx;
@@ -77,8 +91,10 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         if (res === fieldObj.NORMAL_MOVE) {
             nextUser();
         }
-        if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
+        if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {            
             gameover = true;
+            // need await here
+            handlers.call("gameover", res);
         }
         return {res, position, digit, playerId, clientId};
     };
@@ -152,6 +168,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
     };
 
     return {
+        on,
         size,
         tryMove,
         setMove,
