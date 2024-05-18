@@ -4,14 +4,14 @@ export default function PromiseQueue(logger) {
   
     const add = (operation) => {
         return new Promise((resolve, reject) => {
-          queue = queue
-            .then(operation)
-            .then(resolve)
-            .catch(() => {
-                logger.log(e);
-                reject(e);
-            });
+            queue = queue
+                .then(operation)
+                .then(resolve)
+                .catch((e) => {
+                    logger.log(e);
+                    reject(e);
+                });
         });
-      }
-      return {add};
-  }
+    };
+    return {add};
+}

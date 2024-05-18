@@ -23,6 +23,13 @@ async function startGameAsync(window, document, settings) {
     setupConnectionToGame(gameCore, con);
 }
 
+function setupGameToConnectionSend() {
+    // TODO
+}
+
+function setupConnectionToGame() {
+    // TODO
+}
 
 async function connection(window, document, settings) {
     const myId = netObj.getMyId(window, settings, Math.random);
@@ -45,6 +52,6 @@ function makeQr(window, document, settings) {
     return qrRender(url.toString(), document.querySelector(".qrcode"));
 }
 
-function setupRoundNetwork(round, con) {
-    
+function setupRoundNetwork() {
+    // TODO 
 }

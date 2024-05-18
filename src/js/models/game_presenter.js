@@ -25,15 +25,17 @@ function gamePresenter({colorOrder}) {
     const players = [];
     let currentRound = null;
 
+    console.log(colorOrder);
+
     const changeState = async (newState) => {
         if (newState == state) {
             console.log("Same state");
             return;
         }
         const tmp = state;
-        state = newState;
         await handlers.call("changestate", {from: tmp, to: newState});
-    }
+        state = newState;
+    };
     const getCurrentRound = () => currentRound;
     return {
         changeState,
@@ -41,15 +43,18 @@ function gamePresenter({colorOrder}) {
         on,
         IN_ROUND,
         WAIT_FOR_PLAYERS,
-        GAME_OVER
-    }
+        GAME_OVER,
+        startPlayerInd,
+        thisPlayerInd,
+        bottomPlayerInd,
+        gameover,
+        roundInd,
+        players 
+    };
 }
 
-
-function roundPresenter() {
-
-}
 
 export default {
-    presenter: gamePresenter
-}
+    presenter: gamePresenter,
+    player
+};
