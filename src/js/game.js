@@ -132,7 +132,6 @@ export default function game(_window, document, settings, presenter) {
         return handlers.on(name, f);
     }
     const actionKeys = handlers.actionKeys;
-    const makePresenter = presenter.toJson;
 
     const redraw = () => drawField(presenter, box, digits, settings, overlay, btnInstall, field);
 

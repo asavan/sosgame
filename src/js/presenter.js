@@ -182,7 +182,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         movesIdx = Array(settings.size).fill(-1);
         currentUserIdx = (clientUserIdx + round) % playersSize;
         field = fieldObj.field(fieldArr);
-    }
+    };
 
     return {
         on,
