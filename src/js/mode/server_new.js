@@ -41,9 +41,8 @@ async function connection(window, document, settings) {
 
 async function loadFromStorageOrNetOrDefault(con, window, document, settings) {
     console.log(con, window, document, settings);
-    return gamePresenter.presenter();
+    return gamePresenter.presenter(settings.colorOrder);
 }
-
 
 function makeQr(window, document, settings) {
     const staticHost = settings.sh || window.location.href;

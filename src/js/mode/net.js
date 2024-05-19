@@ -1,24 +1,5 @@
 import {log, error} from "../utils/helper.js";
-import actionsFunc from "../actions.js";
-import PromiseQueue from "../utils/async-queue.js";
 import rngFunc from "../utils/random.js";
-
-
-function runLoop2(logger) {
-    return PromiseQueue(logger);
-}
-
-function setupProtocolRaw(connection, actions, queue) {
-    for (const [method, callback] of Object.entries(actions)) {
-        if (typeof callback !== "function") {
-            continue;
-        }
-        connection.on(method, (data) => {
-            queue.add(() => callback(data.data, data.from));
-        });
-    }
-}
-
 
 function networkLoggerFunc(logger, settings) {
     const logInner = (data) => {
@@ -65,15 +46,8 @@ function setupLogger(document, settings) {
     return networkLogger;
 }
 
-function setupGame(game, connection, queue) {
-    const actions = actionsFunc(game);
-    setupProtocolRaw(connection, actions, queue);
-}
-
 export default {
-    setupGame,
     setupLogger,
     getMyId,
-    setupMedia,
-    runLoop2
+    setupMedia
 };

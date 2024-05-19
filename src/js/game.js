@@ -52,6 +52,7 @@ function drawField(presenter, box, digits, settings, overlay, btnInstall, field)
 
 function initField(document, fieldSize, className, elem) {
     assert(elem);
+    elem.replaceChildren();
     for (let i = 0; i < fieldSize; i++) {
         const cell = document.createElement("div");
         cell.className = className;
@@ -102,7 +103,7 @@ function draw(presenter, box) {
     }
 }
 
-function setupOverlay(document) {
+function setupOverlay(document, handlers) {
     const overlay = document.querySelector(".overlay");
     const close = document.querySelector(".close");
     assert(overlay, "No overlay");
@@ -110,21 +111,22 @@ function setupOverlay(document) {
     close.addEventListener("click", function (e) {
         e.preventDefault();
         overlay.classList.remove("show");
+        return handlers.call("winclosed", {});
     }, false);
     return overlay;
 }
 
 export default function game(_window, document, settings, presenter) {
     const field = document.querySelector(".field");
-    const box = document.getElementsByClassName("box")[0];
+    const box = document.querySelector(".box");
     const digits = document.getElementsByClassName("buttons")[0];
     const btnInstall = document.getElementsByClassName("install")[0];
-    const overlay = setupOverlay(document);
     const root = document.documentElement;
     root.style.setProperty("--field-size", presenter.size());
     // field.classList.remove("disabled");
-
-    const handlers = handlersFunc(["message", "gameover", "started"]);
+    
+    const handlers = handlersFunc(["message", "gameover", "started", "winclosed"]);
+    const overlay = setupOverlay(document, handlers);
 
     function on(name, f) {
         return handlers.on(name, f);
@@ -132,10 +134,12 @@ export default function game(_window, document, settings, presenter) {
     const actionKeys = handlers.actionKeys;
     const makePresenter = presenter.toJson;
 
+    const redraw = () => drawField(presenter, box, digits, settings, overlay, btnInstall, field);
+
     async function animate(result, fromId) {
         const res = result.res;
         if (res !== fieldObj.IMPOSSIBLE_MOVE) {
-            drawField(presenter, box, digits, settings, overlay, btnInstall, field);
+            redraw();
             let toSend = result;
             if (fromId) {
                 toSend = {data: result, ignore: [fromId]};
@@ -194,6 +198,6 @@ export default function game(_window, document, settings, presenter) {
         on,
         actionKeys,
         onMessage,
-        makePresenter
+        redraw
     };
 }

@@ -10,27 +10,9 @@ export default [
             sourceType: "module",
             globals: {
                 ...globals.browser,
-                myCustomGlobal: "readonly"
+                // __USE_SERVICE_WORKERS__: "readonly"
             }
-        },
-        // rules: {
-        //     "indent": [
-        //         "error",
-        //         4
-        //     ],
-        //     "linebreak-style": [
-        //         "error",
-        //         "windows"
-        //     ],
-        //     "quotes": [
-        //         "error",
-        //         "double"
-        //     ],
-        //     "semi": [
-        //         "error",
-        //         "always"
-        //     ]
-        // }
+        }
     },
     {
         files: ["src/**/*.js", "test/**/*.js"],

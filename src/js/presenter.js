@@ -19,23 +19,24 @@ function cell(isLastMove, isActive, value, colors, playerIdx) {
 
 function defaultPresenter(settings) {
     return {
-        currentUserIdx : settings.colorOrder.indexOf(settings.color),
         clientUserIdx : settings.colorOrder.indexOf(settings.color),
+        currentUserIdx : settings.colorOrder.indexOf(settings.color),
         playersSize : settings.colorOrder.length,
         activeCellIndex : -1,
         activeDigitIndex : -1,
         lastMove : -1,
         gameover : false,
         gamestarted : false,
+        round: 0,
         fieldArr : fieldObj.init(settings.size),
         movesIdx : Array(settings.size).fill(-1)
     };
 }
 
 export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
-    activeCellIndex, activeDigitIndex, lastMove, gameover, gamestarted, fieldArr, movesIdx}, settings) {
+    activeCellIndex, activeDigitIndex, lastMove, gameover, gamestarted, round, fieldArr, movesIdx}, settings) {
 
-    const field = fieldObj.field(fieldArr);
+    let field = fieldObj.field(fieldArr);
 
     const handlers = handlersFunc(["firstmove", "gameover"]);
 
@@ -66,6 +67,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
             clientUserIdx = currentUserIdx;
         }
     };
+
 
     const setMove = function(position, digit, playerIdx) {
         if (!canMove(position, digit, playerIdx, currentUserIdx)) {
@@ -167,6 +169,21 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         return currentColor() + " player win";
     };
 
+    const nextRound = () => {
+        ++round;
+        gamestarted = false;
+        gameover = false;
+        activeCellIndex = -1;
+        activeDigitIndex = -1;
+        lastMove = -1;
+        gameover = false;
+        gamestarted = false;
+        fieldArr = fieldObj.init(settings.size);
+        movesIdx = Array(settings.size).fill(-1);
+        currentUserIdx = (clientUserIdx + round) % playersSize;
+        field = fieldObj.field(fieldArr);
+    }
+
     return {
         on,
         size,
@@ -182,7 +199,8 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         toJson,
         isGameOver,
         isMyMove,
-        calcLastMoveRes
+        calcLastMoveRes,
+        nextRound
     };
 }
 
