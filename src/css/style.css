@@ -105,7 +105,7 @@ footer {
     cursor: pointer;
 }
 
-@media (width <= 750px) {
+@media (max-width: 750px) {
     .cell {
         min-width: 48px;
         max-width: calc((100vh - 30px)/var(--field-size) - 2px);
