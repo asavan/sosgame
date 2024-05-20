@@ -66,12 +66,14 @@ export default function lobby(clients) {
     };
 
     const indById = (id) => getById(id).index;
+    const idByInd = (ind) => clientsArr[ind];;
 
     return {
         addClient,
         remove,
         swapInd,
         swapById,
-        indById
+        indById,
+        idByInd
     };
 }

@@ -51,8 +51,14 @@ function simpleMove(field) {
     return notLoosingMove(field);
 }
 
+function simpleMoveArr(fieldArr) {
+    const field = fieldObj.field(fieldArr);
+    return simpleMove(field);
+}
+
 export default {
     bestMove,
     notLoosingMove,
-    simpleMove
+    simpleMove,
+    simpleMoveArr
 };

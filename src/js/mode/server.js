@@ -22,25 +22,24 @@ function reconnect(con, serverId) {
     return con.sendRawAll("reconnect", toSend);
 }
 
-function setupGameToConnectionSend(game, con, serverId) {
+function setupGameToConnectionSend(game, con, serverId, lobby) {
     for (const handlerName of game.actionKeys()) {
         game.on(handlerName, (n) => {
-            let toSend = n;
             let ignore = null;
-            if (n.ignore && Array.isArray(n.ignore)) {
-                toSend = n.data;
-                ignore = n.ignore;
+            if (n && n.playerId !== null) {
+                const toIgnore = lobby.idByInd(n.playerId);
+                ignore = [toIgnore];
             }
-            con.sendRawAll(handlerName, toSend, ignore);
+            con.sendRawAll(handlerName, n, ignore);
         });
     }
     return reconnect(con, serverId);
 }
 
-function setupNetwork(game, connection, con, serverId, queue) {
+function setupNetwork(game, connection, con, serverId, queue, lobby) {
     const actions = actionsFunc(game);
     connection.registerHandler(actions, queue);
-    return setupGameToConnectionSend(game, con, serverId);
+    return setupGameToConnectionSend(game, con, serverId, lobby);
 }
 
 export default function gameMode(window, document, settings, gameFunction) {
@@ -67,14 +66,17 @@ export default function gameMode(window, document, settings, gameFunction) {
             connection.on("join", (data) => {
                 lobby.addClient(data.from, data.from);
                 const joinedInd = lobby.indById(data.from);
+                const serverInd = lobby.indById(myId);
                 const presenterObj = presenter.toJson(joinedInd);
                 const toSend = {
                     serverId: myId,
+                    joinedInd,
+                    serverInd, 
                     presenter: presenterObj
                 };
                 con.sendRawTo("gameinit", toSend, data.from);
             });
-            setupNetwork(game, connection, con, myId, queue);
+            setupNetwork(game, connection, con, myId, queue, lobby);
             resolve(game);
         }).catch(e => {
             networkLogger.error(e);

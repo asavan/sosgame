@@ -6,20 +6,17 @@ import PromiseQueue from "../utils/async-queue.js";
 import {assert} from "../utils/helper.js";
 
 
-function setupGameToConnectionSend(game, con, logger, serverId) {
+function setupGameToConnectionSend(game, con, logger, data) {
     for (const handlerName of game.actionKeys()) {
         game.on(handlerName, (n) => {
-            if (n && n.ignore && Array.isArray(n.ignore)) {
-                if (n.ignore.includes(serverId)) {
-                    logger.log("ignore");
-                    return;
-                }
+            if (!n || (n.playerId !== null && n.playerId !== data.joinedInd)) {
+                logger.log("ignore");
+                return;
             }
-            con.sendRawTo(handlerName, n, serverId);
+            con.sendRawTo(handlerName, n, data.serverId);
         });
     }
 }
-
 
 export default function gameMode(window, document, settings, gameFunction) {
 
@@ -33,12 +30,11 @@ export default function gameMode(window, document, settings, gameFunction) {
             networkLogger.log("connected");
             connection.on("gameinit", (data) => {
                 networkLogger.log("gameinit", data);
-                const serverId = data.data.serverId;
                 const presenter = presenterObj.presenterFunc(data.data.presenter, settings);
                 const game = gameFunction(window, document, settings, presenter);
                 const actions = actionsFunc(game);
                 connection.registerHandler(actions, queue);
-                setupGameToConnectionSend(game, con, networkLogger, serverId);
+                setupGameToConnectionSend(game, con, networkLogger, data.data);
                 resolve(game);
             });
 

@@ -137,14 +137,11 @@ export default function game(_window, document, settings, presenter) {
 
     const redraw = () => drawField(presenter, box, digits, settings, overlay, btnInstall, field);
 
-    async function animate(result, fromId) {
+    async function animate(result) {
         const res = result.res;
         if (res !== fieldObj.IMPOSSIBLE_MOVE) {
             redraw();
             let toSend = result;
-            if (fromId) {
-                toSend = {data: result, ignore: [fromId]};
-            }
             await handlers.call("message", toSend);
             if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
                 await handlers.call("gameover", toSend);
@@ -165,7 +162,7 @@ export default function game(_window, document, settings, presenter) {
         }
         presenter.setActivePosition(ind);
         draw(presenter, box);
-        doStep();
+        return doStep();
     };
 
     const handleClickDigits = function (evt) {
@@ -175,14 +172,14 @@ export default function game(_window, document, settings, presenter) {
         }
         presenter.setActiveDigitIndex(ind);
         drawDigits(presenter, digits, settings);
-        doStep();
+        return doStep();
     };
 
 
-    function onMessage({res, position, digit, playerId}, fromId) {
+    function onMessage({res, position, digit, playerId}) {
         const result = presenter.setMove(position, digit, playerId);
-        console.log("onMessage", res === result.res, fromId);
-        return animate(result, fromId);
+        assert(res === result.res, "Bad move");
+        return animate(result);
     }
 
     initField(document, presenter.size(), "cell", box);
