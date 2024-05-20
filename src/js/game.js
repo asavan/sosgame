@@ -47,6 +47,8 @@ function drawField(presenter, box, digits, settings, overlay, btnInstall, field)
         if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
             onGameEndDraw(res, presenter, overlay, btnInstall, field);
         }
+    } else {
+        overlay.classList.remove("show");
     }
 }
 
@@ -119,8 +121,8 @@ function setupOverlay(document, handlers) {
 export default function game(_window, document, settings, presenter) {
     const field = document.querySelector(".field");
     const box = document.querySelector(".box");
-    const digits = document.getElementsByClassName("buttons")[0];
-    const btnInstall = document.getElementsByClassName("install")[0];
+    const digits = document.querySelector(".buttons");
+    const btnInstall = document.querySelector(".install");
     const root = document.documentElement;
     root.style.setProperty("--field-size", presenter.size());
     // field.classList.remove("disabled");
