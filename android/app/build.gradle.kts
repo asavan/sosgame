@@ -16,8 +16,8 @@ android {
         applicationId = "ru.asavan.sosgame"
         minSdk = 24
         targetSdk = 34
-        versionCode = 19
-        versionName = "1.0.0"
+        versionCode = 20
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
