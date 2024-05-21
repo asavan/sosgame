@@ -1,6 +1,6 @@
 {
   "name": "sosgame",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Alex Sav",
   "description": "Sos game",
   "private": true,
@@ -20,7 +20,7 @@
     "style:fix": "npx eslint . -c linters/eslint.config.js --fix",
     "style2": "npx stylelint --config linters/.stylelintrc.json \"src/**/*.css\"",
     "style2:fix": "npx stylelint --config linters/.stylelintrc.json \"src/**/*.css\" --fix",
-    "style3": "npx oxlint -D all -A no-console -A no-null -A no-ternary -A no-abusive-eslint-disable -A max-params -A filename-case -A new-for-builtins -A prefer-add-event-listener ./src",
+    "style3": "npx oxlint -D all -A no-console -A max-params -A prefer-add-event-listener -A filename-case -A no-lonely-if --threads=1 --deny-warnings  --ignore-pattern=src/js/lib/* ./src",
     "test": "node --test --test-reporter dot",
     "test:verbose": "node --test",
     "test:coverage": "c8 node --test --test-reporter dot ./tests",

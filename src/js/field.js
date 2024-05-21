@@ -39,7 +39,7 @@ function stringToVal(str) {
 }
 
 function init(fieldSize) {
-    return Array(fieldSize).fill(0);
+    return Array.from({length: fieldSize}).fill(0);
 }
 
 function field(arrInn) {

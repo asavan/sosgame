@@ -16,7 +16,7 @@ export default function connectionFunc(id, logger) {
             return settings.wh;
         }
         if (location.protocol === "https:") {
-            return null;
+            return;
         }
         return "ws://" + location.hostname + ":" + settings.wsPort;
     }

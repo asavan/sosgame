@@ -14,7 +14,7 @@ export default async function starter(window, document) {
     parseSettings(window, document, settings);
     adjustSettings(settings);
 
-    let mode = null;
+    let mode;
     if (settings.mode === "client") {
         mode = await import("./mode/client.js");
     } else if (settings.mode === "server") {

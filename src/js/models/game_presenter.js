@@ -23,7 +23,7 @@ function gamePresenter({colorOrder}) {
     let roundInd = 0;
     let state = WAIT_FOR_PLAYERS;
     const players = [];
-    let currentRound = null;
+    let currentRound;
 
     console.log(colorOrder);
 

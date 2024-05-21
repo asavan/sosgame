@@ -41,7 +41,7 @@ export default function lobby(clients, shift = 0) {
         clientsArr.pop();
         const lastClient = clients[lastClientId];
         lastClient.index = toRemove.index;
-        clients[id] = null;
+        clients[id] = undefined;
         assert(index === clientsArr.length);
     };
 

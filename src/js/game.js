@@ -58,10 +58,9 @@ function initField(document, fieldSize, className, elem) {
     for (let i = 0; i < fieldSize; i++) {
         const cell = document.createElement("div");
         cell.className = className;
-        elem.appendChild(cell);
+        elem.append(cell);
     }
 }
-
 
 function onGameEndDraw(res, presenter, overlay, btnInstall, field) {
     const message = presenter.endMessage(res);
@@ -73,7 +72,6 @@ function onGameEndDraw(res, presenter, overlay, btnInstall, field) {
     btnInstall.classList.remove("hidden2");
     field.classList.add("disabled");
 }
-
 
 function draw(presenter, box) {
     const iter = presenter.enum1();

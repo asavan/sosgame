@@ -40,13 +40,10 @@ export default function createSignalingChannel(id, socketUrl, logger) {
         return handlers.call("close", id);
     };
 
-    ws.onmessage = function (e) {
+    ws.onmessage = async function (e) {
         if (e.data instanceof Blob) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                return onMessageInner(reader.result);
-            };
-            return reader.readAsText(e.data);
+            const text = await e.data.text();
+            return onMessageInner(text);
         } else {
             return onMessageInner(e.data);
         }

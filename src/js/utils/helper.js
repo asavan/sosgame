@@ -58,8 +58,8 @@ function logToHtml(message, el) {
     if (!el) {
         return;
     }
-    if (typeof message === "object") {
-        el.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + "<br />";
+    if (typeof message === "object" && JSON) {
+        el.innerHTML += JSON.stringify(message) + "<br />";
     } else {
         el.innerHTML += message + "<br />";
     }
@@ -78,7 +78,7 @@ export function log(message, el) {
 function stringToBoolean(string) {
     switch(string.toLowerCase().trim()) {
     case "true": case "yes": case "1": { return true; }
-    case "false": case "no": case "0": case null: { return false; }
+    case "false": case "no": case "0": case undefined: { return false; }
     default: { return Boolean(string); }
     }
 }
@@ -99,13 +99,19 @@ export function parseSettings(window, document, settings) {
 
 export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#using_promise.race_to_detect_the_status_of_a_promise
 export function promiseState(promise) {
     const pendingState = { status: "pending" };
 
     return Promise.race([promise, pendingState]).then(
-        (value) =>
-            value === pendingState ? value : { status: "fulfilled", value },
-        (error) => ({ status: "rejected", error }),
+        (value) => {
+            if (value === pendingState) {
+                return value;
+            } else {
+                return { status: "fulfilled", value };
+            }
+        },
+        (error) => ({ status: "rejected", reason: error }),
     );
 }
 
@@ -117,5 +123,9 @@ export function assert(b, message) {
 }
 
 export function pluralize(count, noun, suffix = "s"){
-    return `${count} ${noun}${count === 1 ? "" : suffix}`;
+    let ending = "";
+    if (count !== 1) {
+        ending = suffix;
+    }
+    return `${count} ${noun}` + ending;
 }

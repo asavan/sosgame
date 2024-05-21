@@ -5,6 +5,7 @@ export default [
     {
         ...js.configs.recommended,
         files: ["src/**/*.js", "test/**/*.js"],
+        ignores: ["src/js/lib/*"],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: "module",
@@ -16,6 +17,7 @@ export default [
     },
     {
         files: ["src/**/*.js", "test/**/*.js"],
+        ignores: ["src/js/lib/*"],
         rules: {
             "indent": [
                 "error",

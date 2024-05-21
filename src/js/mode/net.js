@@ -41,7 +41,10 @@ function getMyId(window, settings, rngEngine) {
 }
 
 function setupLogger(document, settings) {
-    const logger = settings.logger ? document.querySelector(settings.logger) : null;
+    let logger;
+    if (settings.logger) {
+        logger = document.querySelector(settings.logger);
+    }
     const networkLogger = networkLoggerFunc(logger, settings);
     return networkLogger;
 }

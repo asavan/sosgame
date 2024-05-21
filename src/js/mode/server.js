@@ -25,8 +25,8 @@ function reconnect(con, serverId) {
 function setupGameToConnectionSend(game, con, serverId, lobby) {
     for (const handlerName of game.actionKeys()) {
         game.on(handlerName, (n) => {
-            let ignore = null;
-            if (n && n.playerId !== null) {
+            let ignore;
+            if (n && n.playerId !== undefined) {
                 const toIgnore = lobby.idByInd(n.playerId);
                 ignore = [toIgnore];
             }

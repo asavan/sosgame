@@ -29,7 +29,7 @@ function defaultPresenter(settings) {
         gamestarted : false,
         round: 0,
         fieldArr : fieldObj.init(settings.size),
-        movesIdx : Array(settings.size).fill(-1)
+        movesIdx : Array.from({length: settings.size}).fill(-1)
     };
 }
 
@@ -183,7 +183,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         activeDigitIndex = -1;
         lastMove = -1;
         fieldArr = fieldObj.init(size());
-        movesIdx = Array(size()).fill(-1);
+        movesIdx = Array.from({length: size()}).fill(-1);
         currentUserIdx = round % playersSize;
         field = fieldObj.field(fieldArr);
     };
