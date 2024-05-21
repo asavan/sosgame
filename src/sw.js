@@ -46,23 +46,20 @@ function networkOrCache(request) {
         });
 }
 
-function fromCache(request) {
-    return caches.open(CACHE).then(function (cache) {
-        return cache.match(request, {ignoreSearch: true}).then(function (matching) {
-            if (matching) {
-                return matching;
-            }
-            throw new Error("request-not-in-cache");
-        });
-    });
+async function fromCache(request) {
+    const cache = await caches.open(CACHE);
+    const matching = await cache.match(request, { ignoreSearch: true });
+    if (matching) {
+        return matching;
+    }
+    throw new Error("request-not-in-cache");
 }
 
-function precache() {
+async function precache() {
     const filesToCache = self.__WB_MANIFEST.map((e) => e.url);
-    return caches.open(CACHE).then(function (cache) {
-        return cache.addAll([
-            "./",
-            ...filesToCache
-        ]);
-    });
+    const cache = await caches.open(CACHE);
+    return await cache.addAll([
+        "./",
+        ...filesToCache
+    ]);
 }
