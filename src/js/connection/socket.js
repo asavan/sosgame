@@ -9,7 +9,7 @@ export default function connectionFunc(id, logger) {
     }
 
     let currentHandler = {};
-    let queue = null;
+    let queue;
 
     function getWebSocketUrl(settings, location) {
         if (settings.wh) {
@@ -32,7 +32,7 @@ export default function connectionFunc(id, logger) {
             logger.log("Not function");
             return;
         }
-        if (queue == null) {
+        if (!queue) {
             logger.log("No queue");
             return;
         }
@@ -51,7 +51,7 @@ export default function connectionFunc(id, logger) {
                     return;
                 }
 
-                if (json.to !== id && json.to != "all") {
+                if (json.to !== id && json.to !== "all") {
                     logger.log("another user");
                     return;
                 }

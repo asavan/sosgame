@@ -46,9 +46,9 @@ export default function gameMode(window, document, settings, gameFunction) {
 
             con.sendRawAll("join");
             
-        }).catch(e => {
-            networkLogger.error(e);
-            reject(e);
+        }).catch(error => {
+            networkLogger.error(error);
+            reject(error);
         });
     });
 }

@@ -40,8 +40,8 @@ export function swapNodes(n1, n2) {
     if ( p1.isEqualNode(p2) && i1 < i2 ) {
         i2++;
     }
-    p1.insertBefore(n2, p1.children[i1]);
-    p2.insertBefore(n1, p2.children[i2]);
+    p1.before(n2, p1.children[i1]);
+    p2.before(n1, p2.children[i2]);
 }
 
 
@@ -58,7 +58,7 @@ function logToHtml(message, el) {
     if (!el) {
         return;
     }
-    if (typeof message == "object") {
+    if (typeof message === "object") {
         el.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + "<br />";
     } else {
         el.innerHTML += message + "<br />";
@@ -75,11 +75,11 @@ export function log(message, el) {
     console.log(message);
 }
 
-function stringToBoolean(string){
-    switch(string.toLowerCase().trim()){
-    case "true": case "yes": case "1": return true;
-    case "false": case "no": case "0": case null: return false;
-    default: return Boolean(string);
+function stringToBoolean(string) {
+    switch(string.toLowerCase().trim()) {
+    case "true": case "yes": case "1": { return true; }
+    case "false": case "no": case "0": case null: { return false; }
+    default: { return Boolean(string); }
     }
 }
 
@@ -88,7 +88,7 @@ export function parseSettings(window, document, settings) {
     const urlParams = new URLSearchParams(queryString);
     for (const [key, value] of urlParams) {
         if (typeof settings[key] === "number") {
-            settings[key] = parseInt(value, 10);
+            settings[key] = Number.parseInt(value, 10);
         } else if (typeof settings[key] === "boolean") {
             settings[key] = stringToBoolean(value);
         } else {
@@ -105,7 +105,7 @@ export function promiseState(promise) {
     return Promise.race([promise, pendingState]).then(
         (value) =>
             value === pendingState ? value : { status: "fulfilled", value },
-        (reason) => ({ status: "rejected", reason }),
+        (error) => ({ status: "rejected", error }),
     );
 }
 
@@ -117,5 +117,5 @@ export function assert(b, message) {
 }
 
 export function pluralize(count, noun, suffix = "s"){
-    return `${count} ${noun}${count !== 1 ? suffix : ""}`;
+    return `${count} ${noun}${count === 1 ? "" : suffix}`;
 }

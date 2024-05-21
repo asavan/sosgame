@@ -1,6 +1,8 @@
 import handlersFunc from "../utils/handlers.js";
 
-function stub() {}
+function stub() {
+    // do nothing.
+}
 
 export default function createSignalingChannel(id, socketUrl, logger) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);

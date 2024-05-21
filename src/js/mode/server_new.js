@@ -13,7 +13,7 @@ async function startGameAsync(window, document, settings) {
     const gameCore = await loadFromStorageOrNetOrDefault(con, window, document, settings);
     const code = makeQr(window, document, settings);
     gameCore.on("changestate", (stateTransition) => {
-        if (stateTransition.to == gameCore.IN_ROUND) {
+        if (stateTransition.to === gameCore.IN_ROUND) {
             removeElem(code);
             setupRoundNetwork(gameCore.getCurrentRound(), con);
         }

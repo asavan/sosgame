@@ -7,9 +7,9 @@ export default function PromiseQueue(logger) {
             queue = queue
                 .then(operation)
                 .then(resolve)
-                .catch((e) => {
-                    logger.log(e);
-                    reject(e);
+                .catch((error) => {
+                    logger.log(error);
+                    reject(error);
                 });
         });
     };

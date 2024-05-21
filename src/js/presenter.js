@@ -55,7 +55,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         if (digit < 0 || digit >= 2) {
             return false;
         }
-        if (playerIdx != currentUserIdx) {
+        if (playerIdx !== currentUserIdx) {
             return false;
         }
         return field.canSet(position);

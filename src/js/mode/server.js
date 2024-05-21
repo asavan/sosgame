@@ -85,9 +85,9 @@ export default function gameMode(window, document, settings, gameFunction) {
             });
             setupNetwork(game, connection, con, myId, queue, lobby);
             resolve(game);
-        }).catch(e => {
-            networkLogger.error(e);
-            reject(e);
+        }).catch(error => {
+            networkLogger.error(error);
+            reject(error);
         });
 
     });

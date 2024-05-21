@@ -21,7 +21,7 @@ export default function handlersFunc(arr) {
         let promises = [];
         for (const f of getSafe(name)) {
             if (typeof f !== "function") {
-                console.error("bad ", name);
+                console.error("bad call", name);
                 return;
             }
             promises.push(f(arg));

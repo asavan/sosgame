@@ -28,7 +28,7 @@ function gamePresenter({colorOrder}) {
     console.log(colorOrder);
 
     const changeState = async (newState) => {
-        if (newState == state) {
+        if (newState === state) {
             console.log("Same state");
             return;
         }

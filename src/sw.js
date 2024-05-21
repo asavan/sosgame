@@ -9,20 +9,24 @@ self.addEventListener("install", function (evt) {
     }));
 });
 
-self.addEventListener("activate", function (evt) {
-    evt.waitUntil(
-        caches.keys().then(function (cacheNames) {
-            return Promise.all(
-                cacheNames.map(function (cacheName) {
-                    if (cacheName !== CACHE) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(function () {
-            return self.clients.claim();
-        })
-    );
+const deleteCache = async (key) => {
+    await caches.delete(key);
+};
+
+const deleteOldCaches = async () => {
+    const cacheKeepList = [CACHE];
+    const keyList = await caches.keys();
+    const cachesToDelete = keyList.filter((key) => !cacheKeepList.includes(key));
+    await Promise.all(cachesToDelete.map(deleteCache));
+};
+
+const deleteAndClaim = async () => {
+    await deleteOldCaches();
+    await self.clients.claim();
+};
+
+self.addEventListener("activate", (event) => {
+    event.waitUntil(deleteAndClaim());
 });
 
 self.addEventListener("fetch", function (evt) {
