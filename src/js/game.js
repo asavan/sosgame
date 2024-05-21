@@ -140,19 +140,20 @@ export default function game(_window, document, settings, presenter) {
     async function animate(result) {
         const res = result.res;
         if (res !== fieldObj.IMPOSSIBLE_MOVE) {
+            const promises = [];
+            promises.push(delay(200));
+            promises.push(handlers.call("message", result));
+            await Promise.allSettled(promises);
             redraw();
-            let toSend = result;
-            await handlers.call("message", toSend);
             if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
-                await handlers.call("gameover", toSend);
+                await handlers.call("gameover", result);
             }
         }
     }
 
-    async function doStep() {
-        await delay(200);
+    function doStep() {
         const result = presenter.tryMove();
-        await animate(result);
+        return animate(result);
     }
 
     const handleBox = function (evt) {

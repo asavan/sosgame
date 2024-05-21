@@ -20,12 +20,12 @@ function cell(isLastMove, isActive, value, colors, playerIdx) {
 function defaultPresenter(settings) {
     return {
         clientUserIdx : settings.colorOrder.indexOf(settings.color),
-        currentUserIdx : settings.colorOrder.indexOf(settings.color),
-        playersSize : settings.colorOrder.length,
+        currentUserIdx : 0,
+        playersSize : settings.playerLimit,
         activeCellIndex : -1,
         activeDigitIndex : -1,
         lastMove : -1,
-        gameover : false,
+        gameover : true,
         gamestarted : false,
         round: 0,
         fieldArr : fieldObj.init(settings.size),
@@ -60,12 +60,10 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         }
         return field.canSet(position);
     };
-
+    
+    const nextCurrentInd = () => (currentUserIdx + 1) % playersSize;
     const nextUser = () => {
-        currentUserIdx = (currentUserIdx + 1) % playersSize;
-        if (settings.mode === "hotseat") {
-            clientUserIdx = currentUserIdx;
-        }
+        currentUserIdx = nextCurrentInd();
     };
 
 
@@ -116,6 +114,8 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
     const getActiveDigitIndex = () => activeDigitIndex;
 
+    const setClientIndex = (ind) => {clientUserIdx = ind;};
+
     const setActivePosition = function (pos) {
 
         if (clientUserIdx !== currentUserIdx || gameover) {
@@ -143,6 +143,10 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         return res;
     };
 
+    const setMyTurn = () => {
+        currentUserIdx = clientUserIdx;
+    };
+
     const endMessage = (res) => {
         if (res === fieldObj.DRAW_MOVE) {
             return "Draw";
@@ -154,6 +158,9 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
     };
 
     const currentColor = () => settings.colorOrder[currentUserIdx];
+    const getCurrentIndex = () => currentUserIdx;
+    const getClientIndex = () => clientUserIdx;
+    const getPlayersSize = () => playersSize;
 
     const toJson = (externalClientIndex) => {
         return {currentUserIdx, clientUserIdx: externalClientIndex, playersSize,
@@ -169,19 +176,21 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         return currentColor() + " player win";
     };
 
-    const nextRound = () => {
-        ++round;
+    const resetRound = () => {
         gamestarted = false;
         gameover = false;
         activeCellIndex = -1;
         activeDigitIndex = -1;
         lastMove = -1;
-        gameover = false;
-        gamestarted = false;
-        fieldArr = fieldObj.init(settings.size);
-        movesIdx = Array(settings.size).fill(-1);
-        currentUserIdx = (clientUserIdx + round) % playersSize;
+        fieldArr = fieldObj.init(size());
+        movesIdx = Array(size()).fill(-1);
+        currentUserIdx = round % playersSize;
         field = fieldObj.field(fieldArr);
+    };
+
+    const nextRound = () => {
+        ++round;
+        resetRound();
     };
 
     return {
@@ -200,7 +209,13 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         isGameOver,
         isMyMove,
         calcLastMoveRes,
-        nextRound
+        getCurrentIndex,
+        setClientIndex,
+        getClientIndex,
+        getPlayersSize,
+        setMyTurn,
+        nextRound,
+        resetRound
     };
 }
 

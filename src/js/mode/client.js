@@ -29,7 +29,7 @@ export default function gameMode(window, document, settings, gameFunction) {
         connection.connect(connection.getWebSocketUrl(settings, window.location)).then(con => {
             networkLogger.log("connected");
             connection.on("gameinit", (data) => {
-                networkLogger.log("gameinit", data);
+                console.log("gameinit", data);
                 const presenter = presenterObj.presenterFunc(data.data.presenter, settings);
                 const game = gameFunction(window, document, settings, presenter);
                 const actions = actionsFunc(game);

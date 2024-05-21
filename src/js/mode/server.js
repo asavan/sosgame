@@ -49,10 +49,11 @@ export default function gameMode(window, document, settings, gameFunction) {
         const networkLogger = netObj.setupLogger(document, settings);
         const connection = connectionFunc(myId, networkLogger);
         const queue = PromiseQueue(networkLogger);
-        const lobby = lobbyFunc({});
-        lobby.addClient(myId, myId);
         const presenter = presenterObj.presenterFuncDefault(settings);
         const game = gameFunction(window, document, settings, presenter);
+
+        const lobby = lobbyFunc({}, presenter.getClientIndex());
+        lobby.addClient(myId, myId);
 
         connection.connect(connection.getWebSocketUrl(settings, window.location)).then(con => {
             const code = makeQr(window, document, settings);
@@ -67,6 +68,10 @@ export default function gameMode(window, document, settings, gameFunction) {
                 lobby.addClient(data.from, data.from);
                 const joinedInd = lobby.indById(data.from);
                 const serverInd = lobby.indById(myId);
+                if (lobby.size() === settings.playerLimit && presenter.isGameOver()) {
+                    presenter.resetRound();
+                }
+
                 const presenterObj = presenter.toJson(joinedInd);
                 const toSend = {
                     serverId: myId,
@@ -75,6 +80,8 @@ export default function gameMode(window, document, settings, gameFunction) {
                     presenter: presenterObj
                 };
                 con.sendRawTo("gameinit", toSend, data.from);
+                game.redraw();
+                removeElem(code);
             });
             setupNetwork(game, connection, con, myId, queue, lobby);
             resolve(game);

@@ -1,6 +1,6 @@
 import {assert} from "./utils/helper.js";
 
-export default function lobby(clients) {
+export default function lobby(clients, shift = 0) {
     const clientsArr = [];
     for (const [key,] of Object.entries(clients)) {
         clientsArr.push(key);
@@ -17,6 +17,7 @@ export default function lobby(clients) {
         }
         assert(index === clientsArr.length);
     };
+
     const findByIndex = (ind) => {
         const id = clientsArr[ind];
         assert(id, "Bad Index");
@@ -65,8 +66,10 @@ export default function lobby(clients) {
         swapEl(el1, el2);
     };
 
-    const indById = (id) => getById(id).index;
-    const idByInd = (ind) => clientsArr[ind];;
+    const wrap = (ind) => (ind + clientsArr.length)%clientsArr.length;
+    const indById = (id) => wrap(getById(id).index + shift);
+    const idByInd = (ind) => clientsArr[wrap(ind-shift)];
+    const size = () => clientsArr.length;
 
     return {
         addClient,
@@ -74,6 +77,7 @@ export default function lobby(clients) {
         swapInd,
         swapById,
         indById,
-        idByInd
+        idByInd,
+        size
     };
 }

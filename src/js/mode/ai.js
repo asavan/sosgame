@@ -1,12 +1,16 @@
 import presenterObj from "../presenter.js";
-import {delay} from "../utils/helper.js";
+import {delay, assert} from "../utils/helper.js";
 import simpleBot from "../bot/simple_bot.js";
+import lobbyFunc from "../lobby.js";
 
-function botTryToMove(presenter, botInd, game) {
-    const state = presenter.toJson(botInd);
-    if (state.currentUserIdx !== botInd) {
+
+function botTryToMove(presenter, game) {
+    const botInd = presenter.getCurrentIndex();
+    if (botInd === presenter.getClientIndex()) {
         return;
     }
+    const state = presenter.toJson(botInd);
+    assert(state.currentUserIdx === botInd, "Corrupt data");
     const move = simpleBot.simpleMoveArr(state.fieldArr);
     move.playerId = botInd;
     return game.onMessage(move);
@@ -16,8 +20,15 @@ export default function ai(window, document, settings, gameFunction) {
     return new Promise((resolve) => {
         const presenter = presenterObj.presenterFuncDefault(settings);
         const game = gameFunction(window, document, settings, presenter);
-        const userInd = 0;
-        const botInd = 1;
+        const userInd = presenter.getClientIndex();
+        const lobby = lobbyFunc({}, userInd);
+        lobby.addClient("user", "user");
+
+        for (let i = 1; i < presenter.getPlayersSize(); ++i) {
+            const name = "bot" + i;
+            lobby.addClient(name, name);
+        }
+
         game.on("gameover", () => {
             const btnAdd = document.querySelector(".butInstall");
             btnAdd.classList.remove("hidden2");
@@ -28,16 +39,16 @@ export default function ai(window, document, settings, gameFunction) {
                 return;
             }
             await delay(100);
-            await botTryToMove(presenter, botInd, game);
+            await botTryToMove(presenter, game);
         });
 
         game.on("winclosed", () => {
             presenter.nextRound();
             game.redraw();
-            botTryToMove(presenter, botInd, game);
+            botTryToMove(presenter, game);
         });
-        
-        botTryToMove(presenter, botInd, game);
+
+        botTryToMove(presenter, game);
         resolve(game);
     });
 }
