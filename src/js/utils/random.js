@@ -10,6 +10,20 @@ function makeId(length, rngFunc) {
     return result;
 }
 
+function randomInteger(min, max) {
+    let rand = min + Math.random() * (max - min);
+    return Math.floor(rand);
+}
+
+function randomIndex(len) {
+    return randomInteger(0, len);
+}
+
+function randomEl(arr) {
+    return arr[randomIndex(arr.length)];
+}
+
 export default {
-    makeId
+    makeId,
+    randomEl
 };

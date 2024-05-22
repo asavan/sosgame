@@ -1,7 +1,8 @@
 import presenterObj from "../presenter.js";
 import {delay, assert} from "../utils/helper.js";
-import simpleBot from "../bot/simple_bot.js";
+import bot from "../bot/random_bot.js";
 import lobbyFunc from "../lobby.js";
+import fieldObj from "../field.js";
 
 
 function botTryToMove(presenter, game) {
@@ -11,7 +12,7 @@ function botTryToMove(presenter, game) {
     }
     const state = presenter.toJson(botInd);
     assert(state.currentUserIdx === botInd, "Corrupt data");
-    const move = simpleBot.simpleMoveArr(state.fieldArr);
+    const move = bot.bestMove(fieldObj.field(state.fieldArr));
     move.playerId = botInd;
     return game.onMessage(move);
 }
@@ -47,8 +48,9 @@ export default function ai(window, document, settings, gameFunction) {
             game.redraw();
             botTryToMove(presenter, game);
         });
-
+        presenter.resetRound();
         botTryToMove(presenter, game);
+        game.redraw();
         resolve(game);
     });
 }
