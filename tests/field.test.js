@@ -49,3 +49,14 @@ test("drawing", () => {
     }
 });
 
+test("movesLeft", () => {
+    const field = fieldObj.field([5, 0, 0, 5]);
+    assert.equal(2, field.movesLeft());
+    field.setSafeByIndex(1, 1);
+    assert.equal(1, field.movesLeft());
+});
+
+test("asString", () => {
+    const field = fieldObj.field([5, 0, 0, 5, 2]);
+    assert.equal("S  SO", field.asString());
+});

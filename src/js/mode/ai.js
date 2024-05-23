@@ -1,6 +1,6 @@
 import presenterObj from "../presenter.js";
 import {delay, assert} from "../utils/helper.js";
-import bot from "../bot/random_bot.js";
+import bot from "../bot/second_best_bot.js";
 import lobbyFunc from "../lobby.js";
 import fieldObj from "../field.js";
 

@@ -9,7 +9,7 @@ function valueToString(val) {
         return "S"; 
     }
     case 2: { 
-        return "0"; 
+        return "O"; 
     }
     case 0: { 
         return " "; 
@@ -97,6 +97,8 @@ function field(arrInn) {
     };
     const clone = () => field(arrInn);
     const toArr = () => arr.slice(2, -2);
+    const movesLeft = () => arr.reduce((accumulator, currentValue) => accumulator + (currentValue === 0), 0);
+    const asString = () => toArr().map(valueToString).join("");
     return {
         size,
         setSafe,
@@ -104,11 +106,13 @@ function field(arrInn) {
         getCharSafe,
         canSet,
         clone,
+        movesLeft,
+        toArr,
+        asString,
         // for tests
         isEmpty,
         inBounds,
-        checkWinning,
-        toArr
+        checkWinning
     };
 }
 
