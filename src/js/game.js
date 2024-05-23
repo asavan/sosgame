@@ -1,4 +1,3 @@
-import fieldObj from "./field.js";
 import {delay, assert} from "./utils/helper.js";
 import handlersFunc from "./utils/handlers.js";
 
@@ -18,38 +17,27 @@ const handleClick = function (evt, parent) {
     return getIndex(evt, parent);
 };
 
-function drawDigits(presenter, digits, settings) {
+function drawDigits(presenter, digits) {
     for (let i = 0; i < 2; i++) {
         const tile = digits.childNodes[i];
-        for (const color of settings.colorOrder) {
-            tile.classList.remove(color);
-        }
         if (presenter.getActiveDigitIndex() === i) {
             tile.classList.add("active");
             tile.classList.add(presenter.currentColor());
         } else {
             tile.classList.remove("active");
-
+            tile.classList.remove(presenter.currentColor());
         }
     }
 }
 
-function drawField(presenter, box, digits, settings, overlay, btnInstall, field) {
+function drawField(presenter, box, digits, field) {
     draw(presenter, box);
-    drawDigits(presenter, digits, settings);
+    drawDigits(presenter, digits);
     if (presenter.isMyMove()) {
         field.classList.remove("disabled");
     } else {
         field.classList.add("disabled");
-    }
-    if (presenter.isGameOver()) {
-        const res = presenter.calcLastMoveRes();
-        if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
-            onGameEndDraw(res, presenter, overlay, btnInstall, field);
-        }
-    } else {
-        overlay.classList.remove("show");
-    }
+    }    
 }
 
 function initField(document, fieldSize, className, elem) {
@@ -133,25 +121,37 @@ export default function game(_window, document, settings, presenter) {
     }
     const actionKeys = handlers.actionKeys;
 
-    const redraw = () => drawField(presenter, box, digits, settings, overlay, btnInstall, field);
-
-    async function animate(result) {
-        const res = result.res;
-        if (res !== fieldObj.IMPOSSIBLE_MOVE) {
-            const promises = [];
-            promises.push(delay(200));
-            promises.push(handlers.call("message", result));
-            await Promise.allSettled(promises);
-            redraw();
-            if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
-                await handlers.call("gameover", result);
-            }
+    const redraw = () => drawField(presenter, box, digits, field);
+    
+    presenter.on("moveEnd", async (obj) => {
+        const promises = [];
+        if (obj.moveCount === 0) {
+            promises.push(handlers.call("started", obj));
         }
-    }
+        promises.push(redraw());
+        await Promise.allSettled(promises);
+        const promises2 = [];
+        promises2.push(delay(200));
+        promises2.push(handlers.call("message", obj));
+        await Promise.allSettled(promises);
+    });
 
+    presenter.on("nextPlayer", () => {
+        const promises = [];
+        promises.push(delay(100));
+        promises.push(redraw());
+        return Promise.allSettled(promises);
+    });
+
+    presenter.on("gameover", (result) => {
+        const promises = [];
+        promises.push(onGameEndDraw(result.res, presenter, overlay, btnInstall, field));
+        promises.push(handlers.call("gameover", result));
+        return Promise.allSettled(promises);
+    });
+    
     function doStep() {
-        const result = presenter.tryMove();
-        return animate(result);
+        return presenter.tryMove();
     }
 
     const handleBox = function (evt) {
@@ -170,26 +170,24 @@ export default function game(_window, document, settings, presenter) {
             return;
         }
         presenter.setActiveDigitIndex(ind);
-        drawDigits(presenter, digits, settings);
+        drawDigits(presenter, digits);
         return doStep();
     };
 
 
-    function onMessage({res, position, digit, playerId}) {
-        const result = presenter.setMove(position, digit, playerId);
-        assert(res === result.res, "Bad move");
-        return animate(result);
+    async function onMessage({res, position, digit, playerId}) {
+        const result = await presenter.setMove(position, digit, playerId);
+        if (settings.logicDebug) {
+            assert(res === result.res, "Bad move");
+        }
+        return result;
     }
 
     initField(document, presenter.size(), "cell", box);
     box.addEventListener("click", handleBox, false);
     digits.addEventListener("click", handleClickDigits, false);
 
-    drawField(presenter, box, digits, settings, overlay, btnInstall, field);
-
-    presenter.on("firstmove", (obj) => {
-        return handlers.call("started", obj);
-    });
+    redraw();
 
     return {
         on,

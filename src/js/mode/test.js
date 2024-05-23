@@ -9,6 +9,9 @@ export default function test(window, document, settings, gameFunction) {
             btnAdd.classList.remove("hidden2");
         });
 
+        presenter.resetRound();
+        game.redraw();
+
         resolve(game);
     });
 }

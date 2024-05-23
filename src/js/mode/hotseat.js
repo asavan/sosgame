@@ -5,10 +5,12 @@ export default function gameMode(window, document, settings, gameFunction) {
         const presenter = presenterObj.presenterFuncDefault(settings);
         presenter.setMyTurn();
         const game = gameFunction(window, document, settings, presenter);
-        game.on("message", () => {
+        presenter.on("nextPlayer", () => {
             presenter.setClientIndex(presenter.getCurrentIndex());
-            // game.redraw();
+            return game.redraw();
         });
+        presenter.resetRound();
+        game.redraw();
         resolve(game);
     });
 }

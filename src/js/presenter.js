@@ -26,19 +26,19 @@ function defaultPresenter(settings) {
         activeDigitIndex : -1,
         lastMove : -1,
         gameover : true,
-        gamestarted : false,
         round: 0,
+        moveCount: 0,
         fieldArr : fieldObj.init(settings.size),
         movesIdx : Array.from({length: settings.size}).fill(-1)
     };
 }
 
 export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
-    activeCellIndex, activeDigitIndex, lastMove, gameover, gamestarted, round, fieldArr, movesIdx}, settings) {
+    activeCellIndex, activeDigitIndex, lastMove, gameover, round, moveCount, fieldArr, movesIdx}, settings) {
 
     let field = fieldObj.field(fieldArr);
 
-    const handlers = handlersFunc(["firstmove", "gameover"]);
+    const handlers = handlersFunc(["moveEnd", "nextPlayer", "gameover"]);
 
     function on(name, f) {
         return handlers.on(name, f);
@@ -67,7 +67,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
     };
 
 
-    const setMove = function(position, digit, playerIdx) {
+    const setMove = async function(position, digit, playerIdx) {
         if (!canMove(position, digit, playerIdx, currentUserIdx)) {
             return {res: fieldObj.IMPOSSIBLE_MOVE, position: -1, digit: -1, playerId: currentUserIdx, clientId: playerIdx};
         }
@@ -79,22 +79,20 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
         activeCellIndex = -1;
         activeDigitIndex = -1;
-        if (!gamestarted) {
-            // need await here
-            handlers.call("firstmove", {});
-        }
-        gamestarted = true;
         movesIdx[position] = playerIdx;
         lastMove = position;
+        ++moveCount;
         const playerId = currentUserIdx;
         const clientId = clientUserIdx;
+        await handlers.call("moveEnd", {res, position, digit, playerId, clientId, moveCount});
         if (res === fieldObj.NORMAL_MOVE) {
             nextUser();
+            await handlers.call("nextPlayer", {res, position, digit, playerId, clientId, moveCount});
         }
         if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {            
             gameover = true;
             // need await here
-            handlers.call("gameover", res);
+            await handlers.call("gameover", {res, position, digit, playerId, clientId, moveCount});
         }
         return {res, position, digit, playerId, clientId};
     };
@@ -177,7 +175,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
     };
 
     const resetRound = () => {
-        gamestarted = false;
+        moveCount = 0;
         gameover = false;
         activeCellIndex = -1;
         activeDigitIndex = -1;

@@ -1,11 +1,10 @@
 export default {
-    modes: ["client", "ai", "server", "hotseat", "test", "servernew"],
+    modes: ["client", "ai", "server", "hotseat", "test"],
     mode: "hotseat",
     wsPort : 8088,
     logger: "",
-    loggerInMode: ".log",
     networkDebug: false,
-    externalId: "server",
+    logicDebug: false,
     colorOrder: ["blue", "red", "green", "yellow"],
     color: "blue",
     playerLimit: 2,
