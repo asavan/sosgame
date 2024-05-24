@@ -4,7 +4,7 @@ import fieldObj from "./field.js";
 import handlersFunc from "./utils/handlers.js";
 
 function cell(isLastMove, isActive, value, colors, playerIdx) {
-    let text = value;
+    const text = value;
     let color = "";
     if (playerIdx >= 0 && playerIdx < colors.length) {
         color = colors[playerIdx];

@@ -20,8 +20,8 @@ export function removeElem(el) {
 
 export function swapNodes(n1, n2) {
 
-    let p1 = n1.parentNode;
-    let p2 = n2.parentNode;
+    const p1 = n1.parentNode;
+    const p2 = n2.parentNode;
     let i1, i2;
 
     if ( !p1 || !p2 || p1.isEqualNode(n2) || p2.isEqualNode(n1) ) return;

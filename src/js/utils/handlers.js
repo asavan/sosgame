@@ -18,7 +18,7 @@ export default function handlersFunc(arr) {
     const reset = (name) => { delete handlers[name];};
     const set = (f, arr1) => handlers[f] = arr1;
     const call = async (name, arg) => {
-        let promises = [];
+        const promises = [];
         for (const f of getSafe(name)) {
             if (typeof f !== "function") {
                 console.error("bad call", name);

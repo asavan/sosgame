@@ -43,8 +43,14 @@ export default function connectionFunc(id, logger) {
         return new Promise((resolve, reject) => {
             if (!socketUrl) {
                 reject("Can't determine ws address");
+                return;
             }
             const signaling = createSignalingChannel(id, socketUrl, logger);
+            signaling.on("error", (id) => {
+                logger.log("Connection to ws error " + id);
+                reject(id);
+            });
+
             signaling.on("message", function(json) {
                 if (json.from === id) {
                     logger.error("same user");

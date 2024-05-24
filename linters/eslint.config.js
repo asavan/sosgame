@@ -34,7 +34,11 @@ export default [
             "semi": [
                 "error",
                 "always"
-            ]
+            ],
+            "require-await": ["error"],
+            "comma-spacing": ["error"],
+            "prefer-const": ["error"],
+            "no-multi-spaces": ["error"]
         }
     }
 ];

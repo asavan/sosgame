@@ -50,7 +50,7 @@ function field(arrInn) {
     const inBounds = (pos) => pos >= 0 && pos < fieldSize;
     const checkWinning = (pos) => {
         for (let i = pos+2; i < pos + 5; ++i) {
-            let res = arr[i-2] === 5 && arr[i-1] === 2 && arr[i] === 5;
+            const res = arr[i-2] === 5 && arr[i-1] === 2 && arr[i] === 5;
             if (res) {
                 return WINNING_MOVE;
             }
