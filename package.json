@@ -1,6 +1,6 @@
 {
   "name": "sosgame",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Alex Sav",
   "description": "Sos game",
   "private": true,
@@ -28,26 +28,26 @@
     "updates:fix": "npx ncu -u && npm install"
   },
   "devDependencies": {
-    "c8": "^9.1.0",
+    "c8": "^10.1.2",
     "copy-webpack-plugin": "^12.0.2",
-    "css-loader": "^7.1.1",
+    "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.0",
-    "eslint": "^9.3.0",
-    "globals": "^15.2.0",
+    "eslint": "^9.5.0",
+    "globals": "^15.6.0",
     "html-inline-css-webpack-plugin": "^1.11.2",
     "html-webpack-plugin": "^5.6.0",
-    "jsdom": "^24.0.0",
+    "jsdom": "^24.1.0",
     "mini-css-extract-plugin": "^2.9.0",
     "npm-check-updates": "^16.14.20",
     "npm-run-all": "^4.1.5",
-    "oxlint": "^0.3.5",
-    "stylelint": "^15.11.0",
-    "stylelint-config-standard": "^34.0.0",
+    "oxlint": "^0.4.4",
+    "stylelint": "^16.6.1",
+    "stylelint-config-standard": "^36.0.1",
     "terser-webpack-plugin": "^5.3.10",
-    "webpack": "^5.91.0",
+    "webpack": "^5.92.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",
     "workbox-webpack-plugin": "^7.1.0",
-    "ws": "8.17.0"
+    "ws": "8.17.1"
   }
 }

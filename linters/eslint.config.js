@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import globals from "globals";
+import stylisticJs from '@stylistic/eslint-plugin-js';
 
 export default [
     {
@@ -16,29 +17,32 @@ export default [
         }
     },
     {
+        plugins: {
+            '@stylistic/js': stylisticJs
+        },
         files: ["src/**/*.js", "test/**/*.js"],
         ignores: ["src/js/lib/*"],
         rules: {
-            "indent": [
+            "@stylistic/js/indent": [
                 "error",
                 4
             ],
-            "linebreak-style": [
+            "@stylistic/js/linebreak-style": [
                 "error",
                 "windows"
             ],
-            "quotes": [
+            "@stylistic/js/quotes": [
                 "error",
                 "double"
             ],
-            "semi": [
+            "@stylistic/js/semi": [
                 "error",
                 "always"
             ],
-            "require-await": ["error"],
-            "comma-spacing": ["error"],
-            "prefer-const": ["error"],
-            "no-multi-spaces": ["error"]
+            "@stylistic/js/require-await": ["error"],
+            "@stylistic/js/comma-spacing": ["error"],
+            "@stylistic/js/prefer-const": ["error"],
+            "@stylistic/js/no-multi-spaces": ["error"]
         }
     }
 ];

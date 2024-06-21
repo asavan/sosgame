@@ -1,7 +1,6 @@
 {
   "extends": ["stylelint-config-standard"],
   "rules": {
-    "media-feature-range-notation": "prefix",
-    "indentation": 4
+    "media-feature-range-notation": "prefix"
   }
 }
