@@ -1,6 +1,6 @@
 {
   "name": "sosgame",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Alex Sav",
   "description": "Sos game",
   "private": true,
@@ -28,6 +28,7 @@
     "updates:fix": "npx ncu -u && npm install"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^2.2.2",
     "c8": "^10.1.2",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",

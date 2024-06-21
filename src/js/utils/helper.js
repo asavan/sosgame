@@ -24,7 +24,9 @@ export function swapNodes(n1, n2) {
     const p2 = n2.parentNode;
     let i1, i2;
 
-    if ( !p1 || !p2 || p1.isEqualNode(n2) || p2.isEqualNode(n1) ) return;
+    if ( !p1 || !p2 || p1.isEqualNode(n2) || p2.isEqualNode(n1) ) {
+        return;
+    }
 
     for (let i = 0; i < p1.children.length; i++) {
         if (p1.children[i].isEqualNode(n1)) {
@@ -76,7 +78,7 @@ export function log(message, el) {
 }
 
 function stringToBoolean(string) {
-    switch(string.toLowerCase().trim()) {
+    switch (string.toLowerCase().trim()) {
     case "true": case "yes": case "1": { return true; }
     case "false": case "no": case "0": case undefined: { return false; }
     default: { return Boolean(string); }
@@ -99,30 +101,16 @@ export function parseSettings(window, document, settings) {
 
 export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race#using_promise.race_to_detect_the_status_of_a_promise
-export function promiseState(promise) {
-    const pendingState = { status: "pending" };
-
-    return Promise.race([promise, pendingState]).then(
-        (value) => {
-            if (value === pendingState) {
-                return value;
-            } else {
-                return { status: "fulfilled", value };
-            }
-        },
-        (error) => ({ status: "rejected", reason: error }),
-    );
-}
-
 export function assert(b, message) {
-    if (b) return;
+    if (b) {
+        return;
+    }
     console.error(message);
     console.trace(message);
     throw message;
 }
 
-export function pluralize(count, noun, suffix = "s"){
+export function pluralize(count, noun, suffix = "s") {
     let ending = "";
     if (count !== 1) {
         ending = suffix;

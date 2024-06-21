@@ -21,9 +21,7 @@ export default function createSignalingChannel(id, socketUrl, logger) {
         return ws.close();
     };
 
-    const on = (name, f) => {
-        return handlers.on(name, f);
-    };
+    const on = (name, f) => handlers.on(name, f);
 
     function onMessageInner(text) {
         logger.log("Websocket message received: " + text);

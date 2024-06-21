@@ -5,7 +5,9 @@ const handleClick = function (evt, parent) {
     const getIndex = function (e, parent) {
         const target = e.target || e.srcElement;
         for (let i = 0; i < parent.children.length; i++) {
-            if (parent.children[i] === target) return i;
+            if (parent.children[i] === target) {
+                return i;
+            }
         }
         return -1;
     };
@@ -37,7 +39,7 @@ function drawField(presenter, box, digits, field) {
         field.classList.remove("disabled");
     } else {
         field.classList.add("disabled");
-    }    
+    }
 }
 
 function initField(document, fieldSize, className, elem) {
@@ -96,7 +98,7 @@ function setupOverlay(document, handlers) {
     const close = document.querySelector(".close");
     assert(overlay, "No overlay");
     assert(close, "No close button");
-    close.addEventListener("click", function (e) {
+    close.addEventListener("click", (e) => {
         e.preventDefault();
         overlay.classList.remove("show");
         return handlers.call("winclosed", {});
@@ -112,7 +114,7 @@ export default function game(_window, document, settings, presenter) {
     const root = document.documentElement;
     root.style.setProperty("--field-size", presenter.size());
     // field.classList.remove("disabled");
-    
+
     const handlers = handlersFunc(["message", "gameover", "started", "winclosed"]);
     const overlay = setupOverlay(document, handlers);
 
@@ -122,7 +124,7 @@ export default function game(_window, document, settings, presenter) {
     const actionKeys = handlers.actionKeys;
 
     const redraw = () => drawField(presenter, box, digits, field);
-    
+
     presenter.on("moveEnd", async (obj) => {
         const promises = [];
         if (obj.moveCount === 0) {
@@ -149,7 +151,7 @@ export default function game(_window, document, settings, presenter) {
         promises.push(handlers.call("gameover", result));
         return Promise.allSettled(promises);
     });
-    
+
     function doStep() {
         return presenter.tryMove();
     }

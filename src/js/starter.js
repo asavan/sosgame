@@ -29,7 +29,9 @@ export default async function starter(window, document) {
         assert(false, "Unsupported mode");
     }
     mode.default(window, document, settings, gameFunction).
-        catch((error) => {console.error(error);});
+        catch((error) => {
+            console.error(error);
+        });
 
     return mode;
 }

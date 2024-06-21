@@ -22,7 +22,7 @@ function findPattern(pattern, shift, field) {
         const res1 = simpleBot.bestMove(clonedField, position - 2, position + 3);
         if (res1.res !== fieldObj.WINNING_MOVE) {
             soosMoves.push({res: SOOS_MOVE, digit, position});
-        } 
+        }
         ind = str.indexOf(pattern, position + 1);
     }
     return soosMoves;
@@ -82,7 +82,7 @@ function longestEmptyMids(field) {
             curEnd = i + 1;
             if (curLen > maxLen) {
                 maxLen = curLen;
-                
+
                 assert(maxLen === (curEnd - curBegin));
                 if (maxLen%2 === 0) {
                     ans = [curBegin + maxLen/2 - 1, (curBegin + maxLen/2)];
@@ -129,7 +129,7 @@ function bestFirstMove(field) {
     // ind = str.indexOf("S");
     // if (ind < 0) {
     //     const position = randomEmptyMid(field);
-    //     return {res, digit, position};    
+    //     return {res, digit, position};
     // }
     return bestMove1(field);
 }
@@ -189,7 +189,7 @@ function bestMove(field) {
     if (field.movesLeft() % 2 === 1) {
         const soosMove = bestSecondMove(field);
         if (soosMove.res > fieldObj.DRAW_MOVE) {
-            soosMove.res = fieldObj.NORMAL_MOVE;            
+            soosMove.res = fieldObj.NORMAL_MOVE;
         }
         return soosMove;
     }

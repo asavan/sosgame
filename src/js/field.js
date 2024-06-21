@@ -4,35 +4,35 @@ const DRAW_MOVE = 2;
 const WINNING_MOVE = 3;
 
 function valueToString(val) {
-    switch(val) {
-    case 5: { 
-        return "S"; 
+    switch (val) {
+    case 5: {
+        return "S";
     }
-    case 2: { 
-        return "O"; 
+    case 2: {
+        return "O";
     }
-    case 0: { 
-        return " "; 
+    case 0: {
+        return " ";
     }
     }
     return "";
 }
 
 function stringToVal(str) {
-    switch(str) {
+    switch (str) {
     case "S":
-    case "s": { 
-        return 5; 
+    case "s": {
+        return 5;
     }
     case "O":
-    case "o": { 
-        return 2; 
+    case "o": {
+        return 2;
     }
-    case " ": { 
-        return 0; 
+    case " ": {
+        return 0;
     }
-    case "": { 
-        return -1; 
+    case "": {
+        return -1;
     }
     }
     return -1;

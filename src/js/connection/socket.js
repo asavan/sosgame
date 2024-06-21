@@ -26,8 +26,8 @@ export default function connectionFunc(id, logger) {
         currentHandler = handler;
     }
 
-    function callCurrentHandler(method, data) {    
-        const callback = currentHandler[method];  
+    function callCurrentHandler(method, data) {
+        const callback = currentHandler[method];
         if (typeof callback !== "function") {
             logger.log("Not function");
             return;
@@ -36,7 +36,7 @@ export default function connectionFunc(id, logger) {
             logger.log("No queue");
             return;
         }
-        queue.add(() => callback(data.data, data.from));        
+        queue.add(() => callback(data.data, data.from));
     }
 
     function connect(socketUrl) {
@@ -51,7 +51,7 @@ export default function connectionFunc(id, logger) {
                 reject(id);
             });
 
-            signaling.on("message", function(json) {
+            signaling.on("message", (json) => {
                 if (json.from === id) {
                     logger.error("same user");
                     return;

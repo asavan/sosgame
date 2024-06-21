@@ -57,7 +57,9 @@ export default function gameMode(window, document, settings, gameFunction) {
 
         connection.connect(connection.getWebSocketUrl(settings, window.location)).then(con => {
             const code = makeQr(window, document, settings);
-            game.on("started", () => {removeElem(code);});
+            game.on("started", () => {
+                removeElem(code);
+            });
             game.on("winclosed", () => {
                 presenter.nextRound();
                 game.redraw();
@@ -76,7 +78,7 @@ export default function gameMode(window, document, settings, gameFunction) {
                 const toSend = {
                     serverId: myId,
                     joinedInd,
-                    serverInd, 
+                    serverInd,
                     presenter: presenterObj
                 };
                 con.sendRawTo("gameinit", toSend, data.from);

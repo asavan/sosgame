@@ -47,7 +47,9 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
     function* enumerate() {
         for (let i = 0; i < field.size(); ++i) {
-            yield [i, cell(lastMove === i, activeCellIndex === i, field.getCharSafe(i), settings.colorOrder, movesIdx[i])];
+            yield [i, cell(lastMove === i, activeCellIndex === i, field.getCharSafe(i),
+                settings.colorOrder, movesIdx[i])
+            ];
         }
     }
 
@@ -60,7 +62,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         }
         return field.canSet(position);
     };
-    
+
     const nextCurrentInd = () => (currentUserIdx + 1) % playersSize;
     const nextUser = () => {
         currentUserIdx = nextCurrentInd();
@@ -69,7 +71,13 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
     const setMove = async function(position, digit, playerIdx) {
         if (!canMove(position, digit, playerIdx, currentUserIdx)) {
-            return {res: fieldObj.IMPOSSIBLE_MOVE, position: -1, digit: -1, playerId: currentUserIdx, clientId: playerIdx};
+            return {
+                res: fieldObj.IMPOSSIBLE_MOVE,
+                position: -1,
+                digit: -1,
+                playerId: currentUserIdx,
+                clientId: playerIdx
+            };
         }
 
         const res = field.setSafeByIndex(digit, position);
@@ -89,7 +97,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
             nextUser();
             await handlers.call("nextPlayer", {res, position, digit, playerId, clientId, moveCount});
         }
-        if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {            
+        if (res === fieldObj.WINNING_MOVE || res === fieldObj.DRAW_MOVE) {
             gameover = true;
             // need await here
             await handlers.call("gameover", {res, position, digit, playerId, clientId, moveCount});
@@ -112,7 +120,9 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
     const getActiveDigitIndex = () => activeDigitIndex;
 
-    const setClientIndex = (ind) => {clientUserIdx = ind;};
+    const setClientIndex = (ind) => {
+        clientUserIdx = ind;
+    };
 
     const setActivePosition = function (pos) {
 
@@ -129,9 +139,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
     const size = field.size;
 
-    const enum1 = () => {
-        return enumerate();
-    };
+    const enum1 = () => enumerate();
 
     const calcLastMoveRes = () => {
         if (lastMove < 0) {
@@ -160,10 +168,8 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
     const getClientIndex = () => clientUserIdx;
     const getPlayersSize = () => playersSize;
 
-    const toJson = (externalClientIndex) => {
-        return {currentUserIdx, clientUserIdx: externalClientIndex, playersSize,
-            activeCellIndex, activeDigitIndex, lastMove, gameover, fieldArr: field.toArr(), movesIdx};
-    };
+    const toJson = (externalClientIndex) => ({currentUserIdx, clientUserIdx: externalClientIndex, playersSize,
+        activeCellIndex, activeDigitIndex, lastMove, gameover, fieldArr: field.toArr(), movesIdx});
 
     const isMyMove = () => !gameover && currentUserIdx === clientUserIdx;
 
