@@ -1,11 +1,13 @@
-import {removeElem} from "../utils/helper.js";
-import qrRender from "../lib/qrcode.js";
+import PromiseQueue from "../utils/async-queue.js";
+
+import actionsFunc from "../actions.js";
 import connectionFunc from "../connection/socket.js";
-import presenterObj from "../presenter.js";
 import lobbyFunc from "../lobby.js";
 import netObj from "./net.js";
-import actionsFunc from "../actions.js";
-import PromiseQueue from "../utils/async-queue.js";
+import presenterObj from "../presenter.js";
+import qrRender from "../lib/qrcode.js";
+import {removeElem} from "../utils/helper.js";
+
 
 function makeQr(window, document, settings) {
     const staticHost = settings.sh || window.location.href;

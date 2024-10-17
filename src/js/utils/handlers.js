@@ -10,15 +10,14 @@ export default function handlersFunc(arr) {
         if (!Array.isArray(arr)) {
             console.error("No key", name);
             console.trace("No key", name);
-            throw "No name";
+            throw new Error("No name");
         }
         return arr;
     };
     const on = (name, callback) => getSafe(name).push(callback);
-    const reset = (name) => {
-        delete handlers[name];
+    const set = (f, arr1) => {
+        handlers[f] = arr1;
     };
-    const set = (f, arr1) => handlers[f] = arr1;
     const call = async (name, arg) => {
         const promises = [];
         for (const f of getSafe(name)) {
@@ -35,7 +34,6 @@ export default function handlersFunc(arr) {
         on,
         set,
         call,
-        reset,
         actionKeys
     };
 }

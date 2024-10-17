@@ -1,15 +1,12 @@
 {
   "name": "sosgame",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Alex Sav",
   "description": "Sos game",
   "private": true,
   "main": "index.js",
   "type": "module",
   "sideEffects": false,
-  "engines": {
-    "node": ">=20.0.0"
-  },
   "scripts": {
     "ws": "node devtools/ws-server.js",
     "start": "webpack serve --config webpack_configs/webpack.config.js --mode development",
@@ -20,7 +17,7 @@
     "style:fix": "npx eslint . -c linters/eslint.config.js --fix",
     "style2": "npx stylelint --config linters/.stylelintrc.json \"src/**/*.css\"",
     "style2:fix": "npx stylelint --config linters/.stylelintrc.json \"src/**/*.css\" --fix",
-    "style3": "npx oxlint -D all -A no-console -A max-params -A prefer-add-event-listener -A filename-case -A no-lonely-if --threads=1 --deny-warnings  --ignore-pattern=src/js/lib/* ./src",
+    "style3": "npx oxlint -D all -A no-console -A max-params -A prefer-add-event-listener -A no-useless-undefined -A no-undefined -A no-async-await -A func-names -A default-case -A filename-case -A no-lonely-if -A sort-keys -A no-magic-numbers -A no-plusplus --threads=1 --deny-warnings  --ignore-pattern=src/js/lib/* ./src",
     "test": "node --test --test-reporter dot",
     "test:verbose": "node --test",
     "test:coverage": "npx c8 node --test --test-reporter dot",
@@ -28,27 +25,27 @@
     "updates:fix": "npx ncu -u && npm install"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin-js": "^2.2.2",
+    "@stylistic/eslint-plugin-js": "^2.9.0",
     "c8": "^10.1.2",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.0",
-    "eslint": "^9.5.0",
-    "globals": "^15.6.0",
+    "eslint": "^9.12.0",
+    "globals": "^15.11.0",
     "html-inline-css-webpack-plugin": "^1.11.2",
     "html-webpack-plugin": "^5.6.0",
-    "jsdom": "^24.1.0",
-    "mini-css-extract-plugin": "^2.9.0",
-    "npm-check-updates": "^16.14.20",
+    "jsdom": "^25.0.1",
+    "mini-css-extract-plugin": "^2.9.1",
+    "npm-check-updates": "^17.1.4",
     "npm-run-all": "^4.1.5",
-    "oxlint": "^0.4.4",
-    "stylelint": "^16.6.1",
+    "oxlint": "^0.9.10",
+    "stylelint": "^16.10.0",
     "stylelint-config-standard": "^36.0.1",
     "terser-webpack-plugin": "^5.3.10",
-    "webpack": "^5.92.1",
+    "webpack": "^5.95.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4",
+    "webpack-dev-server": "^5.1.0",
     "workbox-webpack-plugin": "^7.1.0",
-    "ws": "8.17.1"
+    "ws": "8.18.0"
   }
 }

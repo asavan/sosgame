@@ -1,5 +1,15 @@
-import handlersFunc from "../utils/handlers.js";
 import createSignalingChannel from "./common.js";
+import handlersFunc from "../utils/handlers.js";
+
+function getWebSocketUrl(settings, location) {
+    if (settings.wh) {
+        return settings.wh;
+    }
+    if (location.protocol === "https:") {
+        return;
+    }
+    return "ws://" + location.hostname + ":" + settings.wsPort;
+}
 
 export default function connectionFunc(id, logger) {
     const handlers = handlersFunc(["close", "disconnect", "error", "join", "gameinit", "reconnect"]);
@@ -11,15 +21,6 @@ export default function connectionFunc(id, logger) {
     let currentHandler = {};
     let queue;
 
-    function getWebSocketUrl(settings, location) {
-        if (settings.wh) {
-            return settings.wh;
-        }
-        if (location.protocol === "https:") {
-            return;
-        }
-        return "ws://" + location.hostname + ":" + settings.wsPort;
-    }
 
     function registerHandler(handler, q) {
         queue = q;

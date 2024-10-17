@@ -42,10 +42,10 @@ export default function createSignalingChannel(id, socketUrl, logger) {
         if (e.data instanceof Blob) {
             const text = await e.data.text();
             return onMessageInner(text);
-        } else {
-            return onMessageInner(e.data);
         }
+        return onMessageInner(e.data);
     };
+
     ws.onerror = function (e) {
         logger.error(e);
         return handlers.call("error", id);

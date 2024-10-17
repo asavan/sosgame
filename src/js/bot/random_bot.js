@@ -1,7 +1,6 @@
-import random from "../utils/random.js";
 import {assert} from "../utils/helper.js";
-
 import fieldObj from "../field.js";
+import random from "../utils/random.js";
 import simpleBot from "./simple_bot.js";
 
 function bestMove(field) {
@@ -18,10 +17,10 @@ function bestMove(field) {
                 return {res, digit, position};
             }
             const res1 = simpleBot.bestMove(clonedField, position - 2, position + 3);
-            if (res1.res !== fieldObj.WINNING_MOVE) {
-                goodMoves.push({res, digit, position});
-            } else {
+            if (res1.res === fieldObj.WINNING_MOVE) {
                 possibleMoves.push({res, digit, position});
+            } else {
+                goodMoves.push({res, digit, position});
             }
         }
     }

@@ -1,8 +1,8 @@
-import presenterObj from "../presenter.js";
-import {delay, assert} from "../utils/helper.js";
+import {assert, delay} from "../utils/helper.js";
 import bot from "../bot/second_best_bot.js";
-import lobbyFunc from "../lobby.js";
 import fieldObj from "../field.js";
+import lobbyFunc from "../lobby.js";
+import presenterObj from "../presenter.js";
 
 
 function botTryToMove(presenter, game) {

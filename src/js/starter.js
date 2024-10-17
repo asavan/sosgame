@@ -1,8 +1,8 @@
 "use strict";
 
-import settings from "./settings.js";
+import {assert, parseSettings} from "./utils/helper.js";
 import gameFunction from "./game.js";
-import {parseSettings, assert} from "./utils/helper.js";
+import settings from "./settings.js";
 
 function adjustSettings(settings) {
     if (settings.colorOrder.length > settings.playerLimit) {

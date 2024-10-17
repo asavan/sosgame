@@ -1,9 +1,8 @@
-import random from "../utils/random.js";
 import {assert} from "../utils/helper.js";
-
 import fieldObj from "../field.js";
-import simpleBot from "./simple_bot.js";
+import random from "../utils/random.js";
 import randomBot from "./random_bot.js";
+import simpleBot from "./simple_bot.js";
 
 const SOOS_MOVE = 4;
 const FIRST_S_MOVE = 5;

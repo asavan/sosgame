@@ -10,12 +10,12 @@ java {
 
 android {
     namespace = "ru.asavan.sosgame"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "ru.asavan.sosgame"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 21
         versionName = "1.1.0"
 
@@ -38,6 +38,6 @@ dependencies {
 //    implementation("androidx.appcompat:appcompat:1.6.1")
 //    implementation("com.google.android.material:material:1.9.0")
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }

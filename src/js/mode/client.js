@@ -1,9 +1,10 @@
-import netObj from "./net.js";
-import connectionFunc from "../connection/socket.js";
-import presenterObj from "../presenter.js";
-import actionsFunc from "../actions.js";
 import PromiseQueue from "../utils/async-queue.js";
+
+import actionsFunc from "../actions.js";
 import {assert} from "../utils/helper.js";
+import connectionFunc from "../connection/socket.js";
+import netObj from "./net.js";
+import presenterObj from "../presenter.js";
 
 
 function setupGameToConnectionSend(game, con, logger, data) {

@@ -65,7 +65,9 @@ function field(arrInn) {
 
     const isEmpty = (pos) => arr[2+pos] === 0;
     const canSet = (pos) => inBounds(pos) && isEmpty(pos);
-    const setStr = (c, pos) => arr[2+pos] = stringToVal(c);
+    const setStr = (c, pos) => {
+        arr[2+pos] = stringToVal(c);
+    };
     const setSafeByIndex = (ind, pos, needrestore = false) => {
         if (!canSet(pos)) {
             return IMPOSSIBLE_MOVE;

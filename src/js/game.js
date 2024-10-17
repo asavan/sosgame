@@ -1,17 +1,17 @@
-import {delay, assert} from "./utils/helper.js";
+import {assert, delay} from "./utils/helper.js";
 import handlersFunc from "./utils/handlers.js";
 
-const handleClick = function (evt, parent) {
-    const getIndex = function (e, parent) {
-        const target = e.target || e.srcElement;
-        for (let i = 0; i < parent.children.length; i++) {
-            if (parent.children[i] === target) {
-                return i;
-            }
+const getIndex = function (e, parent) {
+    const target = e.target || e.srcElement;
+    for (let i = 0; i < parent.children.length; i++) {
+        if (parent.children[i] === target) {
+            return i;
         }
-        return -1;
-    };
+    }
+    return -1;
+};
 
+const handleClick = function (evt, parent) {
     evt.preventDefault();
     if (!evt.target.classList.contains("cell") || evt.target.classList.contains("disabled")) {
         return -1;

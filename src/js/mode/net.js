@@ -1,4 +1,4 @@
-import {log, error} from "../utils/helper.js";
+import {error, log} from "../utils/helper.js";
 import rngFunc from "../utils/random.js";
 
 function networkLoggerFunc(logger, settings) {
@@ -22,7 +22,7 @@ function networkLoggerFunc(logger, settings) {
 
 function setupMedia() {
     if (navigator.mediaDevices) {
-        return navigator.mediaDevices.getUserMedia({
+        navigator.mediaDevices.getUserMedia({
             audio: true,
             video: true
         });
