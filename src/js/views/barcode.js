@@ -22,6 +22,7 @@ export default async function scanBarcode(logger, document) {
                 logger.log(barcodes);
                 // Process the detected barcodes
                 stream.getTracks().forEach(track => track.stop()); // Stop the camera when done
+                video.remove();
                 codesPromice.resolve(barcodes);
             } else {
                 logger.error("No codes found");
