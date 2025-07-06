@@ -43,7 +43,7 @@ export default function connectionFunc(id, logger) {
     function connect(socketUrl) {
         return new Promise((resolve, reject) => {
             if (!socketUrl) {
-                reject("Can't determine ws address");
+                reject(new Error("Can't determine ws address"));
                 return;
             }
             const signaling = createSignalingChannel(id, socketUrl, logger);
