@@ -2,32 +2,27 @@ import {delay} from "../utils/helper.js";
 
 export default async function scanBarcode(logger, document) {
     try {
-        logger.error("before media1");
         const videoCont = document.querySelector(".video-barcode");
         if (!videoCont || videoCont.querySelector("video")) {
             return;
         }
         const barcodeDetector = new BarcodeDetector({formats: ["qr_code"]});
-        logger.error("before media2");
         const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}});
         const video = document.createElement("video");
         video.srcObject = stream;
         videoCont.appendChild(video);
         // video.autoplay = true;
         await video.play();
-        logger.error("after media2");
         const codesPromice = Promise.withResolvers();
 
         async function detect(codesPromice) {
             const barcodes = await barcodeDetector.detect(video);
-            logger.error("after detect");
-
             if (barcodes.length > 0) {
-                logger.error(barcodes);
+                logger.log(barcodes);
                 // Process the detected barcodes
                 stream.getTracks().forEach(track => track.stop()); // Stop the camera when done
                 video.remove();
-                codesPromice.resolve(barcodes);
+                codesPromice.resolve(barcodes[0].rawValue);
             } else {
                 logger.error("No codes found");
                 await delay(100);

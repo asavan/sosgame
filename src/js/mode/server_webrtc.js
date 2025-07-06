@@ -15,7 +15,6 @@ function showReadBtn(document, logger) {
     const qrBtn = document.querySelector(".qr-btn");
     qrBtn.classList.remove("hidden");
     qrBtn.addEventListener("click", async () => {
-        logger.error("before");
         const codes = await scanBarcode(logger, document);
         logger.error("after", codes);
         barCodeready.resolve(codes);
@@ -27,7 +26,6 @@ function showReadBtn(document, logger) {
 export default function gameMode(window, document, settings, gameFunction) {
     return new Promise((resolve, reject) => {
         const networkLogger = netObj.setupLogger(document, settings);
-        showReadBtn(document, networkLogger);
         const myId = netObj.getMyId(window, settings, Math.random);
         const connection = connectionFunc(myId, networkLogger);
 
@@ -42,6 +40,7 @@ export default function gameMode(window, document, settings, gameFunction) {
             makeQrPlain(url, document, ".qrcode");
 
             showReadBtn(document).then(async (answerAndCand) => {
+                networkLogger.error("answerAndCand", answerAndCand);
                 connection.on("open", (openCon) => {
                     const presenter = presenterObj.presenterFuncDefault(settings);
                     const game = gameFunction(window, document, settings, presenter);

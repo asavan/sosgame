@@ -148,13 +148,21 @@ const connectionFunc = function (id, logger) {
         }
     }
 
+    function getOfferAndCands() {
+        return {
+            offer,
+            candidates: localCandidates
+        }
+    }
+
     return {
         on,
         registerHandler,
         sendRawTo,
         sendRawAll,
         placeOfferAndWaitCandidates,
-        setAnswerAndCand
+        setAnswerAndCand,
+        getOfferAndCands
     };
 };
 
