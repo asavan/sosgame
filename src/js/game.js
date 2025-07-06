@@ -135,7 +135,7 @@ export default function game(_window, document, settings, presenter) {
         const promises2 = [];
         promises2.push(delay(200));
         promises2.push(handlers.call("message", obj));
-        await Promise.allSettled(promises);
+        await Promise.allSettled(promises2);
     });
 
     presenter.on("nextPlayer", () => {

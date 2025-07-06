@@ -295,6 +295,7 @@ footer {
 }
 
 .contrl-btn {
+    font-family: Cambria, Georgia, serif;
     display: grid;
     place-items: center;
     width: 50px;
@@ -305,7 +306,6 @@ footer {
     cursor: pointer;
     font-size: 3rem;
     padding: 0 3px;
-    font-family: monospace;
 }
 
 #minimize-btn, #maximize-btn {

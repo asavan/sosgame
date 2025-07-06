@@ -25,6 +25,10 @@ export default async function starter(window, document) {
         mode = await import("./mode/hotseat.js");
     } else if (settings.mode === "test") {
         mode = await import("./mode/test.js");
+    } else if (settings.mode === "swrtc") {
+        mode = await import("./mode/server_webrtc.js");
+    } else if (settings.mode === "cwrtc") {
+        mode = await import("./mode/client_webrtc.js");
     } else {
         assert(false, "Unsupported mode");
     }
