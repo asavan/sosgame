@@ -1,6 +1,6 @@
 import handlersFunc from "../utils/handlers.js";
 
-const connectionFunc = function (id, logger, isServer, settings) {
+const connectionFunc = function (id, logger) {
     logger.log("Webrtc connection " + id);
     const handlers = handlersFunc(["recv", "open", "error", "close", "socket_open", "socket_close", "disconnect"]);
 
@@ -109,7 +109,7 @@ const connectionFunc = function (id, logger, isServer, settings) {
         dataChannel.onopen = function () {
             logger.log("------ DATACHANNEL OPENED ------");
             // TODO make sendRawTo to send to this dataChannel
-            dataChanelWaiter.resolve({sendRawAll, sendRawTo, on})
+            dataChanelWaiter.resolve({sendRawAll, sendRawTo, on});
             return handlers.call("open", {sendRawTo, id});
         };
 

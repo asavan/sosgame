@@ -1,10 +1,10 @@
 export default async function scanBarcode(logger) {
     try {
         logger.error("before media1");
-        const barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+        const barcodeDetector = new BarcodeDetector({ formats: ["qr_code"] });
         logger.error("before media2");
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        const video = document.createElement('video');
+        const video = document.createElement("video");
         video.srcObject = stream;
         video.autoplay = true;
         // await video.play();
@@ -18,6 +18,6 @@ export default async function scanBarcode(logger) {
         }
         return barcodes;
     } catch (error) {
-        logger.error('Error accessing camera or detecting barcodes:', error);
+        logger.error("Error accessing camera or detecting barcodes:", error);
     }
 }

@@ -12,7 +12,7 @@ function connectNetworkAndGame() {
 
 function showReadBtn(document) {
     const barCodeready = Promise.withResolvers();
-    let qrBtn = document.querySelector(".qr-btn");
+    const qrBtn = document.querySelector(".qr-btn");
     qrBtn.classList.remove("hidden");
     qrBtn.addEventListener("click", async () => {
         const codes = await scanBarcode();
@@ -27,8 +27,6 @@ export default function gameMode(window, document, settings, gameFunction) {
         const networkLogger = netObj.setupLogger(document, settings);
         const myId = netObj.getMyId(window, settings, Math.random);
         const connection = connectionFunc(myId, networkLogger);
-        const lobby = lobbyFunc({}, presenter.getClientIndex());
-        lobby.addClient(myId, myId);
 
         const offerPromice = connection.placeOfferAndWaitCandidates();
         const timer = delay(2000);
@@ -44,6 +42,8 @@ export default function gameMode(window, document, settings, gameFunction) {
                 connection.on("open", (openCon) => {
                     const presenter = presenterObj.presenterFuncDefault(settings);
                     const game = gameFunction(window, document, settings, presenter);
+                    const lobby = lobbyFunc({}, presenter.getClientIndex());
+                    lobby.addClient(myId, myId);
                     connectNetworkAndGame(game, openCon);
                     resolve(game);
                 });
