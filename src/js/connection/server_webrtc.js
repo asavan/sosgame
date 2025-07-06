@@ -152,7 +152,7 @@ const connectionFunc = function (id, logger) {
         return {
             offer,
             candidates: localCandidates
-        }
+        };
     }
 
     return {
