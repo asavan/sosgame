@@ -16,7 +16,7 @@ function showReadBtn(document, logger) {
     qrBtn.classList.remove("hidden");
     qrBtn.addEventListener("click", async () => {
         logger.error("before");
-        const codes = await scanBarcode(logger);
+        const codes = await scanBarcode(logger, document);
         logger.error("after", codes);
         barCodeready.resolve(codes);
     });

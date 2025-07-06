@@ -1,4 +1,4 @@
-export default async function scanBarcode(logger) {
+export default async function scanBarcode(logger, document) {
     try {
         logger.error("before media1");
         const barcodeDetector = new BarcodeDetector({ formats: ["qr_code"] });
@@ -6,8 +6,9 @@ export default async function scanBarcode(logger) {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         const video = document.createElement("video");
         video.srcObject = stream;
-        video.autoplay = true;
-        // await video.play();
+        document.querySelector(".video-barcode").appendChild(video);
+        // video.autoplay = true;
+        await video.play();
         logger.error("after media2");
         const barcodes = await barcodeDetector.detect(video);
 
