@@ -43,7 +43,7 @@ function renderQRCodeSVG(text, divElement) {
         level: "M",
         padding: 3,
         image: {
-            source: "./../../images/sos.png",
+            source: "./../images/sos.png",
             width: "10%",
             height: "20%",
             x: "center",
