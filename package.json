@@ -47,5 +47,8 @@
     "webpack-dev-server": "^5.2.2",
     "workbox-webpack-plugin": "^7.3.0",
     "ws": "8.18.3"
+  },
+  "dependencies": {
+    "@akamfoad/qrcode": "^0.3.2"
   }
 }

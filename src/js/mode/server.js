@@ -5,8 +5,8 @@ import connectionFunc from "../connection/socket.js";
 import lobbyFunc from "../lobby.js";
 import netObj from "./net.js";
 import presenterObj from "../presenter.js";
-import qrRender from "../lib/qrcode.js";
 import {removeElem} from "../utils/helper.js";
+import {makeQrPlain} from "../views/qr_helper.js";
 
 
 function makeQr(window, document, settings) {
@@ -14,7 +14,7 @@ function makeQr(window, document, settings) {
     const url = new URL(staticHost);
     url.searchParams.set("mode", "client");
     console.log("enemy url", url.toString());
-    return qrRender(url.toString(), document.querySelector(".qrcode"));
+    return makeQrPlain(url.toString(), document, ".qrcode");
 }
 
 function reconnect(con, serverId) {
