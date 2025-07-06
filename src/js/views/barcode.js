@@ -1,3 +1,5 @@
+import {delay} from "../utils/helper.js";
+
 export default async function scanBarcode(logger, document) {
     try {
         logger.error("before media1");
@@ -23,6 +25,7 @@ export default async function scanBarcode(logger, document) {
                 codesPromice.resolve(barcodes);
             } else {
                 logger.error("No codes found");
+                await delay(100);
                 requestAnimationFrame(() => {
                     detect(codesPromice);
                 });
