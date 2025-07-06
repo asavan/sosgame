@@ -34,9 +34,9 @@ const prodConfig = () => {
             minimizer: [new TerserJSPlugin({
                 terserOptions: {
                     mangle: true,
-                    compress: {
-                        drop_console: true
-                    }
+                    // compress: {
+                    //     drop_console: true
+                    // }
                 }
             }), new CssMinimizerPlugin()],
         },

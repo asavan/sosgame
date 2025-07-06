@@ -16,7 +16,7 @@ function showReadBtn(document, logger) {
     qrBtn.classList.remove("hidden");
     qrBtn.addEventListener("click", async () => {
         const codes = await scanBarcode(logger, document);
-        logger.error("after", codes);
+        logger.error(codes);
         barCodeready.resolve(codes);
     });
 
@@ -42,7 +42,7 @@ export default function gameMode(window, document, settings, gameFunction) {
             makeQrPlain(url, document, ".qrcode");
 
             showReadBtn(document, networkLogger).then(async (answerAndCand) => {
-                networkLogger.error("answerAndCand", answerAndCand);
+                networkLogger.error(answerAndCand);
                 connection.on("open", (openCon) => {
                     mainSection.classList.remove("hidden");
                     const menuSection = document.querySelector(".menu");
