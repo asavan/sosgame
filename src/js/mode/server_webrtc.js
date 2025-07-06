@@ -28,6 +28,8 @@ export default function gameMode(window, document, settings, gameFunction) {
         const networkLogger = netObj.setupLogger(document, settings);
         const myId = netObj.getMyId(window, settings, Math.random);
         const connection = connectionFunc(myId, networkLogger);
+        const mainSection = document.querySelector(".game");
+        mainSection.classList.add("hidden");
 
         const offerPromice = connection.placeOfferAndWaitCandidates();
         const timer = delay(2000);
@@ -42,6 +44,9 @@ export default function gameMode(window, document, settings, gameFunction) {
             showReadBtn(document, networkLogger).then(async (answerAndCand) => {
                 networkLogger.error("answerAndCand", answerAndCand);
                 connection.on("open", (openCon) => {
+                    mainSection.classList.remove("hidden");
+                    const menuSection = document.querySelector(".menu");
+                    menuSection.querySelector(".control-panel")?.classList.add("absolute");
                     const presenter = presenterObj.presenterFuncDefault(settings);
                     const game = gameFunction(window, document, settings, presenter);
                     const lobby = lobbyFunc({}, presenter.getClientIndex());

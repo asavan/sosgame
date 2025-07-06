@@ -30,9 +30,10 @@ body {
     flex-direction: column;
 }
 
-.content {
+.game {
     flex: 1 0 auto;
-    padding: 10px;
+
+    /* padding: 10px; */
 }
 
 footer {
@@ -265,8 +266,15 @@ footer {
     gap: 3px;
 }
 
-.control-panel {
+.absolute {
     position: absolute;
+}
+
+.relative {
+    position: relative;
+}
+
+.control-panel {
     top: 10px;
     right: 10px;
     background-color: #323232;
@@ -304,29 +312,17 @@ footer {
     border: none;
     color: white;
     cursor: pointer;
-    font-size: 3rem;
+    overflow: hidden;
+    font-size: 2rem;
     padding: 0 3px;
 }
 
-#minimize-btn, #maximize-btn {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 3rem;
-    padding: 0 3px;
-}
-
-#control-panel.minimized .panel-header #minimize-btn { display: none; }
-
-#control-panel:not(.minimized) .panel-header #maximize-btn { display: none; }
-
-#control-panel button:not(:disabled):active {
+.control-panel button:not(:disabled):active {
     background-color: #7a7a7a;
     transform: translateY(1px);
 }
 
-#control-panel button:not(:disabled):hover { background-color: #686868; }
+.control-panel button:not(:disabled):hover { background-color: #686868; }
 
 .hidden { display: none; }
 
