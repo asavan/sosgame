@@ -3,12 +3,16 @@ import {delay} from "../utils/helper.js";
 export default async function scanBarcode(logger, document) {
     try {
         logger.error("before media1");
-        const barcodeDetector = new BarcodeDetector(/*{formats: ["qr_code"]}*/);
+        let videoCont = document.querySelector(".video-barcode");
+        if (!videoCont || videoCont.querySelector("video")) {
+            return;
+        }
+        const barcodeDetector = new BarcodeDetector({formats: ["qr_code"]});
         logger.error("before media2");
         const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}});
         const video = document.createElement("video");
         video.srcObject = stream;
-        document.querySelector(".video-barcode").appendChild(video);
+        videoCont.appendChild(video);
         // video.autoplay = true;
         await video.play();
         logger.error("after media2");
@@ -19,7 +23,7 @@ export default async function scanBarcode(logger, document) {
             logger.error("after detect");
 
             if (barcodes.length > 0) {
-                logger.log(barcodes);
+                logger.error(barcodes);
                 // Process the detected barcodes
                 stream.getTracks().forEach(track => track.stop()); // Stop the camera when done
                 video.remove();
