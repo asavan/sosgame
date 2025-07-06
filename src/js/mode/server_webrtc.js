@@ -39,7 +39,7 @@ export default function gameMode(window, document, settings, gameFunction) {
             const url = baseUrl + "?con= " + encodedString;
             makeQrPlain(url, document, ".qrcode");
 
-            showReadBtn(document).then(async (answerAndCand) => {
+            showReadBtn(document, networkLogger).then(async (answerAndCand) => {
                 networkLogger.error("answerAndCand", answerAndCand);
                 connection.on("open", (openCon) => {
                     const presenter = presenterObj.presenterFuncDefault(settings);
