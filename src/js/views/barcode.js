@@ -3,7 +3,7 @@ import {delay} from "../utils/helper.js";
 export default async function scanBarcode(logger, document) {
     try {
         logger.error("before media1");
-        let videoCont = document.querySelector(".video-barcode");
+        const videoCont = document.querySelector(".video-barcode");
         if (!videoCont || videoCont.querySelector("video")) {
             return;
         }
