@@ -1,4 +1,5 @@
 import handlersFunc from "../utils/handlers.js";
+import {processCandidates} from "./common_webrtc.js";
 
 const connectionFunc = function (id, logger) {
     const localCandidates = [];
@@ -54,6 +55,7 @@ const connectionFunc = function (id, logger) {
     }
 
     async function processOffer(offerAndcandidates) {
+        logger.error(offerAndcandidates);
         const peerConnection = SetupFreshConnection(id);
 
         peerConnection.ondatachannel = (ev) => {
@@ -61,9 +63,7 @@ const connectionFunc = function (id, logger) {
         };
         const offer = offerAndcandidates.offer;
         await peerConnection.setRemoteDescription(offer);
-        for (const candidate of offerAndcandidates.c) {
-            await peerConnection.addIceCandidate(candidate);
-        }
+        await processCandidates(offerAndcandidates.c, peerConnection);
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
         return answer;

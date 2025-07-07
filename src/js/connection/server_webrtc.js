@@ -1,4 +1,5 @@
 import handlersFunc from "../utils/handlers.js";
+import {processCandidates} from "./common_webrtc.js";
 
 const connectionFunc = function (id, logger) {
     logger.log("Webrtc connection " + id);
@@ -140,13 +141,7 @@ const connectionFunc = function (id, logger) {
     async function setAnswerAndCand(data) {
         const answer = {type: "answer", sdp: data.sdp};
         await peerConnection.setRemoteDescription(answer);
-        for (const candMessage of data.c) {
-            if (!candMessage.candidate) {
-                await peerConnection.addIceCandidate(null);
-            } else {
-                await peerConnection.addIceCandidate(candMessage);
-            }
-        }
+        await processCandidates(data.c, peerConnection);
     }
 
     function getOfferAndCands() {
