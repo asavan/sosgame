@@ -121,8 +121,18 @@ footer {
         align-self: center;
     }
 
+    .absolute {
+        position: absolute;
+    }
+
     .hidden2 {
         display: none;
+    }
+}
+
+@media (min-width: 750px) {
+    .game {
+        padding: 5px;
     }
 }
 
@@ -264,10 +274,6 @@ footer {
     flex-direction: row;
     align-items: center;
     gap: 3px;
-}
-
-.absolute {
-    position: absolute;
 }
 
 .relative {
