@@ -138,7 +138,7 @@ const connectionFunc = function (id, logger) {
     }
 
     async function setAnswerAndCand(data) {
-        const answer = {type: "answer", sdp: data.sdp}
+        const answer = {type: "answer", sdp: data.sdp};
         await peerConnection.setRemoteDescription(answer);
         for (const candMessage of data.candidates) {
             if (!candMessage.candidate) {

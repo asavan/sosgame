@@ -1,10 +1,8 @@
 import handlersFunc from "../utils/handlers.js";
 
-const connectionFunc = function (id, logger, isServer, settings) {
-    const user = id;
+const connectionFunc = function (id, logger) {
     const localCandidates = [];
     const candidateWaiter = Promise.withResolvers();
-    const dataChanelWaiter = Promise.withResolvers();
 
     const handlers = handlersFunc(["recv", "open", "error", "close", "socket_open", "socket_close"]);
     function on(name, f) {
@@ -13,7 +11,7 @@ const connectionFunc = function (id, logger, isServer, settings) {
 
     // init
     let isConnected = false;
-    let dataChannel = null;
+    const dataChannel = null;
 
     const sendRawTo = (action, data, to) => {
         if (!dataChannel) {

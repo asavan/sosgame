@@ -6,7 +6,7 @@ import {makeQrPlain} from "../views/qr_helper.js";
 import {delay} from "../utils/helper.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
-import * as JSURL from "jsurl2"
+import * as JSURL from "jsurl2";
 
 function connectNetworkAndGame() {
     // later

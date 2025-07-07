@@ -42,15 +42,15 @@ function renderQRCodeSVG(text, divElement) {
     const options = {
         level: "M",
         padding: 3,
-    }
+    };
     if (text.length < 100) {
         options.image = {
-                source: "./images/sos.png",
-                width: "10%",
-                height: "20%",
-                x: "center",
-                y: "center"
-        }
+            source: "./images/sos.png",
+            width: "10%",
+            height: "20%",
+            x: "center",
+            y: "center"
+        };
     }
     const qrSVG = new QRCodeSVG(text, options);
     divElement.innerHTML = qrSVG.toString();
