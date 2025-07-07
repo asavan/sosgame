@@ -34,10 +34,10 @@ const connectionFunc = function (id, logger) {
                 message.sdpMid = e.candidate.sdpMid;
                 message.sdpMLineIndex = e.candidate.sdpMLineIndex;
             }
-
             localCandidates.push(message);
+
             if (!e.candidate) {
-                candidateWaiter.resolve({localCandidates, offer});
+                candidateWaiter.resolve({c: localCandidates, sdp: offer.sdp});
             }
         };
 
@@ -138,7 +138,8 @@ const connectionFunc = function (id, logger) {
     }
 
     async function setAnswerAndCand(data) {
-        await peerConnection.setRemoteDescription(data.offer);
+        const answer = {type: "answer", sdp: data.sdp}
+        await peerConnection.setRemoteDescription(answer);
         for (const candMessage of data.candidates) {
             if (!candMessage.candidate) {
                 await peerConnection.addIceCandidate(null);
@@ -150,8 +151,8 @@ const connectionFunc = function (id, logger) {
 
     function getOfferAndCands() {
         return {
-            offer,
-            candidates: localCandidates
+            sdp: offer.sdp,
+            c: localCandidates
         };
     }
 

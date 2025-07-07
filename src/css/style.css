@@ -54,11 +54,11 @@ footer {
     align-items: stretch;
 }
 
-.qrcode.big {
+.qrcode .big {
     position: absolute;
     top: 0;
     left: 0;
-    width: calc(var(--field-size) * 100px + 50px);
+    width: 100%;
 }
 
 .buttons {

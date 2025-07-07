@@ -1,5 +1,5 @@
 export default {
-    modes: ["client", "ai", "server", "hotseat", "test"],
+    modes: ["client", "ai", "server", "hotseat", "test", "swrtc", "cwrtc"],
     mode: "hotseat",
     wsPort : 8088,
     logger: ".log",

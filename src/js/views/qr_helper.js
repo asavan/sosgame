@@ -39,17 +39,20 @@ function chomp(string, c) {
 }
 
 function renderQRCodeSVG(text, divElement) {
-    const qrSVG = new QRCodeSVG(text, {
+    const options = {
         level: "M",
         padding: 3,
-        image: {
-            source: "./images/sos.png",
-            width: "10%",
-            height: "20%",
-            x: "center",
-            y: "center",
-        },
-    });
+    }
+    if (text.length < 100) {
+        options.image = {
+                source: "./images/sos.png",
+                width: "10%",
+                height: "20%",
+                x: "center",
+                y: "center"
+        }
+    }
+    const qrSVG = new QRCodeSVG(text, options);
     divElement.innerHTML = qrSVG.toString();
 }
 
@@ -75,14 +78,17 @@ export function makeQrPlain(urlStr, document, selector) {
         console.log("No qr");
         return el;
     }
-    return makeQrElement(urlStr, el);
+    const divToRender = document.createElement("div");
+    el.appendChild(divToRender);
+    return makeQrElement(urlStr, divToRender);
 }
 
 export function makeQrElement(urlStr, el) {
-    console.log("enemy url", urlStr);
+    console.log("enemy url", urlStr, urlStr.length);
     renderQRCodeSVG(urlStr, el);
     // bigPicture(el);
     shareAndCopy(el, urlStr);
+    bigPicture(el);
     return el;
 }
 

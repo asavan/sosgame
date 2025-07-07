@@ -5,6 +5,8 @@ import presenterObj from "../presenter.js";
 import {makeQrPlain} from "../views/qr_helper.js";
 import {delay} from "../utils/helper.js";
 import scanBarcode from "../views/barcode.js";
+import LZString from "lz-string";
+import * as JSURL from "jsurl2"
 
 function connectNetworkAndGame() {
     // later
@@ -17,7 +19,8 @@ function showReadBtn(document, logger) {
     qrBtn.addEventListener("click", async () => {
         const codes = await scanBarcode(logger, document);
         logger.error(codes);
-        barCodeready.resolve(codes);
+        const decode = LZString.decompressFromEncodedURIComponent(codes);
+        barCodeready.resolve(JSON.parse(decode));
     });
 
     return barCodeready.promise;
@@ -38,8 +41,15 @@ export default function gameMode(window, document, settings, gameFunction) {
             const baseUrl = "https://asavan.github.io/sosgame/";
             const jsonString = JSON.stringify(dataToSend);
             const encodedString = encodeURIComponent(jsonString);
-            const url = baseUrl + "?con= " + encodedString;
+            const url = baseUrl + "?c=" + encodedString;
+            const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
+            const url2 = baseUrl + "?c=" + encoded2;
             makeQrPlain(url, document, ".qrcode");
+            makeQrPlain(url2, document, ".qrcode");
+            const jsonString3 = JSURL.stringify(dataToSend);
+            const encodedString3 = encodeURIComponent(jsonString3);
+            const url3 = baseUrl + "?c=" + encodedString3;
+            makeQrPlain(url3, document, ".qrcode");
 
             showReadBtn(document, networkLogger).then(async (answerAndCand) => {
                 networkLogger.error(answerAndCand);

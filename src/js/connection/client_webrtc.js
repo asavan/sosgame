@@ -2,6 +2,9 @@ import handlersFunc from "../utils/handlers.js";
 
 const connectionFunc = function (id, logger, isServer, settings) {
     const user = id;
+    const localCandidates = [];
+    const candidateWaiter = Promise.withResolvers();
+    const dataChanelWaiter = Promise.withResolvers();
 
     const handlers = handlersFunc(["recv", "open", "error", "close", "socket_open", "socket_close"]);
     function on(name, f) {
@@ -24,36 +27,14 @@ const connectionFunc = function (id, logger, isServer, settings) {
         return dataChannel.send(JSON.stringify(json));
     };
 
-    // inspired by
-    // http://udn.realityripple.com/docs/Web/API/WebRTC_API/Perfect_negotiation#Implementing_perfect_negotiation
-    // and https://w3c.github.io/webrtc-pc/#perfect-negotiation-example
-    async function connect(socketUrl, channelChooser) {
-        const signaling = channelChooser.createSignalingChannel(id, socketUrl, logger, settings);
-        signaling.on("close", (data) => handlers.call("socket_close", data));
-
-        signaling.on("open", () => {
-            handlers.call("socket_open", {});
-            signaling.send("connected", {id}, "all");
-        });
-
-        signaling.on("error", (data) => {
-            handlers.call("error", data);
-        });
-
-        await signaling.ready();
+    function SetupFreshConnection(id) {
         const peerConnection = new RTCPeerConnection(null);
-
-        const offerSentPromise = Promise.withResolvers();
-        const sendWhenReady = (message) => {
-            offerSentPromise.promise.then(() => {
-                signaling.send("candidate", message, "server");
-            });
-        };
+        // window.pc = peerConnection;
 
         peerConnection.onicecandidate = e => {
-            logger.log("ICE", e);
+            logger.log("Received icecandidate", id, e);
             if (!e) {
-                return;
+                console.error("No ice");
             }
             const message = {
                 type: "candidate",
@@ -63,77 +44,35 @@ const connectionFunc = function (id, logger, isServer, settings) {
                 message.candidate = e.candidate.candidate;
                 message.sdpMid = e.candidate.sdpMid;
                 message.sdpMLineIndex = e.candidate.sdpMLineIndex;
+                localCandidates.push(e.candidate);
             }
-            logger.log({"candidate": e.candidate});
-            sendWhenReady(message);
-            // signaling.send("candidate", message, "server");
-        };
-        // window.pc = peerConnection;
 
-
-        peerConnection.oniceconnectionstatechange = (e) => {
-            logger.log("connection statechange", e);
-            if (peerConnection.iceConnectionState === "failed") {
-                console.error("failed");
-            // peerConnection.restartIce();
+            if (!e.candidate) {
+                candidateWaiter.resolve({c: localCandidates});
             }
         };
 
-        dataChannel = peerConnection.createDataChannel("gamechannel"+id);
-
-        setupDataChannel(dataChannel, signaling);
-
-        // const sdpConstraints = {offerToReceiveAudio: false, offerToReceiveVideo: false};
-
-        const offer = await peerConnection.createOffer();
-        // await delay(1000);
-        await peerConnection.setLocalDescription(offer);
-        // await delay(1000);
-        logger.log("AFTER DESCRIPTION SET");
-
-        signaling.on("message", async (json) => {
-            if (json.from === user) {
-                console.error("same user");
-                return;
-            }
-
-            // TODO delete server
-            if (json.from !== "server") {
-                console.log("not from server");
-                return;
-            }
-
-            if (json.to !== user) {
-                console.log("wrong recipient", user, json.to);
-                return;
-            }
-            logger.log("Websocket message received: ", json);
-
-            if (json.action === "candidate") {
-                logger.log("ON CANDIDATE");
-                if (!json.data.candidate) {
-                    await peerConnection.addIceCandidate(null);
-                } else {
-                    await peerConnection.addIceCandidate(json.data);
-                }
-
-            } else if (json.action === "answer") {
-                await peerConnection.setRemoteDescription(json.data);
-                // now can send candidates
-                offerSentPromise.resolve();
-            } else if (json.action === "connected") {
-                // WHY we need this?
-            } else if (json.action === "close") {
-                // need for server
-            } else {
-                console.error("Unknown type " + json.action);
-            }
-        });
-
-        return signaling.send("offer", {type: "offer", sdp: offer.sdp}, "server");
+        return peerConnection;
     }
 
-    function setupDataChannel(dataChannel, signaling) {
+    async function processOffer(offerAndcandidates) {
+        const peerConnection = SetupFreshConnection(id);
+
+        peerConnection.ondatachannel = (ev) => {
+            setupDataChannel(ev.channel);
+        };
+        const offer = {"type": "offer", "sdp": offerAndcandidates.sdp};
+        await peerConnection.setRemoteDescription(offer);
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        return answer;
+    }
+
+    function getCandidates() {
+        return candidateWaiter.promise;
+    }
+
+    function setupDataChannel(dataChannel) {
         dataChannel.onmessage = function (e) {
             logger.log("data get " + e.data);
             handlers.call("recv", e.data);
@@ -142,8 +81,6 @@ const connectionFunc = function (id, logger, isServer, settings) {
         dataChannel.onopen = function () {
             logger.log("------ DATACHANNEL OPENED ------");
             isConnected = true;
-            signaling.send("close", {}, "server");
-            signaling.close();
             handlers.call("open", {id, sendRawTo});
         };
 
@@ -170,7 +107,7 @@ const connectionFunc = function (id, logger, isServer, settings) {
         });
     }
 
-    return {connect, on, registerHandler, sendRawTo};
+    return {processOffer, on, registerHandler, sendRawTo, getCandidates};
 };
 
 export default connectionFunc;
