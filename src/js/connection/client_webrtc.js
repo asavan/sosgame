@@ -42,11 +42,11 @@ const connectionFunc = function (id, logger) {
                 message.candidate = e.candidate.candidate;
                 message.sdpMid = e.candidate.sdpMid;
                 message.sdpMLineIndex = e.candidate.sdpMLineIndex;
-                localCandidates.push(e.candidate);
             }
+            localCandidates.push(message);
 
             if (!e.candidate) {
-                candidateWaiter.resolve({c: localCandidates});
+                candidateWaiter.resolve(localCandidates);
             }
         };
 
@@ -59,8 +59,11 @@ const connectionFunc = function (id, logger) {
         peerConnection.ondatachannel = (ev) => {
             setupDataChannel(ev.channel);
         };
-        const offer = {"type": "offer", "sdp": offerAndcandidates.sdp};
+        const offer = offerAndcandidates.offer;
         await peerConnection.setRemoteDescription(offer);
+        for (const candidate of offerAndcandidates.c) {
+            await peerConnection.addIceCandidate(candidate);
+        }
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
         return answer;

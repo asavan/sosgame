@@ -37,7 +37,7 @@ const connectionFunc = function (id, logger) {
             localCandidates.push(message);
 
             if (!e.candidate) {
-                candidateWaiter.resolve({c: localCandidates, sdp: offer.sdp});
+                candidateWaiter.resolve(localCandidates);
             }
         };
 
@@ -140,7 +140,7 @@ const connectionFunc = function (id, logger) {
     async function setAnswerAndCand(data) {
         const answer = {type: "answer", sdp: data.sdp};
         await peerConnection.setRemoteDescription(answer);
-        for (const candMessage of data.candidates) {
+        for (const candMessage of data.c) {
             if (!candMessage.candidate) {
                 await peerConnection.addIceCandidate(null);
             } else {
@@ -151,7 +151,7 @@ const connectionFunc = function (id, logger) {
 
     function getOfferAndCands() {
         return {
-            sdp: offer.sdp,
+            offer,
             c: localCandidates
         };
     }

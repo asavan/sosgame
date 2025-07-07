@@ -44,7 +44,7 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     const dataToSend = {sdp: answer.sdp};
     if (cands) {
-        dataToSend.candidates = cands;
+        dataToSend.c = cands;
     }
     const jsonString = JSON.stringify(dataToSend);
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
