@@ -17,8 +17,16 @@ function showReadBtn(document, logger) {
     const qrBtn = document.querySelector(".qr-btn");
     qrBtn.classList.remove("hidden");
     qrBtn.addEventListener("click", async () => {
-        const codes = await scanBarcode(logger, document);
-        logger.error(codes);
+        let codes = await scanBarcode(logger, document);
+        logger.log(codes);
+        if (!codes) {
+            let sign = prompt("Get code from qr");
+            if (sign === null) {
+                barCodeready.reject();
+                return;
+            }
+            codes = sign;
+        }
         const decode = LZString.decompressFromEncodedURIComponent(codes);
         barCodeready.resolve(JSON.parse(decode));
     });
@@ -45,7 +53,7 @@ export default function gameMode(window, document, settings, gameFunction) {
             makeQrPlain(url2, document, ".qrcode");
 
             showReadBtn(document, networkLogger).then(async (answerAndCand) => {
-                networkLogger.error(answerAndCand);
+                networkLogger.log(answerAndCand);
                 connection.on("open", (openCon) => {
                     showGameView(document); const presenter = presenterObj.presenterFuncDefault(settings);
                     const game = gameFunction(window, document, settings, presenter);

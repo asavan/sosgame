@@ -70,6 +70,7 @@ function logToHtml(message, el) {
 export function error(message, el) {
     logToHtml(message, el);
     console.error(message);
+    console.trace(message);
 }
 
 export function log(message, el) {
