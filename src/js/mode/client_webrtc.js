@@ -6,6 +6,7 @@ import {makeQrPlain} from "../views/qr_helper.js";
 import {delay} from "../utils/helper.js";
 
 import LZString from "lz-string";
+import {showGameView} from "../views/section_view.js";
 
 
 function connectNetworkAndGame() {
@@ -26,10 +27,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
     const gamePromice = Promise.withResolvers();
     connection.on("open", (openCon) => {
-        mainSection.classList.remove("hidden");
-        const menuSection = document.querySelector(".menu");
-        menuSection.querySelector(".control-panel")?.classList.add("absolute");
-
+        showGameView(document);
         const presenter = presenterObj.presenterFuncDefault(settings);
         const game = gameFunction(window, document, settings, presenter);
         const lobby = lobbyFunc({}, presenter.getClientIndex());

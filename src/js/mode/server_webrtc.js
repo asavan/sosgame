@@ -6,6 +6,7 @@ import {makeQrPlain} from "../views/qr_helper.js";
 import {delay} from "../utils/helper.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
+import {showGameView} from "../views/section_view.js";
 
 function connectNetworkAndGame() {
     // later
@@ -46,10 +47,7 @@ export default function gameMode(window, document, settings, gameFunction) {
             showReadBtn(document, networkLogger).then(async (answerAndCand) => {
                 networkLogger.error(answerAndCand);
                 connection.on("open", (openCon) => {
-                    mainSection.classList.remove("hidden");
-                    const menuSection = document.querySelector(".menu");
-                    menuSection.querySelector(".control-panel")?.classList.add("absolute");
-                    const presenter = presenterObj.presenterFuncDefault(settings);
+                    showGameView(document); const presenter = presenterObj.presenterFuncDefault(settings);
                     const game = gameFunction(window, document, settings, presenter);
                     const lobby = lobbyFunc({}, presenter.getClientIndex());
                     lobby.addClient(myId, myId);
