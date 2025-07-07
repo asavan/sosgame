@@ -21,7 +21,7 @@ function showReadBtn(document, logger) {
         let codes = await scanBarcode(logger, document);
         logger.log(codes);
         if (!codes) {
-            let sign = prompt("Get code from qr");
+            const sign = prompt("Get code from qr");
             if (sign === null) {
                 barCodeready.reject();
                 return;
