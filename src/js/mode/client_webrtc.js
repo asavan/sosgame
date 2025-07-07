@@ -7,6 +7,7 @@ import {delay} from "../utils/helper.js";
 
 import LZString from "lz-string";
 import {showGameView} from "../views/section_view.js";
+import loggerFunc from "../views/logger.js";
 
 
 function connectNetworkAndGame() {
@@ -20,7 +21,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const mainSection = document.querySelector(".game");
     mainSection.classList.add("hidden");
     const connectionStr = urlParams.get("c");
-    const networkLogger = netObj.setupLogger(document, settings);
+    const networkLogger = loggerFunc(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const connection = connectionFunc(myId, networkLogger);
     const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);

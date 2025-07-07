@@ -7,6 +7,7 @@ import {delay} from "../utils/helper.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
 import {showGameView} from "../views/section_view.js";
+import loggerFunc from "../views/logger.js";
 
 function connectNetworkAndGame() {
     // later
@@ -36,7 +37,7 @@ function showReadBtn(document, logger) {
 
 export default function gameMode(window, document, settings, gameFunction) {
     return new Promise((resolve, reject) => {
-        const networkLogger = netObj.setupLogger(document, settings);
+        const networkLogger = loggerFunc(document, settings);
         const myId = netObj.getMyId(window, settings, Math.random);
         const connection = connectionFunc(myId, networkLogger);
         const mainSection = document.querySelector(".game");
