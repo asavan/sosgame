@@ -6,7 +6,6 @@ import {makeQrPlain} from "../views/qr_helper.js";
 import {delay} from "../utils/helper.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
-import * as JSURL from "jsurl2";
 
 function connectNetworkAndGame() {
     // later
@@ -40,16 +39,9 @@ export default function gameMode(window, document, settings, gameFunction) {
             const dataToSend = connection.getOfferAndCands();
             const baseUrl = "https://asavan.github.io/sosgame/";
             const jsonString = JSON.stringify(dataToSend);
-            const encodedString = encodeURIComponent(jsonString);
-            const url = baseUrl + "?c=" + encodedString;
             const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
-            const url2 = baseUrl + "?c=" + encoded2;
-            makeQrPlain(url, document, ".qrcode");
+            const url2 = baseUrl + "?mode=swrtc&c=" + encoded2;
             makeQrPlain(url2, document, ".qrcode");
-            const jsonString3 = JSURL.stringify(dataToSend);
-            const encodedString3 = encodeURIComponent(jsonString3);
-            const url3 = baseUrl + "?c=" + encodedString3;
-            makeQrPlain(url3, document, ".qrcode");
 
             showReadBtn(document, networkLogger).then(async (answerAndCand) => {
                 networkLogger.error(answerAndCand);
