@@ -10,7 +10,7 @@ export default function handlersFunc(arr) {
         if (!Array.isArray(arr)) {
             console.error("No key", name);
             console.trace("No key", name);
-            throw new Error("No name");
+            throw new Error("No name " + name);
         }
         return arr;
     };

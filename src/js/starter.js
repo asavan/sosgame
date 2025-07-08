@@ -3,6 +3,7 @@
 import {assert, parseSettings} from "./utils/helper.js";
 import gameFunction from "./game.js";
 import settings from "./settings.js";
+import loggerFunc from "./views/logger.js";
 
 function adjustSettings(settings) {
     if (settings.colorOrder.length > settings.playerLimit) {
@@ -13,6 +14,7 @@ function adjustSettings(settings) {
 export default async function starter(window, document) {
     parseSettings(window, document, settings);
     adjustSettings(settings);
+    const mainLogger = loggerFunc(document, settings);
 
     let mode;
     if (settings.mode === "client") {
@@ -34,7 +36,7 @@ export default async function starter(window, document) {
     }
     mode.default(window, document, settings, gameFunction).
         catch((error) => {
-            console.error(error);
+            mainLogger.error(error);
         });
 
     return mode;

@@ -3,7 +3,7 @@ import {processCandidates} from "./common_webrtc.js";
 
 const connectionFunc = function (id, logger) {
     logger.log("Webrtc connection " + id);
-    const handlers = handlersFunc(["recv", "open", "error", "close", "socket_open", "socket_close", "disconnect"]);
+    const handlers = handlersFunc(["recv", "open", "error", "close", "join", "gameinit", "disconnect"]);
 
     const candidateWaiter = Promise.withResolvers();
     const dataChanelWaiter = Promise.withResolvers();
@@ -13,6 +13,29 @@ const connectionFunc = function (id, logger) {
     let dataChannel = null;
     let peerConnection = null;
     let offer = null;
+
+    let currentHandler = {};
+    let queue;
+
+
+    function registerHandler(handler, q) {
+        queue = q;
+        currentHandler = handler;
+    }
+
+    function callCurrentHandler(method, data) {
+        const callback = currentHandler[method];
+        if (typeof callback !== "function") {
+            logger.log("Not function");
+            return;
+        }
+        if (!queue) {
+            logger.log("No queue");
+            return;
+        }
+        queue.add(() => callback(data.data, data.from));
+    }
+
     function on(name, f) {
         return handlers.on(name, f);
     }
@@ -104,7 +127,15 @@ const connectionFunc = function (id, logger) {
     function setupDataChannel(dataChannel, id, clients) {
         dataChannel.onmessage = function (e) {
             logger.log("get data " + e.data);
-            return handlers.call("recv", e.data);
+            const json = JSON.parse(e.data);
+            if (handlers.actionKeys().includes(json.action)) {
+                logger.log("handlers.actionKeys");
+                return handlers.call(json.action, json);
+            }
+            if (Object.keys(currentHandler).includes(json.action)) {
+                logger.log("callCurrentHandler");
+                return callCurrentHandler(json.action, json);
+            }
         };
 
         dataChannel.onopen = function () {
@@ -126,19 +157,13 @@ const connectionFunc = function (id, logger) {
         };
     }
 
-    function registerHandler(actions, queue) {
-        handlers.setOnce("recv", (data) => {
-            // console.log(data);
-            const obj = JSON.parse(data);
-            const res = obj.data;
-            const callback = actions[obj.action];
-            if (typeof callback === "function") {
-                queue.add(() => callback(res, obj.from));
-            }
-        });
-    }
-
     async function setAnswerAndCand(data) {
+        const id = data.id;
+        const client = clients[data.id];
+        if (client) {
+            client.pc.close();
+        }
+        clients[id] = {pc: peerConnection, dc: dataChannel};
         const answer = {type: "answer", sdp: data.sdp};
         await peerConnection.setRemoteDescription(answer);
         await processCandidates(data.c, peerConnection);

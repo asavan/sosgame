@@ -5,17 +5,40 @@ const connectionFunc = function (id, logger) {
     const localCandidates = [];
     const candidateWaiter = Promise.withResolvers();
 
-    const handlers = handlersFunc(["recv", "open", "error", "close", "socket_open", "socket_close"]);
+    const handlers = handlersFunc(["recv", "open", "error", "close", "join", "gameinit"]);
+    let currentHandler = {};
+    let queue;
+
+
+    function registerHandler(handler, q) {
+        queue = q;
+        currentHandler = handler;
+    }
+
+    function callCurrentHandler(method, data) {
+        const callback = currentHandler[method];
+        if (typeof callback !== "function") {
+            logger.log("Not function");
+            return;
+        }
+        if (!queue) {
+            logger.log("No queue");
+            return;
+        }
+        queue.add(() => callback(data.data, data.from));
+    }
+
     function on(name, f) {
         return handlers.on(name, f);
     }
 
     // init
     let isConnected = false;
-    const dataChannel = null;
+    let dataChannel = null;
 
     const sendRawTo = (action, data, to) => {
         if (!dataChannel) {
+            console.error("Not channel");
             return false;
         }
         if (!isConnected) {
@@ -47,6 +70,7 @@ const connectionFunc = function (id, logger) {
             localCandidates.push(message);
 
             if (!e.candidate) {
+                logger.log("No candidate");
                 candidateWaiter.resolve(localCandidates);
             }
         };
@@ -59,6 +83,7 @@ const connectionFunc = function (id, logger) {
         const peerConnection = SetupFreshConnection(id);
 
         peerConnection.ondatachannel = (ev) => {
+            dataChannel = ev.channel;
             setupDataChannel(ev.channel);
         };
         const offer = offerAndcandidates.offer;
@@ -76,7 +101,15 @@ const connectionFunc = function (id, logger) {
     function setupDataChannel(dataChannel) {
         dataChannel.onmessage = function (e) {
             logger.log("data get " + e.data);
-            handlers.call("recv", e.data);
+            const json = JSON.parse(e.data);
+            if (handlers.actionKeys().includes(json.action)) {
+                logger.log("handlers.actionKeys");
+                return handlers.call(json.action, json);
+            }
+            if (Object.keys(currentHandler).includes(json.action)) {
+                logger.log("callCurrentHandler");
+                return callCurrentHandler(json.action, json);
+            }
         };
 
         dataChannel.onopen = function () {
@@ -91,21 +124,8 @@ const connectionFunc = function (id, logger) {
         };
 
         dataChannel.onerror = function () {
-            console.log("DC ERROR!!!");
+            logger.error("DC ERROR!!!");
         };
-    }
-
-
-    function registerHandler(actions, queue) {
-        handlers.setOnce("recv", (data) => {
-            // console.log(data);
-            const obj = JSON.parse(data);
-            const res = obj.data;
-            const callback = actions[obj.action];
-            if (typeof callback === "function") {
-                queue.add(() => callback(res, obj.from));
-            }
-        });
     }
 
     return {processOffer, on, registerHandler, sendRawTo, getCandidates};

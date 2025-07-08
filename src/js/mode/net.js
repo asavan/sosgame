@@ -40,6 +40,18 @@ function getMyId(window, settings, rngEngine) {
     window.sessionStorage.setItem(settings.idNameInStorage, newId);
 }
 
+function setupGameToConnectionSendClient(game, con, logger, data) {
+    for (const handlerName of game.actionKeys()) {
+        game.on(handlerName, (n) => {
+            if (!n || (n.playerId !== null && n.playerId !== data.joinedInd)) {
+                logger.log("ignore");
+                return;
+            }
+            con.sendRawTo(handlerName, n, data.serverId);
+        });
+    }
+}
+
 function setupLogger(document, settings) {
     let logger;
     if (settings.logger) {
@@ -52,5 +64,6 @@ function setupLogger(document, settings) {
 export default {
     setupLogger,
     getMyId,
-    setupMedia
+    setupMedia,
+    setupGameToConnectionSendClient
 };

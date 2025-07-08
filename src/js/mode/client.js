@@ -7,18 +7,6 @@ import netObj from "./net.js";
 import presenterObj from "../presenter.js";
 
 
-function setupGameToConnectionSend(game, con, logger, data) {
-    for (const handlerName of game.actionKeys()) {
-        game.on(handlerName, (n) => {
-            if (!n || (n.playerId !== null && n.playerId !== data.joinedInd)) {
-                logger.log("ignore");
-                return;
-            }
-            con.sendRawTo(handlerName, n, data.serverId);
-        });
-    }
-}
-
 export default function gameMode(window, document, settings, gameFunction) {
 
     return new Promise((resolve, reject) => {
@@ -30,12 +18,12 @@ export default function gameMode(window, document, settings, gameFunction) {
         connection.connect(connection.getWebSocketUrl(settings, window.location)).then(con => {
             networkLogger.log("connected");
             connection.on("gameinit", (data) => {
-                console.log("gameinit", data);
+                networkLogger.log("gameinit", data);
                 const presenter = presenterObj.presenterFunc(data.data.presenter, settings);
                 const game = gameFunction(window, document, settings, presenter);
                 const actions = actionsFunc(game);
                 connection.registerHandler(actions, queue);
-                setupGameToConnectionSend(game, con, networkLogger, data.data);
+                netObj.setupGameToConnectionSendClient(game, con, networkLogger, data.data);
                 resolve(game);
             });
 

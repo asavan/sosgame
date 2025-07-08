@@ -35,7 +35,8 @@ function setupGameToConnectionSend(game, con, serverId, lobby) {
             con.sendRawAll(handlerName, n, ignore);
         });
     }
-    return reconnect(con, serverId);
+    return Promise.resolve();
+    // return reconnect(con, serverId);
 }
 
 function setupNetwork(game, connection, con, serverId, queue, lobby) {

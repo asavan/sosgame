@@ -6,6 +6,6 @@ export function showGameView(document) {
     const menuSection = document.querySelector(".menu");
     menuSection.querySelector(".control-panel")?.classList.add("absolute");
 
-    const logSection = document.querySelector(".log");
-    logSection.innerHTML = "";
+    // const logSection = document.querySelector(".log");
+    // logSection.innerHTML = "";
 }

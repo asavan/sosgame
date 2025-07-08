@@ -1,6 +1,6 @@
 export default function loggerFunc(document, settings, level, el) {
     if (!level) {
-        level = settings.level;
+        level = settings.logLevel;
     }
     if (!el) {
         el = settings.logger;
@@ -10,11 +10,12 @@ export default function loggerFunc(document, settings, level, el) {
     }
     const logHtml = (message) => {
         if (el) {
-            if (typeof message == "object" && JSON && JSON.stringify ) {
-                el.innerHTML += JSON.stringify(message) + "<br />";
-            } else {
-                el.innerHTML += message + "<br />";
+            if (Error.isError(message)) {
+                message = message.toString();
+            } else if (typeof message == "object" && JSON && JSON.stringify ) {
+                message = JSON.stringify(message);
             }
+            el.innerHTML += message + "<br />";
         }
     };
 
