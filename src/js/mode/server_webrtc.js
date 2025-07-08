@@ -3,7 +3,7 @@ import lobbyFunc from "../lobby.js";
 import netObj from "./net.js";
 import presenterObj from "../presenter.js";
 import {makeQrPlain} from "../views/qr_helper.js";
-import { delay } from "../utils/helper.js";
+import {delay, removeElem} from "../utils/helper.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
 import {showGameView} from "../views/section_view.js";
@@ -11,15 +11,22 @@ import loggerFunc from "../views/logger.js";
 import actionsFunc from "../actions.js";
 import PromiseQueue from "../utils/async-queue.js";
 
-function setupGameToConnectionSend(game, con, serverId, lobby) {
+function setupGameToConnectionSend(game, con, lobby, logger) {
     for (const handlerName of game.actionKeys()) {
+        logger.log("register", handlerName);
         game.on(handlerName, (n) => {
             let ignore;
             if (n && n.playerId !== undefined) {
                 const toIgnore = lobby.idByInd(n.playerId);
                 ignore = [toIgnore];
             }
-            con.sendRawAll(handlerName, n, ignore);
+            logger.log("call", handlerName);
+            try {
+                con.sendRawAll(handlerName, n, ignore);
+            } catch (e) {
+                logger.error(e);
+            }
+            logger.log("after call", handlerName);
         });
     }
     return Promise.resolve();
@@ -31,6 +38,7 @@ function connectNetworkAndGame(document, game, presenter, myId, settings, con, c
     lobby.addClient(myId, myId);
 
     const gameLogger = loggerFunc(document, settings);
+    const connectionLogger = loggerFunc(document, settings, 1);
     const queue = PromiseQueue(gameLogger);
 
     connection.on("join", (data) => {
@@ -54,7 +62,7 @@ function connectNetworkAndGame(document, game, presenter, myId, settings, con, c
 
     const actions = actionsFunc(game);
     connection.registerHandler(actions, queue);
-    return setupGameToConnectionSend(game, con, myId, lobby);
+    return setupGameToConnectionSend(game, connection, lobby, connectionLogger);
 }
 
 function showReadBtn(document, logger) {
@@ -97,11 +105,12 @@ export default function gameMode(window, document, settings, gameFunction) {
             const jsonString = JSON.stringify(dataToSend);
             const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
             const url2 = baseUrl + "?mode=cwrtc&c=" + encoded2;
-            makeQrPlain(url2, document, ".qrcode");
+            const qr = makeQrPlain(url2, document, ".qrcode");
 
             showReadBtn(document, networkLogger).then(async (answerAndCand) => {
                 networkLogger.log(answerAndCand);
                 connection.on("open", (openCon) => {
+                    removeElem(qr);
                     showGameView(document); const presenter = presenterObj.presenterFuncDefault(settings);
                     const game = gameFunction(window, document, settings, presenter);
                     connectNetworkAndGame(document, game, presenter, myId, settings, openCon, connection);

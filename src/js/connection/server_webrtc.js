@@ -95,7 +95,8 @@ const connectionFunc = function (id, logger) {
     }
 
     const sendRawAll = (action, data, ignore) => {
-        logger.log(data);
+        console.log("Sending raw all");
+        logger.log("sending", data);
         const json = {from: id, to: "all", action, data};
         for (const [id, client] of Object.entries(clients)) {
             if (ignore && ignore.includes(id)) {
