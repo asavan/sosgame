@@ -9,8 +9,10 @@ import {showGameView} from "../views/section_view.js";
 import loggerFunc from "../views/logger.js";
 import actionsFunc from "../actions.js";
 import PromiseQueue from "../utils/async-queue.js";
+import addSettingsButton from "../views/settings-form-btn.js";
 
 export default async function gameMode(window, document, settings, gameFunction) {
+    addSettingsButton(document, settings);
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const mainSection = document.querySelector(".game");

@@ -10,6 +10,7 @@ import {showGameView} from "../views/section_view.js";
 import loggerFunc from "../views/logger.js";
 import actionsFunc from "../actions.js";
 import PromiseQueue from "../utils/async-queue.js";
+import addSettingsButton from "../views/settings-form-btn.js";
 
 function setupGameToConnectionSend(game, con, lobby, logger) {
     for (const handlerName of game.actionKeys()) {
@@ -90,6 +91,7 @@ function showReadBtn(document, logger) {
 export default function gameMode(window, document, settings, gameFunction) {
     return new Promise((resolve, reject) => {
         const networkLogger = loggerFunc(document, settings);
+        addSettingsButton(document, settings);
         const myId = netObj.getMyId(window, settings, Math.random);
         const connection = connectionFunc(myId, networkLogger);
         const mainSection = document.querySelector(".game");

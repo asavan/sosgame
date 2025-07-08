@@ -30,6 +30,10 @@ body {
     flex-direction: column;
 }
 
+body::backdrop {
+    background-color: white;
+}
+
 .game {
     flex: 1 0 auto;
 
