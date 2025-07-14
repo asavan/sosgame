@@ -6,7 +6,7 @@ export default [
     {
         ...js.configs.recommended,
         files: ["src/**/*.js", "test/**/*.js"],
-        ignores: ["src/js/lib/*"],
+        ignores: ["src/js/lib/*", "src/js/connection/supabase_settings.js"],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: "module",
@@ -23,7 +23,7 @@ export default [
             ' @stylistic': stylistic
         },
         files: ["src/**/*.js", "test/**/*.js"],
-        ignores: ["src/js/lib/*"],
+        ignores: ["src/js/lib/*", "src/js/connection/supabase_settings.js"],
         rules: {
             "prefer-const": ["error"],
             "require-await": ["error"],
@@ -64,6 +64,6 @@ export default [
         }
     },
     {
-        ignores: ["old/*", "android/*", "docs/*", "src/js/lib/*"]
+        ignores: ["old/*", "android/*", "docs/*", "src/js/lib/*", "src/js/connection/supabase_settings.js"]
     }
 ];

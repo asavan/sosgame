@@ -1,73 +1,15 @@
 import connectionFunc from "../connection/server_webrtc.js";
-import lobbyFunc from "../lobby.js";
 import netObj from "./net.js";
-import presenterObj from "../presenter.js";
 import {makeQrPlain} from "../views/qr_helper.js";
 import {delay, removeElem} from "../utils/helper.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
-import {showGameView} from "../views/section_view.js";
 import loggerFunc from "../views/logger.js";
-import actionsFunc from "../actions.js";
-import PromiseQueue from "../utils/async-queue.js";
 import addSettingsButton from "../views/settings-form-btn.js";
-
-function setupGameToConnectionSend(game, con, lobby, logger) {
-    for (const handlerName of game.actionKeys()) {
-        logger.log("register", handlerName);
-        game.on(handlerName, (n) => {
-            let ignore;
-            if (n && n.playerId !== undefined) {
-                const toIgnore = lobby.idByInd(n.playerId);
-                ignore = [toIgnore];
-            }
-            logger.log("call", handlerName);
-            try {
-                con.sendRawAll(handlerName, n, ignore);
-            } catch (e) {
-                logger.error(e);
-            }
-            logger.log("after call", handlerName);
-        });
-    }
-    return Promise.resolve();
-    // return reconnect(con, serverId);
-}
-
-function connectNetworkAndGame(document, game, presenter, myId, settings, con, connection) {
-    const lobby = lobbyFunc({}, presenter.getClientIndex());
-    lobby.addClient(myId, myId);
-
-    const gameLogger = loggerFunc(document, settings);
-    const connectionLogger = loggerFunc(document, settings, 1);
-    const queue = PromiseQueue(gameLogger);
-
-    connection.on("join", (data) => {
-        lobby.addClient(data.from, data.from);
-        const joinedInd = lobby.indById(data.from);
-        const serverInd = lobby.indById(myId);
-        if (lobby.size() === settings.playerLimit && presenter.isGameOver()) {
-            presenter.resetRound();
-        }
-
-        const presenterObj = presenter.toJson(joinedInd);
-        const toSend = {
-            serverId: myId,
-            joinedInd,
-            serverInd,
-            presenter: presenterObj
-        };
-        con.sendRawTo("gameinit", toSend, data.from);
-        game.redraw();
-    });
-
-    const actions = actionsFunc(game);
-    connection.registerHandler(actions, queue);
-    return setupGameToConnectionSend(game, connection, lobby, connectionLogger);
-}
+import {beginGame} from "./server_helper.js";
 
 function showReadBtn(document, logger) {
-    const barCodeready = Promise.withResolvers();
+    const barCodeReady = Promise.withResolvers();
     const qrBtn = document.querySelector(".qr-btn");
     qrBtn.classList.remove("hidden");
     qrBtn.addEventListener("click", async () => {
@@ -75,17 +17,17 @@ function showReadBtn(document, logger) {
         logger.log(codes);
         if (!codes) {
             const sign = prompt("Get code from qr");
-            if (sign === null) {
-                barCodeready.reject();
+            if (sign == null) {
+                barCodeReady.reject();
                 return;
             }
             codes = sign;
         }
         const decode = LZString.decompressFromEncodedURIComponent(codes);
-        barCodeready.resolve(JSON.parse(decode));
+        barCodeReady.resolve(JSON.parse(decode));
     });
 
-    return barCodeready.promise;
+    return barCodeReady.promise;
 }
 
 export default function gameMode(window, document, settings, gameFunction) {
@@ -113,9 +55,7 @@ export default function gameMode(window, document, settings, gameFunction) {
                 networkLogger.log(answerAndCand);
                 connection.on("open", (openCon) => {
                     removeElem(qr);
-                    showGameView(document); const presenter = presenterObj.presenterFuncDefault(settings);
-                    const game = gameFunction(window, document, settings, presenter);
-                    connectNetworkAndGame(document, game, presenter, myId, settings, openCon, connection);
+                    const game = beginGame(window, document, settings, gameFunction, connection, openCon, myId);
                     resolve(game);
                 });
                 await connection.setAnswerAndCand(answerAndCand);

@@ -7,6 +7,7 @@ import netObj from "./net.js";
 import presenterObj from "../presenter.js";
 import {removeElem} from "../utils/helper.js";
 import {makeQrPlain} from "../views/qr_helper.js";
+import {networkHandler} from "../connection/network_handler.js";
 
 
 function makeQr(window, document, settings) {
@@ -39,9 +40,9 @@ function setupGameToConnectionSend(game, con, serverId, lobby) {
     // return reconnect(con, serverId);
 }
 
-function setupNetwork(game, connection, con, serverId, queue, lobby) {
+function setupNetwork(game, connection, con, serverId, lobby) {
     const actions = actionsFunc(game);
-    connection.registerHandler(actions, queue);
+    connection.registerHandler(actions);
     return setupGameToConnectionSend(game, con, serverId, lobby);
 }
 
@@ -50,8 +51,9 @@ export default function gameMode(window, document, settings, gameFunction) {
     return new Promise((resolve, reject) => {
         const myId = netObj.getMyId(window, settings, Math.random);
         const networkLogger = netObj.setupLogger(document, settings);
-        const connection = connectionFunc(myId, networkLogger);
         const queue = PromiseQueue(networkLogger);
+        const networkActions = networkHandler({}, queue, networkLogger);
+        const connection = connectionFunc(myId, networkLogger, networkActions);
         const presenter = presenterObj.presenterFuncDefault(settings);
         const game = gameFunction(window, document, settings, presenter);
 
@@ -88,7 +90,7 @@ export default function gameMode(window, document, settings, gameFunction) {
                 game.redraw();
                 removeElem(code);
             });
-            setupNetwork(game, connection, con, myId, queue, lobby);
+            setupNetwork(game, connection, con, myId, lobby);
             resolve(game);
         }).catch(error => {
             networkLogger.error(error);

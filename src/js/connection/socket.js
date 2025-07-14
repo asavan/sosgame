@@ -1,5 +1,6 @@
 import createSignalingChannel from "./common.js";
 import handlersFunc from "../utils/handlers.js";
+import {setupSignaling} from "./socket_helper.js";
 
 function getWebSocketUrl(settings, location) {
     if (settings.wh) {
@@ -11,33 +12,15 @@ function getWebSocketUrl(settings, location) {
     return "ws://" + location.hostname + ":" + settings.wsPort;
 }
 
-export default function connectionFunc(id, logger) {
+export default function connectionFunc(id, logger, networkActions) {
     const handlers = handlersFunc(["close", "disconnect", "error", "join", "gameinit", "reconnect"]);
 
     function on(name, f) {
         return handlers.on(name, f);
     }
 
-    let currentHandler = {};
-    let queue;
-
-
-    function registerHandler(handler, q) {
-        queue = q;
-        currentHandler = handler;
-    }
-
-    function callCurrentHandler(method, data) {
-        const callback = currentHandler[method];
-        if (typeof callback !== "function") {
-            logger.log("Not function");
-            return;
-        }
-        if (!queue) {
-            logger.log("No queue");
-            return;
-        }
-        queue.add(() => callback(data.data, data.from));
+    function registerHandler(handler) {
+        networkActions.changeHandler(handler);
     }
 
     function connect(socketUrl) {
@@ -47,46 +30,11 @@ export default function connectionFunc(id, logger) {
                 return;
             }
             const signaling = createSignalingChannel(id, socketUrl, logger);
-            signaling.on("error", (id) => {
-                logger.log("Connection to ws error " + id);
-                reject(id);
-            });
-
-            signaling.on("message", (json) => {
-                if (json.from === id) {
-                    logger.error("same user");
-                    return;
-                }
-
-                if (json.to !== id && json.to !== "all") {
-                    logger.log("another user");
-                    return;
-                }
-
-                if (json.ignore && Array.isArray(json.ignore) && json.ignore.includes(id)) {
-                    logger.log("user in ignore list");
-                    return;
-                }
-                if (handlers.actionKeys().includes(json.action)) {
-                    logger.log("handlers.actionKeys");
-                    return handlers.call(json.action, json);
-                }
-                if (Object.keys(currentHandler).includes(json.action)) {
-                    logger.log("callCurrentHandler");
-                    return callCurrentHandler(json.action, json);
-                }
-                logger.log("Unknown action " + json.action);
-            });
-
-            const sendRawAll = (type, data, ignore) => {
-                logger.log(data);
-                return signaling.send(type, data, "all", ignore);
-            };
-
-            const sendRawTo = (type, data, to) => signaling.send(type, data, to);
-            signaling.on("open", () => resolve({sendRawAll, sendRawTo}));
+            const setupPromise = setupSignaling(signaling, id, logger, handlers, networkActions);
+            setupPromise.then(resolve).catch(reject);
         });
     }
+
     return {
         connect, on, getWebSocketUrl, registerHandler
     };

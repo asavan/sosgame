@@ -27,7 +27,7 @@ function adjustMode(changed, settings, queryString) {
 export default async function starter(window, document) {
     const changed = parseSettings(window.location.search, settings);
     adjustSettings(settings);
-    adjustMode(settings, changed, window.location.search);
+    adjustMode(changed, settings, window.location.search);
     const mainLogger = loggerFunc(document, settings);
 
     let mode;
@@ -45,6 +45,8 @@ export default async function starter(window, document) {
         mode = await import("./mode/server_webrtc.js");
     } else if (settings.mode === "cwrtc") {
         mode = await import("./mode/client_webrtc.js");
+    } else if (settings.mode === "ssupa") {
+        mode = await import("./mode/supa_server.js");
     } else {
         assert(false, "Unsupported mode");
     }
