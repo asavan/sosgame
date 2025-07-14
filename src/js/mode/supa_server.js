@@ -13,13 +13,15 @@ export default async function gameMode(window, document, settings, gameFunction)
     addSettingsButton(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const gameChannel = supaChannel.createSignalingChannelWithName(
-        supaChannel.getConnectionUrl(settings), myId, networkLogger);
+        supaChannel.getConnectionUrl(myId), myId, networkLogger);
     const lobbyChanel = supaChannel.createSignalingChannelWithName("sos_lobby", myId, networkLogger);
 
     lobbyChanel.on("message", (json) => {
         networkLogger.log(json);
         if (json.action === "join") {
             lobbyChanel.send("in_lobby", {}, json.from);
+            // await delay(1000);
+            // gameChannel.send("lalala", {}, "all");
             return;
         }
         networkLogger.log("unknown action");
@@ -29,6 +31,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const networkActions = networkHandler({}, queue, networkLogger);
 
     const connection = connectionFunc(myId, networkLogger, networkActions, gameChannel);
+    await connection.connect();
     const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
     return game;
 }

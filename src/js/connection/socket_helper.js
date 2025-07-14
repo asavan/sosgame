@@ -6,6 +6,7 @@ export function setupSignaling(signaling, id, logger, handlers, currentHandler) 
     });
 
     signaling.on("message", (json) => {
+        logger.log("Received message", json);
         if (json.from === id) {
             logger.error("same user");
             return;

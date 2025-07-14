@@ -2,12 +2,12 @@ import { createClient } from "@supabase/supabase-js";
 import supabase_settings from "./supabase_settings.js";
 import handlersFunc from "../utils/handlers.js";
 
-function getConnectionUrl(settings) {
-    return "sos" + settings.seed;
+function getConnectionUrl(id) {
+    return "sos" + id;
 }
 
-function createSignalingChannel(id, socketUrl, logger, settings) {
-    return createSignalingChannelWithName(getConnectionUrl(settings), id, logger);
+function createSignalingChannel(id, socketUrl, logger) {
+    return createSignalingChannelWithName(getConnectionUrl(id), id, logger);
 }
 
 function createSignalingChannelWithName(name, id, logger) {
@@ -15,10 +15,11 @@ function createSignalingChannelWithName(name, id, logger) {
     const supabase = createClient(supabase_settings.SUPABASE_URL,
         supabase_settings.SUPA_API_ANON_KEY);
     const myChannel = supabase.channel(name);
+    logger.log("chan: " + name);
 
     const send = (type, sdp, to, ignore) => {
         const json = {from: id, to: to, action: type, data: sdp, ignore};
-        logger.log("Sending [" + id + "] to [" + to + "]: " + JSON.stringify(sdp));
+        logger.log(name, "Sending [" + id + "] to [" + to + "]: " + JSON.stringify(json));
         return myChannel.send({
             type: "broadcast",
             event: type,
@@ -56,6 +57,8 @@ function createSignalingChannelWithName(name, id, logger) {
     function ready() {
         return readyPromise;
     }
+
+    // const getName = () => name;
 
     const on = (name, f) => handlers.on(name, f);
     return {on, send, close, ready};

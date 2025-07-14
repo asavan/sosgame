@@ -32,10 +32,11 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     lobby.addClient(myId, myId);
 
     const gameLogger = loggerFunc(document, settings);
-    const connectionLogger = loggerFunc(document, settings, 1);
+    const connectionLogger = loggerFunc(document, settings, 4);
     const queue = PromiseQueue(gameLogger);
 
     connection.on("join", (data) => {
+        connectionLogger.log("join", data);
         lobby.addClient(data.from, data.from);
         const joinedInd = lobby.indById(data.from);
         const serverInd = lobby.indById(myId);
