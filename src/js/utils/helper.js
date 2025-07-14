@@ -86,9 +86,9 @@ function stringToBoolean(string) {
     }
 }
 
-export function parseSettings(window, document, settings) {
-    const queryString = window.location.search;
+export function parseSettings(queryString, settings) {
     const urlParams = new URLSearchParams(queryString);
+    const changed = [];
     for (const [key, value] of urlParams) {
         if (typeof settings[key] === "number") {
             settings[key] = Number.parseInt(value, 10);
@@ -97,7 +97,9 @@ export function parseSettings(window, document, settings) {
         } else {
             settings[key] = value;
         }
+        changed.push(key);
     }
+    return changed;
 }
 
 export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));

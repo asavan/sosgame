@@ -106,7 +106,7 @@ export default function gameMode(window, document, settings, gameFunction) {
             const baseUrl = urlWithoutParams || "https://asavan.github.io/sosgame/";
             const jsonString = JSON.stringify(dataToSend);
             const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
-            const url2 = baseUrl + "?mode=cwrtc&c=" + encoded2;
+            const url2 = baseUrl + "?c=" + encoded2;
             const qr = makeQrPlain(url2, document, ".qrcode");
 
             showReadBtn(document, networkLogger).then(async (answerAndCand) => {

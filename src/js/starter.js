@@ -11,9 +11,23 @@ function adjustSettings(settings) {
     }
 }
 
+function adjustMode(changed, settings, queryString) {
+    const keepModes = ["mode"];
+    for (const keepMode of keepModes) {
+        if (changed.includes(keepMode)) {
+            return;
+        }
+    }
+    const urlParams = new URLSearchParams(queryString);
+    if (urlParams.has("c")) {
+        settings.mode = "cwrtc";
+    }
+}
+
 export default async function starter(window, document) {
-    parseSettings(window, document, settings);
+    const changed = parseSettings(window.location.search, settings);
     adjustSettings(settings);
+    adjustMode(settings, changed, window.location.search);
     const mainLogger = loggerFunc(document, settings);
 
     let mode;
