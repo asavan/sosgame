@@ -32,7 +32,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     if (servers.length !== 1) {
         networkLogger.log(servers);
         // TODO show every service and make user choose
-        return;
+        return Promise.reject(myId);
     }
     const serverId = servers[0];
     networkLogger.log("connected2", serverId);
