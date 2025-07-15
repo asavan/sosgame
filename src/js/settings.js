@@ -2,7 +2,7 @@ export default {
     modes: ["client", "ai", "server", "hotseat", "test", "swrtc", "cwrtc", "ssupa", "csupa"],
     mode: "hotseat",
     wsPort : 8088,
-    logger: ".log",
+    logger: "",
     networkDebug: false,
     logicDebug: false,
     colorOrder: ["blue", "red", "green", "yellow"],

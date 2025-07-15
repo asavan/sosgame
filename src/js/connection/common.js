@@ -7,6 +7,7 @@ function stub() {
 export default function createSignalingChannel(id, socketUrl, logger) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
     const ws = new WebSocket(socketUrl);
+    const connectionPromise = Promise.withResolvers();
 
     const send = (type, sdp, to, ignore) => {
         const json = {from: id, to: to, action: type, data: sdp, ignore};
@@ -23,6 +24,8 @@ export default function createSignalingChannel(id, socketUrl, logger) {
 
     const on = (name, f) => handlers.on(name, f);
 
+    const ready = () => connectionPromise.promise;
+
     function onMessageInner(text) {
         logger.log("Websocket message received: " + text);
         const json = JSON.parse(text);
@@ -30,6 +33,7 @@ export default function createSignalingChannel(id, socketUrl, logger) {
     }
 
     ws.onopen = function() {
+        connectionPromise.resolve(id);
         return handlers.call("open", id);
     };
 
@@ -50,5 +54,5 @@ export default function createSignalingChannel(id, socketUrl, logger) {
         logger.error(e);
         return handlers.call("error", id);
     };
-    return {on, send, close};
+    return {on, send, close, ready};
 }

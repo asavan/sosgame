@@ -43,12 +43,13 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     const connection = connectionFunc(myId, networkLogger, networkActions, gameChannel);
     const gamePromise = Promise.withResolvers();
-    await connection.connect();
     connection.on("gameinit", (data) => {
+        networkLogger.log("init", data);
         const game = beginGame(window, document, settings, gameFunction,
             networkLogger, connection, connection, data);
         gamePromise.resolve(game);
     });
+    await connection.connect();
     connection.sendRawTo("join", {}, serverId);
     return gamePromise.promise;
 }

@@ -5,6 +5,13 @@ import actionsFunc from "../actions.js";
 import {showGameView} from "../views/section_view.js";
 import presenterObj from "../presenter.js";
 
+function reconnect(con, serverId) {
+    const toSend = {
+        serverId: serverId,
+    };
+    return con.sendRawAll("reconnect", toSend);
+}
+
 function setupGameToConnectionSend(game, con, lobby, logger) {
     for (const handlerName of game.actionKeys()) {
         logger.log("register", handlerName);
@@ -35,6 +42,12 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     const connectionLogger = loggerFunc(document, settings, 4);
     const queue = PromiseQueue(gameLogger);
 
+    game.on("winclosed", () => {
+        presenter.nextRound();
+        game.redraw();
+        return reconnect(con, myId);
+    });
+
     connection.on("join", (data) => {
         connectionLogger.log("join", data);
         lobby.addClient(data.from, data.from);
@@ -42,6 +55,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
         const serverInd = lobby.indById(myId);
         if (lobby.size() === settings.playerLimit && presenter.isGameOver()) {
             presenter.resetRound();
+            showGameView(document);
         }
 
         const presenterObj = presenter.toJson(joinedInd);
@@ -61,7 +75,6 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
 }
 
 export function beginGame(window, document, settings, gameFunction, connection, openCon, myId) {
-    showGameView(document);
     const presenter = presenterObj.presenterFuncDefault(settings);
     const game = gameFunction(window, document, settings, presenter);
     connectNetworkAndGame(document, game, presenter, myId, settings, openCon, connection);

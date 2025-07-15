@@ -31,7 +31,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const networkActions = networkHandler({}, queue, networkLogger);
 
     const connection = connectionFunc(myId, networkLogger, networkActions, gameChannel);
-    await connection.connect();
     const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
+    await connection.connect();
     return game;
 }

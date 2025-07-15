@@ -40,6 +40,16 @@ function getMyId(window, settings, rngEngine) {
     window.sessionStorage.setItem(settings.idNameInStorage, newId);
 }
 
+function getWebSocketUrl(settings, location) {
+    if (settings.wh) {
+        return settings.wh;
+    }
+    if (location.protocol === "https:") {
+        return;
+    }
+    return "ws://" + location.hostname + ":" + settings.wsPort;
+}
+
 function setupGameToConnectionSendClient(game, con, logger, data) {
     for (const handlerName of game.actionKeys()) {
         game.on(handlerName, (n) => {
@@ -65,5 +75,6 @@ export default {
     setupLogger,
     getMyId,
     setupMedia,
-    setupGameToConnectionSendClient
+    setupGameToConnectionSendClient,
+    getWebSocketUrl
 };
