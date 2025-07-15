@@ -26,7 +26,7 @@ async function makeSupaChan(id, settings, logger) {
 const delayReject = async (ms) => {
     await delay(ms);
     return Promise.reject(new Error("timeout"));
-}
+};
 
 export default async function createSignalingChannel(id, location, settings, logger) {
     const socketUrl = netObj.getWebSocketUrl(settings, location);
