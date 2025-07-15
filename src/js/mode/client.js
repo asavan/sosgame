@@ -6,7 +6,7 @@ import netObj from "./net.js";
 import {networkHandler} from "../connection/network_handler.js";
 import {beginGame} from "./client_helper.js";
 import loggerFunc from "../views/logger.js";
-import createSignalingChannel from "../connection/common.js";
+import createSignalingChannel from "../connection/websocket_channel.js";
 
 export default async function gameMode(window, document, settings, gameFunction) {
 

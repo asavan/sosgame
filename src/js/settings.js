@@ -7,6 +7,7 @@ export default {
     logicDebug: false,
     colorOrder: ["blue", "red", "green", "yellow"],
     color: "blue",
+    gameChanPrefix: "sos_",
     playerLimit: 2,
     logLevel: 2,
     idNameInStorage: "my-id",

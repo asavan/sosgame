@@ -13,8 +13,9 @@ export default async function gameMode(window, document, settings, gameFunction)
     addSettingsButton(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const gameChannel = supaChannel.createSignalingChannelWithName(
-        supaChannel.getConnectionUrl(myId), myId, networkLogger);
-    const lobbyChanel = supaChannel.createSignalingChannelWithName("sos_lobby", myId, networkLogger);
+        supaChannel.getConnectionUrl(myId, settings), myId, networkLogger);
+    const lobbyName = supaChannel.getConnectionUrl("lobby", settings);
+    const lobbyChanel = supaChannel.createSignalingChannelWithName(lobbyName, myId, networkLogger);
 
     lobbyChanel.on("message", (json) => {
         networkLogger.log(json);

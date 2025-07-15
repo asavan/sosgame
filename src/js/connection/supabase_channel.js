@@ -2,12 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import supabase_settings from "./supabase_settings.js";
 import handlersFunc from "../utils/handlers.js";
 
-function getConnectionUrl(id) {
-    return "sos" + id;
-}
-
-function createSignalingChannel(id, socketUrl, logger) {
-    return createSignalingChannelWithName(getConnectionUrl(id), id, logger);
+function getConnectionUrl(id, settings) {
+    return settings.gameChanPrefix + id;
 }
 
 function createSignalingChannelWithName(name, id, logger) {
@@ -66,6 +62,5 @@ function createSignalingChannelWithName(name, id, logger) {
 
 export default {
     getConnectionUrl,
-    createSignalingChannel,
     createSignalingChannelWithName
 };

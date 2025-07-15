@@ -12,7 +12,8 @@ export default async function gameMode(window, document, settings, gameFunction)
     const networkLogger = loggerFunc(document, settings);
     addSettingsButton(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
-    const lobbyChanel = supaChannel.createSignalingChannelWithName("sos_lobby", myId, networkLogger);
+    const lobbyName = supaChannel.getConnectionUrl("lobby", settings);
+    const lobbyChanel = supaChannel.createSignalingChannelWithName(lobbyName, myId, networkLogger);
 
     const servers = [];
     lobbyChanel.on("message", (json) => {
@@ -36,7 +37,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const serverId = servers[0];
     networkLogger.log("connected2", serverId);
     const gameChannel = supaChannel.createSignalingChannelWithName(
-        supaChannel.getConnectionUrl(serverId), myId, networkLogger);
+        supaChannel.getConnectionUrl(serverId, settings), myId, networkLogger);
 
     const queue = PromiseQueue(networkLogger);
     const networkActions = networkHandler({}, queue, networkLogger);
