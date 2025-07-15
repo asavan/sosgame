@@ -1,7 +1,7 @@
 import presenterObj from "../presenter.js";
 import {showGameView} from "../views/section_view.js";
 
-export default async function gameMode(window, document, settings, gameFunction) {
+export default function gameMode(window, document, settings, gameFunction) {
     showGameView(document);
     const presenter = presenterObj.presenterFuncDefault(settings);
     presenter.setMyTurn();
@@ -12,5 +12,5 @@ export default async function gameMode(window, document, settings, gameFunction)
     });
     presenter.resetRound();
     game.redraw();
-    return game;
+    return Promise.resolve(game);
 }
