@@ -38,6 +38,7 @@ function getMyId(window, settings, rngEngine) {
     }
     const newId = rngFunc.makeId(settings.idNameLen, rngEngine);
     window.sessionStorage.setItem(settings.idNameInStorage, newId);
+    return newId;
 }
 
 function getWebSocketUrl(settings, location) {

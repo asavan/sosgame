@@ -30,7 +30,7 @@ function setupGameToConnectionSend(game, con, lobby, logger) {
             logger.log("after call", handlerName);
         });
     }
-    return Promise.resolve();
+    // return Promise.resolve();
     // return reconnect(con, serverId);
 }
 
@@ -39,7 +39,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     lobby.addClient(myId, myId);
 
     const gameLogger = loggerFunc(document, settings);
-    const connectionLogger = loggerFunc(document, settings, 4);
+    const connectionLogger = loggerFunc(document, settings, 1);
     const queue = PromiseQueue(gameLogger);
 
     game.on("winclosed", () => {
@@ -71,7 +71,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
 
     const actions = actionsFunc(game);
     connection.registerHandler(actions, queue);
-    return setupGameToConnectionSend(game, connection, lobby, connectionLogger);
+    setupGameToConnectionSend(game, connection, lobby, connectionLogger);
 }
 
 export function beginGame(window, document, settings, gameFunction, connection, openCon, myId) {
