@@ -1,31 +1,14 @@
 import handlersFunc from "../utils/handlers.js";
 import {processCandidates} from "./common_webrtc.js";
 
-const connectionFunc = function (id, logger) {
+const connectionFunc = function (id, logger, networkActions) {
     const localCandidates = [];
     const candidateWaiter = Promise.withResolvers();
 
     const handlers = handlersFunc(["recv", "open", "error", "close", "join", "gameinit"]);
-    let currentHandler = {};
-    let queue;
 
-
-    function registerHandler(handler, q) {
-        queue = q;
-        currentHandler = handler;
-    }
-
-    function callCurrentHandler(method, data) {
-        const callback = currentHandler[method];
-        if (typeof callback !== "function") {
-            logger.log("Not function");
-            return;
-        }
-        if (!queue) {
-            logger.log("No queue");
-            return;
-        }
-        queue.add(() => callback(data.data, data.from));
+    function registerHandler(handler) {
+        networkActions.changeHandler(handler);
     }
 
     function on(name, f) {
@@ -106,10 +89,11 @@ const connectionFunc = function (id, logger) {
                 logger.log("handlers.actionKeys");
                 return handlers.call(json.action, json);
             }
-            if (Object.keys(currentHandler).includes(json.action)) {
+            if (networkActions.check(json.action)) {
                 logger.log("callCurrentHandler");
-                return callCurrentHandler(json.action, json);
+                return networkActions.process(json.action, json);
             }
+            logger.log("Unknown action " + json.action);
         };
 
         dataChannel.onopen = function () {

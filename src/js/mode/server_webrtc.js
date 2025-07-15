@@ -7,6 +7,8 @@ import LZString from "lz-string";
 import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./server_helper.js";
+import PromiseQueue from "../utils/async-queue.js";
+import {networkHandler} from "../connection/network_handler.js";
 
 function showReadBtn(document, logger) {
     const barCodeReady = Promise.withResolvers();
@@ -35,7 +37,9 @@ export default function gameMode(window, document, settings, gameFunction) {
         const networkLogger = loggerFunc(document, settings);
         addSettingsButton(document, settings);
         const myId = netObj.getMyId(window, settings, Math.random);
-        const connection = connectionFunc(myId, networkLogger);
+        const queue = PromiseQueue(networkLogger);
+        const networkActions = networkHandler({}, queue, networkLogger);
+        const connection = connectionFunc(myId, networkLogger, networkActions);
         const mainSection = document.querySelector(".game");
         mainSection.classList.add("hidden");
 

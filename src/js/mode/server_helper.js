@@ -45,7 +45,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     game.on("winclosed", () => {
         presenter.nextRound();
         game.redraw();
-        return reconnect(con, myId);
+        return reconnect(connection, myId);
     });
 
     connection.on("join", (data) => {
