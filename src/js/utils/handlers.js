@@ -1,4 +1,4 @@
-export default function handlersFunc(arr) {
+export default function handlersFunc(arr, queue) {
     const handlers = {};
     for (const f of arr) {
         handlers[f] = [];
@@ -15,20 +15,27 @@ export default function handlersFunc(arr) {
         return arr;
     };
     const hasAction = (name) => actionKeys().includes(name);
-    const on = (name, callback) => getSafe(name).push(callback);
+    const on = (name, callback) => {
+        if (typeof callback !== "function") {
+            console.error("bad setup", name);
+            return;
+        }
+        getSafe(name).push(callback);
+    };
     const set = (f, arr1) => {
         handlers[f] = arr1;
     };
-    const call = async (name, arg) => {
-        const promises = [];
-        for (const f of getSafe(name)) {
-            if (typeof f !== "function") {
-                console.error("bad call", name);
-                return;
-            }
-            promises.push(f(arg));
+    const call = (name, arg) => {
+        const operation = () => {
+            const promises = getSafe(name).map(f => f(arg));
+            return Promise.allSettled(promises);
+        };
+
+        if (queue) {
+            return queue.add(() => operation);
+        } else {
+            return operation();
         }
-        await Promise.allSettled(promises);
     };
 
     return {
