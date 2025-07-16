@@ -52,6 +52,7 @@ export default function createSignalingChannel(id, socketUrl, logger) {
 
     ws.onerror = function (e) {
         logger.error(e);
+        connectionPromise.reject(e);
         return handlers.call("error", id);
     };
     return {on, send, close, ready};

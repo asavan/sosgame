@@ -1,5 +1,3 @@
-"use strict";
-
 function init(game) {
     return {
         "message": game.onMessage

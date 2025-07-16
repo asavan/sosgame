@@ -18,18 +18,16 @@ export default function lobby(clients, shift = 0) {
         assert(index === clientsArr.length);
     };
 
-    const findByIndex = (ind) => {
-        const id = clientsArr[ind];
-        assert(id, "Bad Index");
-        const client = clients[id];
-        assert(client, "Empty client");
-        return client;
-    };
-
     const getById = (id) => {
         const el = clients[id];
         assert(el, `No id ${id} in clients`);
         return el;
+    };
+
+    const findByIndex = (ind) => {
+        const id = clientsArr[ind];
+        assert(id, "Bad Index");
+        return getById(id);
     };
 
     // TODO maybe use splice instead
