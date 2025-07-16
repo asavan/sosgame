@@ -13,15 +13,15 @@ export function networkHandler(actions, queue, logger) {
         }
         queue.add(() => callback(data.data, data.from));
     }
-    function check(action) {
+    function hasAction(action) {
         return Object.keys(currentHandler).includes(action);
     }
     function changeHandler(actions) {
         currentHandler = actions;
     }
     return {
-        check,
+        hasAction,
         changeHandler,
-        process: callCurrentHandler,
+        call: callCurrentHandler,
     };
 }

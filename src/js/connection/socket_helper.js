@@ -21,12 +21,12 @@ export function setupSignaling(signaling, id, logger, handlers, currentHandler) 
             logger.log("user in ignore list");
             return;
         }
-        if (handlers.actionKeys().includes(json.action)) {
+        if (handlers.hasAction(json.action)) {
             logger.log("handlers.actionKeys");
             return handlers.call(json.action, json);
         }
-        if (currentHandler.check(json.action)) {
-            return currentHandler.process(json.action, json);
+        if (currentHandler && currentHandler.hasAction(json.action)) {
+            return currentHandler.call(json.action, json);
         }
         logger.log("Unknown action " + json.action);
     });
