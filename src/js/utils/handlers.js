@@ -26,14 +26,18 @@ export default function handlersFunc(arr, queue) {
         handlers[f] = arr1;
     };
     const call = (name, arg) => {
+        console.log("call ", name, arg);
         const operation = () => {
             const promises = getSafe(name).map(f => f(arg));
+            console.log("form operation", promises[0]);
             return Promise.allSettled(promises);
         };
 
         if (queue) {
-            return queue.add(() => operation);
+            console.log("run in queue");
+            return queue.add(operation);
         } else {
+            console.log("run sync");
             return operation();
         }
     };

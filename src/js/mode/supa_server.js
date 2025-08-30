@@ -6,7 +6,6 @@ import {delay} from "../utils/helper.js";
 import {beginGame} from "./server_helper.js";
 import connectionFunc from "../connection/broadcast.js";
 import PromiseQueue from "../utils/async-queue.js";
-import {networkHandler} from "../connection/network_handler.js";
 
 export default async function gameMode(window, document, settings, gameFunction) {
     const networkLogger = loggerFunc(document, settings);
@@ -29,9 +28,8 @@ export default async function gameMode(window, document, settings, gameFunction)
     });
     await Promise.all([gameChannel.ready(), lobbyChanel.ready(), delay(300)]);
     const queue = PromiseQueue(networkLogger);
-    const networkActions = networkHandler({}, queue, networkLogger);
 
-    const connection = connectionFunc(myId, networkLogger, networkActions, gameChannel);
+    const connection = connectionFunc(myId, networkLogger, gameChannel);
     const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
     await connection.connect();
     return game;

@@ -1,7 +1,7 @@
 import handlersFunc from "../utils/handlers.js";
 import {processCandidates} from "./common_webrtc.js";
 
-const connectionFunc = function (id, logger, networkActions) {
+const connectionFunc = function (id, logger) {
     logger.log("Webrtc connection " + id);
     const handlers = handlersFunc(["recv", "open", "error", "close", "join", "gameinit", "disconnect"]);
 
@@ -14,8 +14,10 @@ const connectionFunc = function (id, logger, networkActions) {
     let peerConnection = null;
     let offer = null;
 
+    let externalHandlers = null;
+
     function registerHandler(handler) {
-        networkActions.changeHandler(handler);
+        externalHandlers = handler;
     }
 
     function on(name, f) {
@@ -111,13 +113,13 @@ const connectionFunc = function (id, logger, networkActions) {
         dataChannel.onmessage = function (e) {
             logger.log("get data " + e.data);
             const json = JSON.parse(e.data);
-            if (handlers.actionKeys().includes(json.action)) {
+            if (handlers.hasAction(json.action)) {
                 logger.log("handlers.actionKeys");
                 return handlers.call(json.action, json);
             }
-            if (networkActions.check(json.action)) {
+            if (externalHandlers && externalHandlers.hasAction(json.action)) {
                 logger.log("callCurrentHandler");
-                return networkActions.process(json.action, json);
+                return externalHandlers.call(json.action, json.data);
             }
             logger.log("Unknown action " + json.action);
         };

@@ -4,7 +4,7 @@ export default {
     wsPort : 8088,
     logger: "",
     networkDebug: false,
-    logicDebug: false,
+    logicDebug: true,
     colorOrder: ["blue", "red", "green", "yellow"],
     color: "blue",
     gameChanPrefix: "sos_",

@@ -1,14 +1,16 @@
 import handlersFunc from "../utils/handlers.js";
 import {processCandidates} from "./common_webrtc.js";
 
-const connectionFunc = function (id, logger, networkActions) {
+const connectionFunc = function (id, logger) {
     const localCandidates = [];
     const candidateWaiter = Promise.withResolvers();
 
     const handlers = handlersFunc(["recv", "open", "error", "close", "join", "gameinit"]);
 
+    let externalHandlers = null;
+
     function registerHandler(handler) {
-        networkActions.changeHandler(handler);
+        externalHandlers = handler;
     }
 
     function on(name, f) {
@@ -85,13 +87,13 @@ const connectionFunc = function (id, logger, networkActions) {
         dataChannel.onmessage = function (e) {
             logger.log("data get " + e.data);
             const json = JSON.parse(e.data);
-            if (handlers.actionKeys().includes(json.action)) {
+            if (handlers.hasAction(json.action)) {
                 logger.log("handlers.actionKeys");
                 return handlers.call(json.action, json);
             }
-            if (networkActions.check(json.action)) {
-                logger.log("callCurrentHandler");
-                return networkActions.process(json.action, json);
+            if (externalHandlers && externalHandlers.hasAction(json.action)) {
+                logger.log("callCurrentHandler client");
+                return externalHandlers.call(json.action, json.data);
             }
             logger.log("Unknown action " + json.action);
         };

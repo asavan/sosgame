@@ -9,7 +9,6 @@ import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./client_helper.js";
 import PromiseQueue from "../utils/async-queue.js";
-import {networkHandler} from "../connection/network_handler.js";
 
 export default async function gameMode(window, document, settings, gameFunction) {
     addSettingsButton(document, settings);
@@ -21,8 +20,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const networkLogger = loggerFunc(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const queue = PromiseQueue(networkLogger);
-    const networkActions = networkHandler({}, queue, networkLogger);
-    const connection = connectionFunc(myId, networkLogger, networkActions);
+    const connection = connectionFunc(myId, networkLogger);
     const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);
     const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
     const gamePromise = Promise.withResolvers();
@@ -35,7 +33,7 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     connection.on("gameinit", (data) => {
         const game = beginGame(window, document, settings, gameFunction,
-            networkLogger, connection, connection, data);
+            networkLogger, connection, connection, data, queue);
         gamePromise.resolve(game);
     });
 

@@ -4,6 +4,7 @@ import PromiseQueue from "../utils/async-queue.js";
 import actionsFunc from "../actions.js";
 import {showGameView} from "../views/section_view.js";
 import presenterObj from "../presenter.js";
+import actionToHandler from "../utils/action_to_handler.js";
 
 function reconnect(con, serverId) {
     const toSend = {
@@ -70,7 +71,8 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     });
 
     const actions = actionsFunc(game);
-    connection.registerHandler(actions, queue);
+    const gameHandler = actionToHandler(queue, actions);
+    connection.registerHandler(gameHandler);
     setupGameToConnectionSend(game, connection, lobby, connectionLogger);
 }
 

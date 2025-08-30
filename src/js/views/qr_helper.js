@@ -23,7 +23,7 @@ function shareAndCopy(elem, url) {
         await writeClipboardText(url);
         try {
             if (navigator.share) {
-                await navigator.share(shareData);
+                // await navigator.share(shareData);
             }
         } catch (err) {
             console.error(err);

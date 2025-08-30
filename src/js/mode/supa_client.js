@@ -4,7 +4,6 @@ import netObj from "./net.js";
 import supaChannel from "../connection/supabase_channel.js";
 import {delay} from "../utils/helper.js";
 import PromiseQueue from "../utils/async-queue.js";
-import {networkHandler} from "../connection/network_handler.js";
 import connectionFunc from "../connection/broadcast.js";
 import {beginGame} from "./client_helper.js";
 
@@ -40,14 +39,13 @@ export default async function gameMode(window, document, settings, gameFunction)
         supaChannel.getConnectionUrl(serverId, settings), myId, networkLogger);
 
     const queue = PromiseQueue(networkLogger);
-    const networkActions = networkHandler({}, queue, networkLogger);
 
-    const connection = connectionFunc(myId, networkLogger, networkActions, gameChannel);
+    const connection = connectionFunc(myId, networkLogger, gameChannel);
     const gamePromise = Promise.withResolvers();
     connection.on("gameinit", (data) => {
         networkLogger.log("init", data);
         const game = beginGame(window, document, settings, gameFunction,
-            networkLogger, connection, connection, data);
+            networkLogger, connection, connection, data, queue);
         gamePromise.resolve(game);
     });
     await connection.connect();

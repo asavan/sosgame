@@ -177,7 +177,9 @@ export default function game(_window, document, settings, presenter) {
     };
 
 
-    async function onMessage({res, position, digit, playerId}) {
+    async function onMessage(data) {
+        const {res, position, digit, playerId} = {...data};
+        console.log("onMessage", res, position, digit, playerId);
         const result = await presenter.setMove(position, digit, playerId);
         if (settings.logicDebug) {
             assert(res === result.res, "Bad move");

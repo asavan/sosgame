@@ -58,6 +58,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
             return false;
         }
         if (playerIdx !== currentUserIdx) {
+            console.error("Wrong player", playerIdx, currentUserIdx);
             return false;
         }
         return field.canSet(position);

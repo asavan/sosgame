@@ -4,7 +4,6 @@ import connectionFunc from "../connection/broadcast.js";
 import netObj from "./net.js";
 import {removeElem} from "../utils/helper.js";
 import {makeQrPlain} from "../views/qr_helper.js";
-import {networkHandler} from "../connection/network_handler.js";
 import {beginGame} from "./server_helper.js";
 import createSignalingChannel from "../connection/channel_with_name.js";
 import loggerFunc from "../views/logger.js";
@@ -26,8 +25,7 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     await gameChannel.ready();
     const queue = PromiseQueue(networkLogger);
-    const networkActions = networkHandler({}, queue, networkLogger);
-    const connection = connectionFunc(myId, networkLogger, networkActions, gameChannel);
+    const connection = connectionFunc(myId, networkLogger, gameChannel);
     const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
     game.on("started", () => {
         removeElem(code);
