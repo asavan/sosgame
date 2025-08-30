@@ -22,8 +22,8 @@ function shareAndCopy(elem, url) {
     elem.addEventListener("dblclick", async () => {
         await writeClipboardText(url);
         try {
-            if (navigator.share) {
-                // await navigator.share(shareData);
+            if (navigator.share && navigator.maxTouchPoints > 1) {
+                await navigator.share(shareData);
             }
         } catch (err) {
             console.error(err);

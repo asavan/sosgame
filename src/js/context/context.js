@@ -3,7 +3,7 @@ function windowContext(window, document, settings) {
         window,
         document,
         settings
-    }
+    };
 }
 
 function gameContext(context, game, presenter) {
@@ -12,3 +12,7 @@ function gameContext(context, game, presenter) {
     return context;
 }
 
+export default {
+    windowContext,
+    gameContext
+};

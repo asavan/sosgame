@@ -3,7 +3,7 @@ import {processCandidates} from "./common_webrtc.js";
 
 const connectionFunc = function (id, logger) {
     logger.log("Webrtc connection " + id);
-    const handlers = handlersFunc(["recv", "open", "error", "close", "join", "gameinit", "disconnect"]);
+    const handlers = handlersFunc(["open", "error", "close", "join", "gameinit", "disconnect"]);
 
     const candidateWaiter = Promise.withResolvers();
     const dataChanelWaiter = Promise.withResolvers();

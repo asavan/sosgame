@@ -1,5 +1,3 @@
-import PromiseQueue from "../utils/async-queue.js";
-
 import connectionFunc from "../connection/broadcast.js";
 import netObj from "./net.js";
 import {removeElem} from "../utils/helper.js";
@@ -24,7 +22,6 @@ export default async function gameMode(window, document, settings, gameFunction)
     const code = makeQr(window, document, settings, gameChannel.clientModeName());
 
     await gameChannel.ready();
-    const queue = PromiseQueue(networkLogger);
     const connection = connectionFunc(myId, networkLogger, gameChannel);
     const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
     game.on("started", () => {

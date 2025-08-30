@@ -5,7 +5,7 @@ const connectionFunc = function (id, logger) {
     const localCandidates = [];
     const candidateWaiter = Promise.withResolvers();
 
-    const handlers = handlersFunc(["recv", "open", "error", "close", "join", "gameinit"]);
+    const handlers = handlersFunc(["open", "error", "close", "join", "gameinit"]);
 
     let externalHandlers = null;
 
