@@ -13,13 +13,7 @@ export default function connectionFunc(id, logger, signaling) {
         return handlers.on(name, f);
     }
 
-    function connect() {
-        const signalPromise = Promise.withResolvers();
-        signaling.on("error", (id) => {
-            logger.log("Connection to ws error " + id);
-            signalPromise.reject(id);
-        });
-
+    async function connect() {
         signaling.on("message", (json) => {
             logger.log("Received message", json);
             if (json.from === id) {
@@ -52,8 +46,8 @@ export default function connectionFunc(id, logger, signaling) {
         };
 
         const sendRawTo = (type, data, to) => signaling.send(type, data, to);
-        signaling.on("open", () => signalPromise.resolve({sendRawAll, sendRawTo}));
-        return signalPromise.promise;
+        await signaling.ready();
+        return {sendRawAll, sendRawTo};
     }
 
     const sendRawAll = (type, data, ignore) => {
