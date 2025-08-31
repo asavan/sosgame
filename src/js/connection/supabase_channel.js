@@ -36,6 +36,8 @@ function createSignalingChannelWithName(name, id, logger) {
     const readyPromise = new Promise((resolve, reject) => {
         myChannel.subscribe((status) => {
             if (status !== "SUBSCRIBED") {
+                logger.error("SUBSCRIBED", status);
+                myChannel.teardown();
                 handlers.call("error", id);
                 reject(status);
                 return;

@@ -7,7 +7,9 @@ const runSafe = async (index, window, document, settings, gameFunction) => {
     const modeName = modes[index];
     const mode = await modeName;
     try {
+        console.log("Try mode " + index);
         const game = await mode.default(window, document, settings, gameFunction);
+        console.log("Choose mode " + index);
         return game;
     } catch (e) {
         console.error(e);

@@ -29,7 +29,7 @@ export default async function starter(window, document) {
     adjustSettings(settings);
     adjustMode(changed, settings, window.location.search);
     const mainLogger = loggerFunc(document, settings);
-
+    mainLogger.log("Choosen mode " + settings.mode);
     let mode;
     if (settings.mode === "client") {
         mode = await import("./mode/client.js");

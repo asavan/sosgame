@@ -28,6 +28,7 @@ export default async function gameMode(window, document, settings, gameFunction)
         // con.sendRawTo("join", {}, data.data.serverId);
     });
 
+    await gameChannel.ready();
     await connection.connect();
     networkLogger.log("connected");
     connection.sendRawAll("join");
