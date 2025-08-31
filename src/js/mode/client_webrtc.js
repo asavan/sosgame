@@ -1,4 +1,6 @@
 import connectionFunc from "../connection/client_webrtc.js";
+import connectionFuncSig from "../connection/broadcast.js";
+
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
 import {delay} from "../utils/helper.js";
@@ -10,6 +12,9 @@ import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./client_helper.js";
 import PromiseQueue from "../utils/async-queue.js";
 
+import createSignalingChannel from "../connection/channel_with_name.js";
+import actionToHandler from "../utils/action_to_handler.js";
+
 export default async function gameMode(window, document, settings, gameFunction) {
     addSettingsButton(document, settings);
     const queryString = window.location.search;
@@ -20,6 +25,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const networkLogger = loggerFunc(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const queue = PromiseQueue(networkLogger);
+    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
     const connection = connectionFunc(myId, networkLogger);
     const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);
     const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
@@ -46,6 +52,12 @@ export default async function gameMode(window, document, settings, gameFunction)
     if (cands) {
         dataToSend.c = cands;
     }
+    gameChannelPromise.then(chan => {
+        const sigConnection = connectionFuncSig(myId, networkLogger, chan);
+        sigConnection.connect();
+        sigConnection.sendRawAll("offer_and_cand", dataToSend);
+    });
+
     const jsonString = JSON.stringify(dataToSend);
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
     const qr = makeQrPlain(encoded2, document, ".qrcode");

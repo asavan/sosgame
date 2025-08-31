@@ -1,4 +1,6 @@
 import connectionFunc from "../connection/server_webrtc.js";
+import connectionFuncSig from "../connection/broadcast.js";
+
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
 import {delay, removeElem} from "../utils/helper.js";
@@ -7,6 +9,8 @@ import LZString from "lz-string";
 import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./server_helper.js";
+import createSignalingChannel from "../connection/channel_with_name.js";
+import actionToHandler from "../utils/action_to_handler.js";
 
 function showReadBtn(window, document, logger) {
     const barCodeReady = Promise.withResolvers();
@@ -39,6 +43,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     mainSection.classList.add("hidden");
 
     const offerPromice = connection.placeOfferAndWaitCandidates();
+    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
     const timer = delay(2000);
     await Promise.race([offerPromice, timer]);
     const dataToSend = connection.getOfferAndCands();
@@ -51,6 +56,23 @@ export default async function gameMode(window, document, settings, gameFunction)
     const qr = makeQrPlain(url2, document, ".qrcode");
 
     const answerAndCandPromise = Promise.withResolvers();
+    gameChannelPromise.then(chan => {
+        const sigConnection = connectionFuncSig(myId, networkLogger, chan);
+
+        const actions = {
+            "offer_and_cand": (data) => {
+                answerAndCandPromise.resolve(data);
+            },
+            "joinsig": (data) => {
+                networkLogger.log(data);
+                sigConnection.sendRawTo("offer_and_cand", dataToSend, data.from);
+            }
+        };
+        const handlers = actionToHandler(null, actions);
+
+        sigConnection.registerHandler(handlers);
+        sigConnection.connect();
+    });
     const gamePromise = Promise.withResolvers();
     connection.on("open", (openCon) => {
         removeElem(qr);
