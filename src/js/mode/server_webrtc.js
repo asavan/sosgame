@@ -73,7 +73,7 @@ export default async function gameMode(window, document, settings, gameFunction)
         });
 
         sigConnection.registerHandler(handlers);
-        sigConnection.connect();
+        return sigConnection.connect();
     });
     const gamePromise = Promise.withResolvers();
     connection.on("open", (openCon) => {

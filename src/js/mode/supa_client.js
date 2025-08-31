@@ -1,46 +1,16 @@
 import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import netObj from "./net.js";
-import supaChannel from "../connection/supabase_channel.js";
-import {delay} from "../utils/helper.js";
 import PromiseQueue from "../utils/async-queue.js";
 import connectionFunc from "../connection/broadcast.js";
 import {beginGame} from "./client_helper.js";
+import supaLobby from "../connection/supabase_lobby.js";
 
 export default async function gameMode(window, document, settings, gameFunction) {
     const networkLogger = loggerFunc(document, settings);
     addSettingsButton(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
-    const lobbyName = supaChannel.getConnectionUrl("lobby", settings);
-    const lobbyChanel = supaChannel.createSignalingChannelWithName(lobbyName, myId, networkLogger);
-
-    const servers = [];
-    lobbyChanel.on("message", (json) => {
-        if (json.from === myId) {
-            networkLogger.error("Ignore self");
-            return;
-        }
-        networkLogger.log(json);
-        if (json.action === "in_lobby") {
-            servers.push(json.from);
-            return;
-        }
-        networkLogger.log("unknown action");
-    });
-    await lobbyChanel.ready();
-    lobbyChanel.send("join", {}, "all");
-    await delay(500);
-    // await Promise.all([, delay(3000)]);
-    networkLogger.log("connected", myId);
-    if (servers.length !== 1) {
-        networkLogger.log(servers);
-        // TODO show every service and make user choose
-        return Promise.reject(myId);
-    }
-    const serverId = servers[0];
-    networkLogger.log("connected2", serverId);
-    const gameChannel = supaChannel.createSignalingChannelWithName(
-        supaChannel.getConnectionUrl(serverId, settings), myId, networkLogger);
+    const gameChannel = supaLobby.makeSupaChanClient(myId, settings, networkLogger);
 
     const queue = PromiseQueue(networkLogger);
 
@@ -53,6 +23,6 @@ export default async function gameMode(window, document, settings, gameFunction)
         gamePromise.resolve(game);
     });
     await connection.connect();
-    connection.sendRawTo("join", {}, serverId);
+    connection.sendRawTo("join", {}, gameChannel.getServerId());
     return gamePromise.promise;
 }

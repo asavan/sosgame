@@ -12,7 +12,7 @@ import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./client_helper.js";
 import PromiseQueue from "../utils/async-queue.js";
 
-import createSignalingChannel from "../connection/channel_with_name.js";
+import createSignalingChannel from "../connection/channel_with_name_client.js";
 import actionToHandler from "../utils/action_to_handler.js";
 
 async function clientOfferPromise(window, networkPromise) {
