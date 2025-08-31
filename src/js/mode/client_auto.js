@@ -1,4 +1,4 @@
-const modes = [import("./client.js"), import("./supa_client.js"), import("./hotseat.js")];
+const modes = [import("./client.js"), import("./client_webrtc.js"), import("./supa_client.js"), import("./hotseat.js")];
 
 const runSafe = async (index, window, document, settings, gameFunction) => {
     if (index >= modes.length) {

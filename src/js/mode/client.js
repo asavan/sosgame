@@ -12,9 +12,14 @@ export default async function gameMode(window, document, settings, gameFunction)
     const myId = netObj.getMyId(window, settings, Math.random);
     const networkLogger = loggerFunc(document, settings);
     const queue = PromiseQueue(networkLogger);
-    const gameChannel = createSignalingChannel(myId, netObj.getWebSocketUrl(settings, window.location), networkLogger);
-    const connection = connectionFunc(myId, networkLogger, gameChannel);
+    const socketUrl = netObj.getWebSocketUrl(settings, window.location);
     const gamePromise = Promise.withResolvers();
+    if (!socketUrl) {
+        gamePromise.reject("No socket");
+        return gamePromise.promise;
+    }
+    const gameChannel = createSignalingChannel(myId, socketUrl, networkLogger);
+    const connection = connectionFunc(myId, networkLogger, gameChannel);
 
     connection.on("gameinit", (data) => {
         const game = beginGame(window, document, settings, gameFunction,
