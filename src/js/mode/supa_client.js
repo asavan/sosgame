@@ -10,7 +10,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const networkLogger = loggerFunc(document, settings);
     addSettingsButton(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
-    const gameChannel = supaLobby.makeSupaChanClient(myId, settings, networkLogger);
+    const gameChannel = await supaLobby.makeSupaChanClient(myId, settings, networkLogger);
 
     const queue = PromiseQueue(networkLogger);
 

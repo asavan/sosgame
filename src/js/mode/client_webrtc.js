@@ -68,6 +68,8 @@ export default async function gameMode(window, document, settings, gameFunction)
         sigConnectionPromise.resolve(sigConnection);
         sigConnection.sendRawAll("join", {});
         // sigConnection.sendRawAll("offer_and_cand", dataToSend);
+    }).catch(err => {
+        networkPromise.reject(err);
     });
 
     const offerAndCandidates = await clientOfferPromise(window, networkPromise.promise);
