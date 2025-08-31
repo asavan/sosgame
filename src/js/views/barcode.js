@@ -1,9 +1,9 @@
 import {delay} from "../utils/helper.js";
 
-export default async function scanBarcode(logger, document) {
+export default async function scanBarcode(window, document, logger) {
     try {
         const videoCont = document.querySelector(".video-barcode");
-        if (!videoCont || videoCont.querySelector("video")) {
+        if (!videoCont || videoCont.querySelector("video") || !("BarcodeDetector" in window)) {
             return;
         }
         const barcodeDetector = new BarcodeDetector({formats: ["qr_code"]});
@@ -13,28 +13,28 @@ export default async function scanBarcode(logger, document) {
         videoCont.appendChild(video);
         // video.autoplay = true;
         await video.play();
-        const codesPromice = Promise.withResolvers();
+        const codesPromise = Promise.withResolvers();
 
-        async function detect(codesPromice) {
+        async function detect(codesPromise) {
             const barcodes = await barcodeDetector.detect(video);
             if (barcodes.length > 0) {
                 logger.log(barcodes);
                 // Process the detected barcodes
                 stream.getTracks().forEach(track => track.stop()); // Stop the camera when done
                 video.remove();
-                codesPromice.resolve(barcodes[0].rawValue);
+                codesPromise.resolve(barcodes[0].rawValue);
             } else {
                 logger.error("No codes found");
                 await delay(100);
                 requestAnimationFrame(() => {
-                    detect(codesPromice);
+                    detect(codesPromise);
                 });
             }
-            return codesPromice;
+            return codesPromise;
         }
 
-        detect(codesPromice);
-        return codesPromice.promise;
+        detect(codesPromise);
+        return codesPromise.promise;
     } catch (error) {
         logger.error("Error accessing camera or detecting barcodes:", error);
     }

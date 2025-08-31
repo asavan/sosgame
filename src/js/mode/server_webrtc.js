@@ -8,12 +8,12 @@ import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./server_helper.js";
 
-function showReadBtn(document, logger) {
+function showReadBtn(window, document, logger) {
     const barCodeReady = Promise.withResolvers();
     const qrBtn = document.querySelector(".qr-btn");
     qrBtn.classList.remove("hidden");
     qrBtn.addEventListener("click", async () => {
-        let codes = await scanBarcode(logger, document);
+        let codes = await scanBarcode(window, document, logger);
         logger.log(codes);
         if (!codes) {
             const sign = prompt("Get code from qr");
@@ -58,7 +58,7 @@ export default async function gameMode(window, document, settings, gameFunction)
         gamePromise.resolve(game);
     });
 
-    showReadBtn(document, networkLogger).then(async (answerAndCand) => {
+    showReadBtn(window, document, networkLogger).then(async (answerAndCand) => {
         networkLogger.log(answerAndCand);
         answerAndCandPromise.resolve(answerAndCand);
     });
