@@ -30,42 +30,40 @@ function showReadBtn(document, logger) {
     return barCodeReady.promise;
 }
 
-export default function gameMode(window, document, settings, gameFunction) {
-    return new Promise((resolve, reject) => {
-        const networkLogger = loggerFunc(document, settings);
-        addSettingsButton(document, settings);
-        const myId = netObj.getMyId(window, settings, Math.random);
-        const connection = connectionFunc(myId, networkLogger);
-        const mainSection = document.querySelector(".game");
-        mainSection.classList.add("hidden");
+export default async function gameMode(window, document, settings, gameFunction) {
+    const networkLogger = loggerFunc(document, settings);
+    addSettingsButton(document, settings);
+    const myId = netObj.getMyId(window, settings, Math.random);
+    const connection = connectionFunc(myId, networkLogger);
+    const mainSection = document.querySelector(".game");
+    mainSection.classList.add("hidden");
 
-        const offerPromice = connection.placeOfferAndWaitCandidates();
-        const timer = delay(2000);
-        Promise.race([offerPromice, timer]).then(() => {
-            const dataToSend = connection.getOfferAndCands();
-            const currentUrl = new URL(window.location.href);
-            const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
-            const baseUrl = urlWithoutParams || "https://asavan.github.io/sosgame/";
-            const jsonString = JSON.stringify(dataToSend);
-            const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
-            const url2 = baseUrl + "?c=" + encoded2;
-            const qr = makeQrPlain(url2, document, ".qrcode");
+    const offerPromice = connection.placeOfferAndWaitCandidates();
+    const timer = delay(2000);
+    await Promise.race([offerPromice, timer]);
+    const dataToSend = connection.getOfferAndCands();
+    const currentUrl = new URL(window.location.href);
+    const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
+    const baseUrl = urlWithoutParams || "https://asavan.github.io/sosgame/";
+    const jsonString = JSON.stringify(dataToSend);
+    const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
+    const url2 = baseUrl + "?c=" + encoded2;
+    const qr = makeQrPlain(url2, document, ".qrcode");
 
-            showReadBtn(document, networkLogger).then(async (answerAndCand) => {
-                networkLogger.log(answerAndCand);
-                connection.on("open", (openCon) => {
-                    removeElem(qr);
-                    const game = beginGame(window, document, settings, gameFunction, connection, openCon, myId);
-                    resolve(game);
-                });
-                await connection.setAnswerAndCand(answerAndCand);
-                console.log("after set", answerAndCand);
-            }).catch((e) => {
-                reject(e);
-            });
-        }).catch(error => {
-            networkLogger.error(error);
-            reject(error);
-        });
+    const answerAndCandPromise = Promise.withResolvers();
+    const gamePromise = Promise.withResolvers();
+    connection.on("open", (openCon) => {
+        removeElem(qr);
+        const game = beginGame(window, document, settings, gameFunction, connection, openCon, myId);
+        gamePromise.resolve(game);
     });
+
+    showReadBtn(document, networkLogger).then(async (answerAndCand) => {
+        networkLogger.log(answerAndCand);
+        answerAndCandPromise.resolve(answerAndCand);
+    });
+    const answerAndCand = await answerAndCandPromise.promise;
+    await connection.setAnswerAndCand(answerAndCand);
+    networkLogger.log("after set", answerAndCand);
+    return gamePromise.promise;
 }
