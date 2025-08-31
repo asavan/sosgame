@@ -11,6 +11,10 @@ async function makeSupaChan(id, settings, logger) {
 
     lobbyChanel.on("message", (json) => {
         logger.log(json);
+        if (json.from === id) {
+            logger.error("Ignore self");
+            return;
+        }
         if (json.action === "join") {
             lobbyChanel.send("in_lobby", {}, json.from);
         }

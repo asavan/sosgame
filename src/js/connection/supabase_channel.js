@@ -33,13 +33,19 @@ function createSignalingChannelWithName(name, id, logger) {
             }
         );
 
+    const close = async () => {
+        await handlers.call("beforeclose", id);
+        await myChannel.unsubscribe();
+        myChannel.teardown();
+    };
+
     const readyPromise = new Promise((resolve, reject) => {
         myChannel.subscribe((status) => {
             if (status !== "SUBSCRIBED") {
                 logger.error("SUBSCRIBED", status);
-                myChannel.teardown();
                 handlers.call("error", id);
                 reject(status);
+                close();
                 return;
             }
             handlers.call("open", id);
@@ -47,10 +53,6 @@ function createSignalingChannelWithName(name, id, logger) {
         });
     });
 
-    const close = async () => {
-        await handlers.call("beforeclose", id);
-        return myChannel.unsubscribe();
-    };
 
     function ready() {
         return readyPromise;

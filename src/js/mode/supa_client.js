@@ -16,6 +16,10 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     const servers = [];
     lobbyChanel.on("message", (json) => {
+        if (json.from === myId) {
+            networkLogger.error("Ignore self");
+            return;
+        }
         networkLogger.log(json);
         if (json.action === "in_lobby") {
             servers.push(json.from);

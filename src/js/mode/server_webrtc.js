@@ -82,7 +82,7 @@ export default async function gameMode(window, document, settings, gameFunction)
         gamePromise.resolve(game);
     });
 
-    showReadBtn(window, document, networkLogger).then(async (answerAndCand) => {
+    showReadBtn(window, document, networkLogger).then((answerAndCand) => {
         networkLogger.log(answerAndCand);
         answerAndCandPromise.resolve(answerAndCand);
     });

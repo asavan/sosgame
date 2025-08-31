@@ -48,12 +48,14 @@ export default async function gameMode(window, document, settings, gameFunction)
     connection.on("gameinit", (data) => {
         const game = beginGame(window, document, settings, gameFunction,
             networkLogger, connection, connection, data, queue);
-        gameChannelPromise.then(chan => {chan.close();});
+        gameChannelPromise.then(chan => {
+            chan.close();
+        });
         gamePromise.resolve(game);
     });
     const networkPromise = Promise.withResolvers();
     const sigConnectionPromise = Promise.withResolvers();
-    gameChannelPromise.then(chan => {
+    gameChannelPromise.then(async chan => {
         const sigConnection = connectionFuncSig(myId, networkLogger, chan);
         const actions = {
             "offer_and_cand": (data) => {
@@ -62,7 +64,7 @@ export default async function gameMode(window, document, settings, gameFunction)
         };
         const handlers = actionToHandler(null, actions);
         sigConnection.registerHandler(handlers);
-        sigConnection.connect();
+        await sigConnection.connect();
         sigConnectionPromise.resolve(sigConnection);
         sigConnection.sendRawAll("join", {});
         // sigConnection.sendRawAll("offer_and_cand", dataToSend);
