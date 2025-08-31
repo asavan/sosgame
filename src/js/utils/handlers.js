@@ -29,7 +29,7 @@ export default function handlersFunc(arr, queue) {
         console.log("call ", name, arg);
         const operation = () => {
             const promises = getSafe(name).map(f => f(arg));
-            console.log("form operation", promises[0]);
+            console.log("form operation", name, promises[0]);
             return Promise.allSettled(promises);
         };
 

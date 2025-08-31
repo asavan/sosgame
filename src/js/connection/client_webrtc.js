@@ -63,17 +63,17 @@ const connectionFunc = function (id, logger) {
         return peerConnection;
     }
 
-    async function processOffer(offerAndcandidates) {
-        logger.error(offerAndcandidates);
+    async function processOffer(offerAndCandidates) {
+        logger.error(offerAndCandidates);
         const peerConnection = SetupFreshConnection(id);
 
         peerConnection.ondatachannel = (ev) => {
             dataChannel = ev.channel;
             setupDataChannel(ev.channel);
         };
-        const offer = offerAndcandidates.offer;
+        const offer = offerAndCandidates.offer;
         await peerConnection.setRemoteDescription(offer);
-        await processCandidates(offerAndcandidates.c, peerConnection);
+        await processCandidates(offerAndCandidates.c, peerConnection);
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
         return answer;

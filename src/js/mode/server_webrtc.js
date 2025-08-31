@@ -47,6 +47,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const timer = delay(2000);
     await Promise.race([offerPromice, timer]);
     const dataToSend = connection.getOfferAndCands();
+    dataToSend.id = myId;
     const currentUrl = new URL(window.location.href);
     const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
     const baseUrl = urlWithoutParams || "https://asavan.github.io/sosgame/";
@@ -62,13 +63,14 @@ export default async function gameMode(window, document, settings, gameFunction)
         const actions = {
             "offer_and_cand": (data) => {
                 answerAndCandPromise.resolve(data);
-            },
-            "joinsig": (data) => {
-                networkLogger.log(data);
-                sigConnection.sendRawTo("offer_and_cand", dataToSend, data.from);
             }
         };
         const handlers = actionToHandler(null, actions);
+
+        sigConnection.on("join", (data) => {
+            networkLogger.log(data);
+            sigConnection.sendRawTo("offer_and_cand", dataToSend, data.from);
+        });
 
         sigConnection.registerHandler(handlers);
         sigConnection.connect();
