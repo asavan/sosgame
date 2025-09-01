@@ -1,5 +1,5 @@
 import handlersFunc from "../utils/handlers.js";
-import {processCandidates} from "./common_webrtc.js";
+import {processCandidates, SetupFreshConnection} from "./common_webrtc.js";
 
 const connectionFunc = function (id, logger) {
     const localCandidates = [];
@@ -34,38 +34,8 @@ const connectionFunc = function (id, logger) {
         return dataChannel.send(JSON.stringify(json));
     };
 
-    function SetupFreshConnection(id) {
-        const peerConnection = new RTCPeerConnection(null);
-        // window.pc = peerConnection;
-
-        peerConnection.onicecandidate = e => {
-            logger.log("Received icecandidate", id, e);
-            if (!e) {
-                console.error("No ice");
-            }
-            const message = {
-                type: "candidate",
-                candidate: null,
-            };
-            if (e.candidate) {
-                message.candidate = e.candidate.candidate;
-                message.sdpMid = e.candidate.sdpMid;
-                message.sdpMLineIndex = e.candidate.sdpMLineIndex;
-            }
-            localCandidates.push(message);
-
-            if (!e.candidate) {
-                logger.log("No candidate");
-                candidateWaiter.resolve(localCandidates);
-            }
-        };
-
-        return peerConnection;
-    }
-
     async function processOffer(offerAndCandidates) {
-        logger.error(offerAndCandidates);
-        const peerConnection = SetupFreshConnection(id);
+        const peerConnection = SetupFreshConnection(id, logger, localCandidates, candidateWaiter);
 
         peerConnection.ondatachannel = (ev) => {
             dataChannel = ev.channel;

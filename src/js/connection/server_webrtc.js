@@ -1,5 +1,5 @@
 import handlersFunc from "../utils/handlers.js";
-import {processCandidates} from "./common_webrtc.js";
+import {processCandidates, SetupFreshConnection} from "./common_webrtc.js";
 
 const connectionFunc = function (id, logger) {
     logger.log("Webrtc connection " + id);
@@ -24,47 +24,10 @@ const connectionFunc = function (id, logger) {
         return handlers.on(name, f);
     }
 
-    function SetupFreshConnection(id) {
-        const peerConnection = new RTCPeerConnection(null);
-        // window.pc = peerConnection;
-
-        peerConnection.onicecandidate = e => {
-            logger.log("Received icecandidate", id, e);
-            if (!e) {
-                console.error("No ice");
-            }
-            const message = {
-                type: "candidate",
-                candidate: null,
-            };
-            if (e.candidate) {
-                message.candidate = e.candidate.candidate;
-                message.sdpMid = e.candidate.sdpMid;
-                message.sdpMLineIndex = e.candidate.sdpMLineIndex;
-            }
-            localCandidates.push(message);
-
-            if (!e.candidate) {
-                candidateWaiter.resolve(localCandidates);
-            }
-        };
-
-        return peerConnection;
-    }
-
-
-    //init
 
     async function placeOfferAndWaitCandidates() {
-        peerConnection = SetupFreshConnection(id);
+        peerConnection = SetupFreshConnection(id, logger, localCandidates, candidateWaiter);
         // window.pc = peerConnection;
-        peerConnection.oniceconnectionstatechange = (e) => {
-            logger.log("connection statechange", e);
-            if (peerConnection.iceConnectionState === "failed") {
-                console.error("failed");
-                // peerConnection.restartIce();
-            }
-        };
 
         dataChannel = peerConnection.createDataChannel("gamechannel"+id);
 
@@ -147,6 +110,7 @@ const connectionFunc = function (id, logger) {
         const id = data.id;
         const client = clients[data.id];
         if (client) {
+            console.error("Close old client");
             client.pc.close();
         }
         clients[id] = {pc: peerConnection, dc: dataChannel};
