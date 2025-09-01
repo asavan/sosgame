@@ -1,5 +1,3 @@
-"use strict";
-
 export function hideElem(el) {
     if (el) {
         el.classList.add("hidden");
@@ -54,28 +52,6 @@ export function vibrateIfNeeded(window, inactivePeriod, lastInteractTime) {
             window.navigator.vibrate([200]);
         }
     }
-}
-
-function logToHtml(message, el) {
-    if (!el) {
-        return;
-    }
-    if (typeof message === "object" && JSON) {
-        el.innerHTML += JSON.stringify(message) + "<br />";
-    } else {
-        el.innerHTML += message + "<br />";
-    }
-}
-
-export function error(message, el) {
-    logToHtml(message, el);
-    console.error(message);
-    console.trace(message);
-}
-
-export function log(message, el) {
-    logToHtml(message, el);
-    console.log(message);
 }
 
 function stringToBoolean(string) {
