@@ -19,6 +19,8 @@ function createSignalingChannelWithName(name, id, logger) {
 function createSignalingChannelWithNameByClient(name, id, logger, supabase) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
     const myChannel = supabase.channel(name);
+    let readyCounter = 0;
+    let needClose = true;
     logger.log("chan: " + name);
 
     const send = (type, sdp, to, ignore) => {
@@ -44,16 +46,23 @@ function createSignalingChannelWithNameByClient(name, id, logger, supabase) {
     const close = async () => {
         await handlers.call("beforeclose", id);
         await myChannel.unsubscribe();
-        myChannel.teardown();
+        return myChannel.teardown();
     };
 
     const readyPromise = new Promise((resolve, reject) => {
-        myChannel.subscribe((status) => {
+        ++readyCounter;
+        console.log("readyCounter " + readyCounter);
+        myChannel.subscribe(async (status) => {
             if (status !== "SUBSCRIBED") {
-                logger.error("SUBSCRIBED", status);
-                handlers.call("error", id);
-                reject(status);
-                close();
+                if (needClose) {
+                    needClose = false;
+                    logger.error("SUBSCRIBED " + name, status);
+                    handlers.call("error", id);
+                    await close();
+                    reject(status);
+                } else {
+                    logger.log("SUBSCRIBED2 " + name, status);
+                }
                 return;
             }
             handlers.call("open", id);
