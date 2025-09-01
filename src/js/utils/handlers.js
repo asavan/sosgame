@@ -26,9 +26,14 @@ export default function handlersFunc(arr, queue) {
         handlers[f] = arr1;
     };
     const call = (name, arg) => {
+        const callbacks = getSafe(name);
+        if (callbacks.length === 0) {
+            console.log("No handlers " + name);
+            return Promise.resolve();
+        }
         console.log("call ", name, arg);
         const operation = () => {
-            const promises = getSafe(name).map(f => f(arg));
+            const promises = callbacks.map(f => f(arg));
             console.log("form operation", name, promises[0]);
             return Promise.allSettled(promises);
         };

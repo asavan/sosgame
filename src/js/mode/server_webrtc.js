@@ -74,6 +74,8 @@ export default async function gameMode(window, document, settings, gameFunction)
 
         sigConnection.registerHandler(handlers);
         return sigConnection.connect();
+    }).catch(err => {
+        networkLogger.log(err);
     });
     const gamePromise = Promise.withResolvers();
     connection.on("open", (openCon) => {
