@@ -22,6 +22,13 @@ export default function handlersFunc(arr, queue) {
         }
         getSafe(name).push(callback);
     };
+    const reset = (name, callback) => {
+        if (!hasAction(name)) {
+            throw new Error("No name for reset " + name);
+        }
+        handlers[name] = [];
+        on(name, callback);
+    };
     const set = (f, arr1) => {
         handlers[f] = arr1;
     };
@@ -51,6 +58,7 @@ export default function handlersFunc(arr, queue) {
         on,
         set,
         call,
+        reset,
         hasAction,
         actionKeys
     };
