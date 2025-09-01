@@ -3,9 +3,10 @@ import supaChannel from "../connection/supabase_channel.js";
 
 async function makeSupaChanServer(id, settings, logger) {
     const name = supaChannel.getConnectionUrl(id, settings);
-    const chan = supaChannel.createSignalingChannelWithName(name, id, logger);
+    const supabaseClient = supaChannel.createSupaClient();
+    const chan = supaChannel.createSignalingChannelWithNameByClient(name, id, logger, supabaseClient);
     const lobbyName = supaChannel.getConnectionUrl("lobby", settings);
-    const lobbyChanel = supaChannel.createSignalingChannelWithName(lobbyName, id, logger);
+    const lobbyChanel = supaChannel.createSignalingChannelWithNameByClient(lobbyName, id, logger, supabaseClient);
 
     lobbyChanel.on("message", (json) => {
         logger.log(json);
@@ -26,41 +27,41 @@ async function makeSupaChanServer(id, settings, logger) {
     return chan;
 }
 
-async function makeSupaChanClient(myId, settings, networkLogger) {
+async function makeSupaChanClient(id, settings, logger) {
     const lobbyName = supaChannel.getConnectionUrl("lobby", settings);
-    const lobbyChanel = supaChannel.createSignalingChannelWithName(lobbyName, myId, networkLogger);
+    const supabaseClient = supaChannel.createSupaClient();
+    const lobbyChanel = supaChannel.createSignalingChannelWithNameByClient(lobbyName, id, logger, supabaseClient);
 
     const servers = [];
     lobbyChanel.on("message", (json) => {
-        if (json.from === myId) {
-            networkLogger.error("Ignore self");
+        if (json.from === id) {
+            logger.error("Ignore self");
             return;
         }
-        networkLogger.log(json);
+        logger.log(json);
         if (json.action === "in_lobby") {
             servers.push(json.from);
             return;
         }
-        networkLogger.log("unknown action");
+        logger.log("unknown action");
     });
     await lobbyChanel.ready();
     lobbyChanel.send("join", {}, "all");
     await delay(500);
     // await Promise.all([, delay(3000)]);
-    networkLogger.log("connected", myId);
+    logger.log("connected", id);
     if (servers.length !== 1) {
-        networkLogger.log(servers);
+        logger.log(servers);
         // TODO show every service and make user choose
-        return Promise.reject(myId);
+        return Promise.reject(id);
     }
     const serverId = servers[0];
-    networkLogger.log("connected2", serverId);
-    const gameChannel = supaChannel.createSignalingChannelWithName(
-        supaChannel.getConnectionUrl(serverId, settings), myId, networkLogger);
+    logger.log("connected2", serverId);
+    const gameChannel = supaChannel.createSignalingChannelWithNameByClient(
+        supaChannel.getConnectionUrl(serverId, settings), id, logger, supabaseClient);
     gameChannel.getServerId = () => serverId;
     return gameChannel;
 }
-
 
 export default {
     makeSupaChanServer,

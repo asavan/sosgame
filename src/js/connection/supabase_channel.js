@@ -6,10 +6,18 @@ function getConnectionUrl(id, settings) {
     return settings.gameChanPrefix + id;
 }
 
-function createSignalingChannelWithName(name, id, logger) {
-    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
-    const supabase = createClient(supabase_settings.SUPABASE_URL,
+function createSupaClient() {
+    return createClient(supabase_settings.SUPABASE_URL,
         supabase_settings.SUPA_API_ANON_KEY);
+}
+
+function createSignalingChannelWithName(name, id, logger) {
+    const supabase = createSupaClient();
+    return createSignalingChannelWithNameByClient(name, id, logger, supabase);
+}
+
+function createSignalingChannelWithNameByClient(name, id, logger, supabase) {
+    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
     const myChannel = supabase.channel(name);
     logger.log("chan: " + name);
 
@@ -66,5 +74,7 @@ function createSignalingChannelWithName(name, id, logger) {
 
 export default {
     getConnectionUrl,
-    createSignalingChannelWithName
+    createSignalingChannelWithName,
+    createSupaClient,
+    createSignalingChannelWithNameByClient
 };
