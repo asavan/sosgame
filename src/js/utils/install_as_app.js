@@ -1,4 +1,3 @@
-"use strict";
 import {hideElem, showElem} from "./helper.js";
 export default function install(window, document) {
     const btnAdd = document.querySelector(".butInstall");

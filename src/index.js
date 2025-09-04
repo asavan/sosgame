@@ -1,5 +1,3 @@
-"use strict";
-
 import install from "./js/utils/install_as_app.js";
 import starter from "./js/starter.js";
 

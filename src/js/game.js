@@ -1,23 +1,7 @@
 import {assert, delay} from "./utils/helper.js";
 import handlersFunc from "./utils/handlers.js";
+import handleClick from "./views/click.js";
 
-const getIndex = function (e, parent) {
-    const target = e.target || e.srcElement;
-    for (let i = 0; i < parent.children.length; i++) {
-        if (parent.children[i] === target) {
-            return i;
-        }
-    }
-    return -1;
-};
-
-const handleClick = function (evt, parent) {
-    evt.preventDefault();
-    if (!evt.target.classList.contains("cell") || evt.target.classList.contains("disabled")) {
-        return -1;
-    }
-    return getIndex(evt, parent);
-};
 
 function drawDigits(presenter, digits) {
     for (let i = 0; i < 2; i++) {
@@ -48,6 +32,8 @@ function initField(document, fieldSize, className, elem) {
     for (let i = 0; i < fieldSize; i++) {
         const cell = document.createElement("div");
         cell.className = className;
+        const num = i + 1;
+        cell.dataset.num = num;
         elem.append(cell);
     }
 }

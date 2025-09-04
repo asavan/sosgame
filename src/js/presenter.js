@@ -1,5 +1,3 @@
-"use strict";
-
 import fieldObj from "./field.js";
 import handlersFunc from "./utils/handlers.js";
 

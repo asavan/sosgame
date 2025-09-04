@@ -1,5 +1,3 @@
-"use strict";
-
 import {assert, parseSettings} from "./utils/helper.js";
 import gameFunction from "./game.js";
 import settings from "./settings.js";

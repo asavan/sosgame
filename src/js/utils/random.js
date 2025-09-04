@@ -1,5 +1,3 @@
-"use strict";
-
 function makeId(length, rngFunc) {
     let result = "";
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
