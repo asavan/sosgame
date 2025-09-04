@@ -4,7 +4,7 @@ plugins {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(24))
     }
 }
 
@@ -17,9 +17,18 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 22
-        versionName = "1.1.1"
+        versionName = "1.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packaging {
+        jniLibs {
+            pickFirsts += "META-INF/nanohttpd/*"
+        }
+        resources {
+            pickFirsts += "META-INF/nanohttpd/*"
+        }
     }
 
     buildTypes {
