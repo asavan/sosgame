@@ -111,11 +111,13 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         const networkPromise = Promise.withResolvers();
         const sigConnectionPromise = Promise.withResolvers();
         if (signalingChan) {
-            console.log("register actions");
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
             const actions = {
                 "offer_and_cand": (data) => {
                     networkPromise.resolve(data);
+                },
+                "stop_waiting": () => {
+                    connectionPromise.resolve(id);
                 }
             };
             const handlers = actionToHandler(null, actions);

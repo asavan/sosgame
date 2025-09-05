@@ -43,10 +43,10 @@ export default async function gameMode(window, document, settings, gameFunction)
     const mainSection = document.querySelector(".game");
     mainSection.classList.add("hidden");
 
-    const offerPromice = connection.placeOfferAndWaitCandidates();
     const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
+    const offerPromise = connection.placeOfferAndWaitCandidates();
     const timer = delay(2000);
-    await Promise.race([offerPromice, timer]);
+    await Promise.race([offerPromise, timer]);
     const dataToSend = connection.getOfferAndCands();
     dataToSend.id = myId;
     const currentUrl = new URL(window.location.href);
@@ -64,6 +64,10 @@ export default async function gameMode(window, document, settings, gameFunction)
         const actions = {
             "offer_and_cand": (data) => {
                 answerAndCandPromise.resolve(data);
+                delay(2000).then(() => {
+                    // TODO send only if not opened yet. Send not to all.
+                    sigConnection.sendRawTo("stop_waiting", {}, "all");
+                });
             }
         };
         const handlers = actionToHandler(null, actions);
