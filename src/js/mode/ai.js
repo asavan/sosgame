@@ -1,4 +1,5 @@
-import {assert, delay} from "../utils/helper.js";
+import {assert} from "../utils/helper.js";
+import {delay} from "../utils/timer.js";
 import bot from "../bot/second_best_bot.js";
 import fieldObj from "../field.js";
 import lobbyFunc from "../lobby.js";

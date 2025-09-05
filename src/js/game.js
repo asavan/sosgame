@@ -1,4 +1,5 @@
-import {assert, delay} from "./utils/helper.js";
+import {assert} from "./utils/helper.js";
+import {delay} from "./utils/timer.js";
 import handlersFunc from "./utils/handlers.js";
 import handleClick from "./views/click.js";
 
