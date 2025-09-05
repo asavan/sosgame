@@ -35,13 +35,17 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
             console.error("Not connected");
             return false;
         }
+        if (!serverId) {
+            console.error("No server");
+            console.trace("How");
+        }
+        if (!dataChannel) {
+            console.error("Not data channel");
+            return signalingChan.send(action, data, serverId);
+        }
         const json = {from: id, to: serverId, action, data};
         logger.log("Sending [" + id + "] to [" + serverId + "]: " + JSON.stringify(data));
         const str = JSON.stringify(json);
-        if (!dataChannel) {
-            console.error("Not data channel");
-            return signalingChan.send(str);
-        }
         return dataChannel.send(str);
     };
 
@@ -112,6 +116,14 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         const sigConnectionPromise = Promise.withResolvers();
         if (signalingChan) {
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
+            console.error("setup gameinit 22");
+            sigConnection.on("gameinit", (data) => {
+                console.log(data);
+                serverId = data.from;
+                sigConnection.dispose();
+                connectionPromise.resolve(id);
+                networkPromise.reject("timeout");
+            });
             const actions = {
                 "offer_and_cand": (data) => {
                     networkPromise.resolve(data);
@@ -130,7 +142,9 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
             // sigConnectionPromise.reject("No chan");
         }
 
+        console.error("setup gameinit 23");
         const offerAndCandidates = await clientOfferPromise(window, networkPromise.promise);
+        console.error("setup gameinit 24");
         serverId = offerAndCandidates.id;
         const answer = await processOffer(offerAndCandidates);
         const timer = delay(2000);
@@ -141,6 +155,7 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         if (cands) {
             dataToSend.c = cands;
         }
+        console.error("setup gameinit 27");
         if (signalingChan) {
             const sigConnection = await sigConnectionPromise.promise;
             sigConnection.sendRawTo("offer_and_cand", dataToSend, serverId);

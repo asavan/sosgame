@@ -1,6 +1,9 @@
 import handlersFunc from "../utils/handlers.js";
 
-export default function connectionFunc(id, logger, signaling) {
+export default function connectionFunc(id, logger, signaling, logname) {
+    if (!signaling) {
+        throw new Error("No signaling");
+    }
     const handlers = handlersFunc(["close", "disconnect", "error", "join", "gameinit", "reconnect"]);
 
     let externalHandlers = null;
@@ -14,8 +17,9 @@ export default function connectionFunc(id, logger, signaling) {
     }
 
     async function connect() {
+        logger.log("bind signal", logname);
         signaling.on("message", (json) => {
-            logger.log("Received message", json);
+            logger.log("Received message", json, logname);
             if (json.from === id) {
                 logger.error("same user");
                 return;
@@ -31,7 +35,7 @@ export default function connectionFunc(id, logger, signaling) {
                 return;
             }
             if (handlers.hasAction(json.action)) {
-                logger.log("handlers.actionKeys");
+                logger.log("handlers.actionKeys", logname);
                 return handlers.call(json.action, json);
             }
             if (externalHandlers && externalHandlers.hasAction(json.action)) {
@@ -57,7 +61,14 @@ export default function connectionFunc(id, logger, signaling) {
 
     const sendRawTo = (type, data, to) => signaling.send(type, data, to);
 
+    const dispose = () => {
+        for (const action of handlers.actionKeys()) {
+            handlers.set(action, []);
+        }
+        registerHandler(null);
+    };
+
     return {
-        connect, on, registerHandler, sendRawAll, sendRawTo,
+        connect, on, registerHandler, sendRawAll, sendRawTo, dispose
     };
 }

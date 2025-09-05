@@ -1,4 +1,4 @@
-export default function handlersFunc(arr, queue) {
+export default function handlersFunc(arr, queue, handName) {
     const handlers = {};
     for (const f of arr) {
         handlers[f] = [];
@@ -35,10 +35,10 @@ export default function handlersFunc(arr, queue) {
     const call = (name, arg) => {
         const callbacks = getSafe(name);
         if (callbacks.length === 0) {
-            console.log("No handlers " + name);
+            console.trace("No handlers " + name);
             return Promise.resolve();
         }
-        console.log("call ", name, arg);
+        console.log("call ", name, arg, callbacks.length, handName);
         const operation = () => {
             const promises = callbacks.map(f => f(arg));
             console.log("form operation", name, promises[0]);

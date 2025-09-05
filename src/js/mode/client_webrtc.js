@@ -31,25 +31,37 @@ export default async function gameMode(window, document, settings, gameFunction)
     const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
     const sigChan = await Promise.race([gameChannelPromise, delay(5000)]).catch(() => null);
     const dataChan = createDataChannel(window, settings, myId, networkLogger, sigChan);
+    let commChan = null;
     const gamePromise = Promise.withResolvers();
-    const dataToSendPromise = dataChan.connect();
-    dataToSendPromise.then((dataToSend) => showQr(document, dataToSend)).catch((err) => {
-        gamePromise.reject(err);
-    });
+    console.error("gamePromise");
+    try {
+        const dataToSend = await dataChan.connect();
+        commChan = dataChan;
+        console.error("gamePromise1");
+        showQr(document, dataToSend);
+        console.error("gamePromise2");
+    } catch (err) {
+        console.error(err);
+        commChan = sigChan;
+    }
 
-    const connection = connectionFunc(myId, networkLogger, dataChan);
+    const connection = connectionFunc(myId, networkLogger, commChan, "secondName");
 
+    console.error("gameinit1");
     connection.on("gameinit", (data) => {
+        console.error("gameinit22", data);
         const game = beginGame(window, document, settings, gameFunction,
             networkLogger, connection, connection, data, queue);
         gamePromise.resolve(game);
     });
 
-    await connection.connect();
-    networkLogger.log("open");
-    showGameView(document);
-    connection.sendRawTo("join", {}, "all");
-    networkLogger.log("after send");
-
+    const runAsync = async () => {
+        await connection.connect();
+        networkLogger.log("open");
+        showGameView(document);
+        connection.sendRawTo("join", {}, "all");
+        networkLogger.log("after send");
+    };
+    runAsync();
     return gamePromise.promise;
 }
