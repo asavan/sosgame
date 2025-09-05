@@ -11,11 +11,6 @@ function createSupaClient() {
         supabase_settings.SUPA_API_ANON_KEY);
 }
 
-function createSignalingChannelWithName(name, id, logger) {
-    const supabase = createSupaClient();
-    return createSignalingChannelWithNameByClient(name, id, logger, supabase);
-}
-
 function createSignalingChannelWithNameByClient(name, id, logger, supabase) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
     const myChannel = supabase.channel(name);
@@ -83,7 +78,6 @@ function createSignalingChannelWithNameByClient(name, id, logger, supabase) {
 
 export default {
     getConnectionUrl,
-    createSignalingChannelWithName,
     createSupaClient,
     createSignalingChannelWithNameByClient
 };

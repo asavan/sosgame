@@ -1,0 +1,148 @@
+import handlersFunc from "../utils/handlers.js";
+import {processCandidates, SetupFreshConnection} from "./common_webrtc.js";
+import connectionFuncSig from "./broadcast.js";
+import actionToHandler from "../utils/action_to_handler.js";
+import {delay} from "../utils/helper.js";
+
+function stub() {
+    // do nothing.
+}
+
+export async function clientOfferPromise(window, networkPromise) {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const connectionStr = urlParams.get("c");
+    if (!connectionStr) {
+        const offerAndCandidates = await networkPromise;
+        return offerAndCandidates;
+    }
+    const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);
+    const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
+    return offerAndCandidates;
+}
+
+export function createDataChannel(id, logger, signalingChan) {
+    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
+    let isConnected = false;
+    let dataChannel = null;
+
+    const localCandidates = [];
+    const candidateWaiter = Promise.withResolvers();
+
+    const connectionPromise = Promise.withResolvers();
+
+    const send = (action, data, to, ignore) => {
+        if (!dataChannel) {
+            console.error("Not channel");
+            return false;
+        }
+        if (!isConnected) {
+            console.error("Not connected");
+            return false;
+        }
+        const json = {from: id, to, action, data, ignore};
+        logger.log("Sending [" + id + "] to [" + to + "]: " + JSON.stringify(data));
+        return dataChannel.send(JSON.stringify(json));
+    };
+
+    async function processOffer(offerAndCandidates) {
+        const peerConnection = SetupFreshConnection(id, logger, localCandidates, candidateWaiter);
+
+        peerConnection.ondatachannel = (ev) => {
+            dataChannel = ev.channel;
+            setupDataChannel(ev.channel);
+        };
+        const offer = offerAndCandidates.offer;
+        await peerConnection.setRemoteDescription(offer);
+        await processCandidates(offerAndCandidates.c, peerConnection);
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        return answer;
+    }
+
+    function getCandidates() {
+        return candidateWaiter.promise;
+    }
+
+    function setupDataChannel(dataChannel) {
+        dataChannel.onmessage = function (e) {
+            logger.log("data get " + e.data);
+            const json = JSON.parse(e.data);
+            return handlers.call("message", json);
+        };
+
+        dataChannel.onopen = function () {
+            logger.log("------ DATACHANNEL OPENED ------");
+            isConnected = true;
+            connectionPromise.resolve(id);
+            return handlers.call("open", id);
+        };
+
+        dataChannel.onclose = function () {
+            logger.log("------ DC closed! ------");
+            isConnected = false;
+            return handlers.call("close", id);
+        };
+
+        dataChannel.onerror = function () {
+            logger.error("DC ERROR!!!");
+        };
+    }
+
+    const close = async () => {
+        // iphone fires "onerror" on close socket
+        await handlers.call("beforeclose", id);
+        if (isConnected) {
+            isConnected = false;
+            if (dataChannel) {
+                dataChannel.close();
+            }
+        }
+    };
+
+    const on = handlers.on;
+
+    const ready = () => connectionPromise.promise;
+
+    async function connect() {
+        const networkPromise = Promise.withResolvers();
+        const sigConnectionPromise = Promise.withResolvers();
+        if (signalingChan) {
+            console.log("register actions");
+            const sigConnection = connectionFuncSig(id, logger, signalingChan);
+            const actions = {
+                "offer_and_cand": (data) => {
+                    networkPromise.resolve(data);
+                }
+            };
+            const handlers = actionToHandler(null, actions);
+            sigConnection.registerHandler(handlers);
+            await sigConnection.connect();
+            sigConnectionPromise.resolve(sigConnection);
+            sigConnection.sendRawAll("join", {});
+        } else {
+            console.error("CONNECT 2");
+            networkPromise.reject("No chan");
+            // sigConnectionPromise.reject("No chan");
+        }
+
+        const offerAndCandidates = await clientOfferPromise(window, networkPromise.promise);
+        const serverId = offerAndCandidates.id;
+        const answer = await processOffer(offerAndCandidates);
+        const timer = delay(2000);
+        const candidatesPromice = getCandidates();
+        const cands = await Promise.race([candidatesPromice, timer]);
+
+        const dataToSend = {sdp: answer.sdp, id};
+        if (cands) {
+            dataToSend.c = cands;
+        }
+        if (signalingChan) {
+            const sigConnection = await sigConnectionPromise.promise;
+            sigConnection.sendRawTo("offer_and_cand", dataToSend, serverId);
+        }
+
+        return dataToSend;
+    }
+    return {on, send, close, ready, connect};
+}

@@ -1,6 +1,6 @@
 {
   "name": "sosgame",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": "Alex Sav",
   "description": "Sos game",
   "private": true,
@@ -25,7 +25,7 @@
     "updates:fix": "npx ncu -u && npm install && npm audit fix"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin": "^5.2.3",
+    "@stylistic/eslint-plugin": "^5.3.1",
     "c8": "^10.1.3",
     "copy-webpack-plugin": "^13.0.1",
     "css-loader": "^7.1.2",
@@ -38,7 +38,7 @@
     "mini-css-extract-plugin": "^2.9.4",
     "npm-check-updates": "^18.0.3",
     "npm-run-all": "^4.1.5",
-    "oxlint": "^1.13.0",
+    "oxlint": "^1.14.0",
     "stylelint": "^16.23.1",
     "stylelint-config-standard": "^39.0.0",
     "terser-webpack-plugin": "^5.3.14",
@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@akamfoad/qrcode": "^0.3.2",
-    "@supabase/supabase-js": "^2.56.1",
+    "@supabase/supabase-js": "^2.57.0",
     "jsurl2": "^2.2.0",
     "lz-string": "^1.5.0"
   }

@@ -53,6 +53,7 @@ async function makeSupaChanClient(id, settings, logger) {
     if (servers.length !== 1) {
         logger.log(servers);
         // TODO show every service and make user choose
+        supabaseClient.removeAllChannels();
         return Promise.reject(id);
     }
     const serverId = servers[0];
