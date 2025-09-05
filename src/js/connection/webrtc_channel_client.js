@@ -2,18 +2,16 @@ import handlersFunc from "../utils/handlers.js";
 import {processCandidates, SetupFreshConnection} from "./common_webrtc.js";
 import connectionFuncSig from "./broadcast.js";
 import actionToHandler from "../utils/action_to_handler.js";
-import {delay} from "../utils/helper.js";
+import {delay} from "../utils/timer.js";
 
-function stub() {
-    // do nothing.
-}
+import LZString from "lz-string";
 
-export async function clientOfferPromise(window, networkPromise) {
+async function clientOfferPromise(window, networkOfferPromise) {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const connectionStr = urlParams.get("c");
     if (!connectionStr) {
-        const offerAndCandidates = await networkPromise;
+        const offerAndCandidates = await networkOfferPromise;
         return offerAndCandidates;
     }
     const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);
@@ -21,28 +19,30 @@ export async function clientOfferPromise(window, networkPromise) {
     return offerAndCandidates;
 }
 
-export function createDataChannel(id, logger, signalingChan) {
+export function createDataChannel(window, settings, id, logger, signalingChan) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
-    let isConnected = false;
+    let isConnected = !!signalingChan;
     let dataChannel = null;
+    let serverId = null;
 
     const localCandidates = [];
     const candidateWaiter = Promise.withResolvers();
 
     const connectionPromise = Promise.withResolvers();
 
-    const send = (action, data, to, ignore) => {
-        if (!dataChannel) {
-            console.error("Not channel");
-            return false;
-        }
+    const send = (action, data) => {
         if (!isConnected) {
             console.error("Not connected");
             return false;
         }
-        const json = {from: id, to, action, data, ignore};
-        logger.log("Sending [" + id + "] to [" + to + "]: " + JSON.stringify(data));
-        return dataChannel.send(JSON.stringify(json));
+        const json = {from: id, to: serverId, action, data};
+        logger.log("Sending [" + id + "] to [" + serverId + "]: " + JSON.stringify(data));
+        const str = JSON.stringify(json);
+        if (!dataChannel) {
+            console.error("Not data channel");
+            return signalingChan.send(str);
+        }
+        return dataChannel.send(str);
     };
 
     async function processOffer(offerAndCandidates) {
@@ -74,6 +74,9 @@ export function createDataChannel(id, logger, signalingChan) {
         dataChannel.onopen = function () {
             logger.log("------ DATACHANNEL OPENED ------");
             isConnected = true;
+            if (signalingChan) {
+                signalingChan.close();
+            }
             connectionPromise.resolve(id);
             return handlers.call("open", id);
         };
@@ -121,13 +124,12 @@ export function createDataChannel(id, logger, signalingChan) {
             sigConnectionPromise.resolve(sigConnection);
             sigConnection.sendRawAll("join", {});
         } else {
-            console.error("CONNECT 2");
             networkPromise.reject("No chan");
             // sigConnectionPromise.reject("No chan");
         }
 
         const offerAndCandidates = await clientOfferPromise(window, networkPromise.promise);
-        const serverId = offerAndCandidates.id;
+        serverId = offerAndCandidates.id;
         const answer = await processOffer(offerAndCandidates);
         const timer = delay(2000);
         const candidatesPromice = getCandidates();

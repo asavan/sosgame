@@ -3,7 +3,8 @@ import connectionFuncSig from "../connection/broadcast.js";
 
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
-import {delay, removeElem} from "../utils/helper.js";
+import {removeElem} from "../utils/helper.js";
+import {delay} from "../utils/timer.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
 import loggerFunc from "../views/logger.js";

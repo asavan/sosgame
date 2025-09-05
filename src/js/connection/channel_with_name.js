@@ -1,13 +1,7 @@
 import wsChannel from "./websocket_channel.js";
 import netObj from "../mode/net.js";
 import supaLobby from "./supabase_lobby.js";
-import {delay} from "../utils/helper.js";
-
-
-const delayReject = async (ms) => {
-    await delay(ms);
-    return Promise.reject(new Error("timeout"));
-};
+import {delayReject} from "../utils/timer.js";
 
 export default async function createSignalingChannel(id, location, settings, logger) {
     const socketUrl = netObj.getWebSocketUrl(settings, location);

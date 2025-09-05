@@ -2,7 +2,7 @@ import connectionFunc from "../connection/broadcast.js";
 
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
-import {delay} from "../utils/helper.js";
+import {delay} from "../utils/timer.js";
 
 import LZString from "lz-string";
 import {showGameView} from "../views/section_view.js";
@@ -22,8 +22,8 @@ export default async function gameMode(window, document, settings, gameFunction)
     const myId = netObj.getMyId(window, settings, Math.random);
     const queue = PromiseQueue(networkLogger);
     const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
-    const sigChan = await Promise.race([gameChannelPromise, delay(5000)]).catch(err => null);
-    const dataChan = createDataChannel(myId, networkLogger, sigChan);
+    const sigChan = await Promise.race([gameChannelPromise, delay(5000)]).catch(() => null);
+    const dataChan = createDataChannel(window, settings, myId, networkLogger, sigChan);
     const dataToSend = await dataChan.connect();
 
     const jsonString = JSON.stringify(dataToSend);
@@ -41,9 +41,6 @@ export default async function gameMode(window, document, settings, gameFunction)
     connection.on("gameinit", (data) => {
         const game = beginGame(window, document, settings, gameFunction,
             networkLogger, connection, connection, data, queue);
-        if (sigChan) {
-            sigChan.close();
-        }
         gamePromise.resolve(game);
     });
 

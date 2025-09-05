@@ -1,4 +1,4 @@
-import {delay} from "../utils/helper.js";
+import {delay} from "../utils/timer.js";
 import supaChannel from "../connection/supabase_channel.js";
 
 async function makeSupaChanServer(id, settings, logger) {

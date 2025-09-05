@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {delay} from "../src/js/utils/helper.js";
+import {delay} from "../src/js/utils/timer.js";
 import actionToHandler from "../src/js/utils/action_to_handler.js";
 import PromiseQueue from "../src/js/utils/async-queue.js";
 

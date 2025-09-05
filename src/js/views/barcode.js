@@ -1,4 +1,4 @@
-import {delay} from "../utils/helper.js";
+import {delay} from "../utils/timer.js";
 
 export default async function scanBarcode(window, document, logger) {
     try {
