@@ -84,7 +84,7 @@ export function assert(b, message) {
     }
     console.error(message);
     console.trace(message);
-    throw message;
+    throw new Error(message);
 }
 
 export function pluralize(count, noun, suffix = "s") {

@@ -5,7 +5,7 @@ function stub() {
 }
 
 export default function createSignalingChannel(id, socketUrl, logger) {
-    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"], null, "socket_handler");
+    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"], null, "socket_chan");
     const ws = new WebSocket(socketUrl);
     const connectionPromise = Promise.withResolvers();
 

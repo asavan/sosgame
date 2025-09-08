@@ -1,6 +1,5 @@
 import lobbyFunc from "../lobby.js";
 import loggerFunc from "../views/logger.js";
-import PromiseQueue from "../utils/async-queue.js";
 import actionsFunc from "../actions.js";
 import {showGameView} from "../views/section_view.js";
 import presenterObj from "../presenter.js";
@@ -39,9 +38,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     const lobby = lobbyFunc({}, presenter.getClientIndex());
     lobby.addClient(myId, myId);
 
-    const gameLogger = loggerFunc(document, settings);
     const connectionLogger = loggerFunc(document, settings, 1);
-    const queue = PromiseQueue(gameLogger);
 
     game.on("winclosed", () => {
         presenter.nextRound();
@@ -71,7 +68,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     });
 
     const actions = actionsFunc(game);
-    const gameHandler = actionToHandler(queue, actions);
+    const gameHandler = actionToHandler(actions);
     connection.registerHandler(gameHandler);
     setupGameToConnectionSend(game, connection, lobby, connectionLogger);
 }

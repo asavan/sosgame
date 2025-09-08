@@ -36,12 +36,9 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
     let field = fieldObj.field(fieldArr);
 
-    const handlers = handlersFunc(["moveEnd", "nextPlayer", "gameover"]);
+    const handlers = handlersFunc(["moveEnd", "nextPlayer", "gameover"], null, "presenter");
 
-    function on(name, f) {
-        return handlers.on(name, f);
-    }
-
+    const on = handlers.on;
 
     function* enumerate() {
         for (let i = 0; i < field.size(); ++i) {

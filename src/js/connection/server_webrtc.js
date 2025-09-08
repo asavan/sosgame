@@ -44,7 +44,6 @@ const connectionFunc = function (id, logger) {
     }
 
     const sendRawAll = (action, data, ignore) => {
-        console.log("Sending raw all");
         logger.log("sending", data);
         const json = {from: id, to: "all", action, data};
         for (const [id, client] of Object.entries(clients)) {
@@ -56,10 +55,10 @@ const connectionFunc = function (id, logger) {
                 try {
                     client.dc.send(JSON.stringify(json));
                 } catch (e) {
-                    console.log(e, client);
+                    logger.log(e, client);
                 }
             } else {
-                console.error("No connection", client);
+                logger.error("No connection", client);
             }
         }
     };
@@ -103,7 +102,7 @@ const connectionFunc = function (id, logger) {
         };
 
         dataChannel.onerror = function () {
-            console.error("DC ERROR!!!");
+            logger.error("DC ERROR!!!");
             return handlers.call("disconnect", id);
         };
     }

@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {delay} from "../src/js/utils/timer.js";
 import actionToHandler from "../src/js/utils/action_to_handler.js";
-import PromiseQueue from "../src/js/utils/async-queue.js";
 
 test("init_field", async () => {
 
@@ -15,8 +14,7 @@ test("init_field", async () => {
         }
     };
 
-    const queue = PromiseQueue(console);
-    const handler = actionToHandler(queue, actions);
+    const handler = actionToHandler(actions);
     const result = await handler.call("delay", 20);
     assert.equal(20, result[0].value, "init correct");
 });

@@ -15,7 +15,7 @@ export function SetupFreshConnection(id, logger, localCandidates, candidateWaite
     peerConnection.onicecandidate = e => {
         logger.log("Received icecandidate", id, e);
         if (!e) {
-            console.error("No ice");
+            logger.error("No ice");
             return;
         }
         const message = {
@@ -37,7 +37,7 @@ export function SetupFreshConnection(id, logger, localCandidates, candidateWaite
     peerConnection.oniceconnectionstatechange = (e) => {
         logger.log("connection statechange", e);
         if (peerConnection.iceConnectionState === "failed") {
-            console.error("failed iceConnectionState");
+            logger.error("failed iceConnectionState");
             // peerConnection.restartIce();
         }
     };

@@ -74,7 +74,7 @@ export default async function gameMode(window, document, settings, gameFunction)
                 return Promise.resolve();
             }
         };
-        const handlers = actionToHandler(null, actions);
+        const handlers = actionToHandler(actions);
 
         sigConnection.on("join", (data) => {
             networkLogger.log(data);
@@ -103,6 +103,8 @@ export default async function gameMode(window, document, settings, gameFunction)
     showReadBtn(window, document, networkLogger).then((answerAndCand) => {
         networkLogger.log(answerAndCand);
         answerAndCandPromise.resolve(answerAndCand);
+    }).catch(err => {
+        networkLogger.error(err);
     });
     const answerAndCand = await answerAndCandPromise.promise;
     await connection.setAnswerAndCand(answerAndCand);

@@ -102,7 +102,7 @@ export default function game(_window, document, settings, presenter) {
     root.style.setProperty("--field-size", presenter.size());
     // field.classList.remove("disabled");
 
-    const handlers = handlersFunc(["message", "gameover", "started", "winclosed"]);
+    const handlers = handlersFunc(["message", "gameover", "started", "winclosed"], null, "gamehandler");
     const overlay = setupOverlay(document, handlers);
 
     function on(name, f) {

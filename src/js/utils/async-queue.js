@@ -12,7 +12,7 @@ export default function PromiseQueue(logger) {
             .then(operation)
             .then(resolve)
             .catch((error) => {
-                logger?.log(error);
+                logger?.error(error);
                 reject(error);
             });
     });

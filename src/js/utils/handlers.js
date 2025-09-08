@@ -1,4 +1,9 @@
-export default function handlersFunc(arr, queue, handName) {
+import PromiseQueue from "./async-queue.js";
+import {assert} from "./helper.js";
+
+const defaultQueue = PromiseQueue(console);
+
+export default function handlersFunc(arr, queue = defaultQueue) {
     const handlers = {};
     for (const f of arr) {
         handlers[f] = [];
@@ -7,25 +12,16 @@ export default function handlersFunc(arr, queue, handName) {
     const actionKeys = () => Object.keys(handlers);
     const getSafe = (name) => {
         const arr = handlers[name];
-        if (!Array.isArray(arr)) {
-            console.error("No key", name);
-            console.trace("No key", name);
-            throw new Error("No name " + name);
-        }
+        assert(Array.isArray(arr), "No key " + name);
         return arr;
     };
     const hasAction = (name) => actionKeys().includes(name);
     const on = (name, callback) => {
-        if (typeof callback !== "function") {
-            console.error("bad setup", name);
-            return;
-        }
+        assert(typeof callback === "function", "bad setup " + name);
         getSafe(name).push(callback);
     };
     const reset = (name, callback) => {
-        if (!hasAction(name)) {
-            throw new Error("No name for reset " + name);
-        }
+        assert(hasAction(name), "No name for reset " + name);
         handlers[name] = [];
         on(name, callback);
     };
@@ -38,26 +34,19 @@ export default function handlersFunc(arr, queue, handName) {
             console.trace("No handlers " + name);
             return Promise.resolve();
         }
-        console.log("call ", name, arg, callbacks.length, handName);
+        // console.log("call ", name, arg, callbacks.length, handName);
         const operation = () => {
             const promises = callbacks.map(f => Promise.try(f, arg));
-            if (callbacks.length === 0) {
-                console.trace("No handlers2 " + name);
-                console.error("h2");
-            }
-            if (promises[0] === undefined) {
-                console.trace("No handlers3 " + name);
-                console.error("h3", callbacks[0]);
-            }
-            console.log("form operation", name, promises[0]);
+            assert(callbacks.length !== 0, "No handlers2 " + name);
+            assert(promises[0] !== undefined, "No handlers3 " + name);
             return Promise.allSettled(promises);
         };
 
         if (queue) {
-            console.log("run in queue");
+            // console.error("run in queue " + name);
             return queue.add(operation);
         } else {
-            console.log("run sync");
+            // console.error("run sync");
             return operation();
         }
     };
