@@ -58,6 +58,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const qr = makeQrPlain(url2, document, ".qrcode");
 
     const answerAndCandPromise = Promise.withResolvers();
+    let clientId = null;
     gameChannelPromise.then(chan => {
         const sigConnection = connectionFuncSig(myId, networkLogger, chan);
 
@@ -66,7 +67,9 @@ export default async function gameMode(window, document, settings, gameFunction)
                 answerAndCandPromise.resolve(data);
                 delay(2000).then(() => {
                     // TODO send only if not opened yet. Send not to all.
-                    sigConnection.sendRawTo("stop_waiting", {}, "all");
+                    if (clientId != null) {
+                        sigConnection.sendRawTo("stop_waiting", {}, clientId);
+                    }
                 });
                 return Promise.resolve();
             }
@@ -75,7 +78,12 @@ export default async function gameMode(window, document, settings, gameFunction)
 
         sigConnection.on("join", (data) => {
             networkLogger.log(data);
-            sigConnection.sendRawTo("offer_and_cand", dataToSend, data.from);
+            if (clientId == null) {
+                clientId = data.from;
+            }
+            if (clientId === data.from) {
+                sigConnection.sendRawTo("offer_and_cand", dataToSend, clientId);
+            }
             return Promise.resolve();
         });
 

@@ -31,6 +31,8 @@ const connectionFunc = function (id, logger) {
 
         dataChannel = peerConnection.createDataChannel("gamechannel"+id);
 
+        logger.log("datachanid " + dataChannel.id);
+
         setupDataChannel(dataChannel, id, clients);
 
         // const sdpConstraints = {offerToReceiveAudio: false, offerToReceiveVideo: false};
