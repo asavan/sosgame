@@ -8,4 +8,9 @@ if (__USE_SERVICE_WORKERS__) {
     }
 }
 
+window.addEventListener("unhandledrejection", (event) => {
+    console.warn(`UNHANDLED PROMISE REJECTION: ${event.reason}`);
+    // event.preventDefault();
+});
+
 starter(window, document);

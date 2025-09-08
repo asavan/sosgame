@@ -121,15 +121,19 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
                 console.log(data);
                 serverId = data.from;
                 sigConnection.dispose();
-                connectionPromise.resolve(id);
+                connectionPromise.reject("timeout3");
                 networkPromise.reject("timeout");
+                return Promise.resolve();
             });
             const actions = {
                 "offer_and_cand": (data) => {
                     networkPromise.resolve(data);
+                    return Promise.resolve();
                 },
                 "stop_waiting": () => {
-                    connectionPromise.resolve(id);
+                    connectionPromise.reject("timeout2");
+                    networkPromise.reject("timeout5");
+                    return Promise.resolve();
                 }
             };
             const handlers = actionToHandler(null, actions);

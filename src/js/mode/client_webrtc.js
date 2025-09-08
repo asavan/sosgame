@@ -62,6 +62,8 @@ export default async function gameMode(window, document, settings, gameFunction)
         connection.sendRawTo("join", {}, "all");
         networkLogger.log("after send");
     };
-    runAsync();
+    runAsync().catch((err) => {
+        gamePromise.reject(err);
+    });
     return gamePromise.promise;
 }

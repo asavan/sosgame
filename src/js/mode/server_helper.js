@@ -67,7 +67,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
             presenter: presenterObj
         };
         con.sendRawTo("gameinit", toSend, data.from);
-        game.redraw();
+        return game.redraw();
     });
 
     const actions = actionsFunc(game);

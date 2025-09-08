@@ -40,7 +40,15 @@ export default function handlersFunc(arr, queue, handName) {
         }
         console.log("call ", name, arg, callbacks.length, handName);
         const operation = () => {
-            const promises = callbacks.map(f => f(arg));
+            const promises = callbacks.map(f => Promise.try(f, arg));
+            if (callbacks.length === 0) {
+                console.trace("No handlers2 " + name);
+                console.error("h2");
+            }
+            if (promises[0] === undefined) {
+                console.trace("No handlers3 " + name);
+                console.error("h3", callbacks[0]);
+            }
             console.log("form operation", name, promises[0]);
             return Promise.allSettled(promises);
         };

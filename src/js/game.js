@@ -110,7 +110,10 @@ export default function game(_window, document, settings, presenter) {
     }
     const actionKeys = handlers.actionKeys;
 
-    const redraw = () => drawField(presenter, box, digits, field);
+    const redraw = () => {
+        drawField(presenter, box, digits, field);
+        return Promise.resolve();
+    };
 
     presenter.on("moveEnd", async (obj) => {
         const promises = [];

@@ -68,6 +68,7 @@ export default async function gameMode(window, document, settings, gameFunction)
                     // TODO send only if not opened yet. Send not to all.
                     sigConnection.sendRawTo("stop_waiting", {}, "all");
                 });
+                return Promise.resolve();
             }
         };
         const handlers = actionToHandler(null, actions);
@@ -75,6 +76,7 @@ export default async function gameMode(window, document, settings, gameFunction)
         sigConnection.on("join", (data) => {
             networkLogger.log(data);
             sigConnection.sendRawTo("offer_and_cand", dataToSend, data.from);
+            return Promise.resolve();
         });
 
         sigConnection.registerHandler(handlers);
@@ -87,6 +89,7 @@ export default async function gameMode(window, document, settings, gameFunction)
         removeElem(qr);
         const game = beginGame(window, document, settings, gameFunction, connection, openCon, myId);
         gamePromise.resolve(game);
+        return Promise.resolve();
     });
 
     showReadBtn(window, document, networkLogger).then((answerAndCand) => {
