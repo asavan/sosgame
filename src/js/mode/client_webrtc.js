@@ -61,6 +61,8 @@ export default async function gameMode(window, document, settings, gameFunction)
         showGameView(document);
         connection.sendRawTo("join", {}, "all");
         networkLogger.log("after send");
+        await delay(5000);
+        gamePromise.reject("timeout6");
     };
     runAsync().catch((err) => {
         gamePromise.reject(err);

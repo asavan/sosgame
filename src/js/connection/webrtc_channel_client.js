@@ -2,7 +2,7 @@ import handlersFunc from "../utils/handlers.js";
 import {processCandidates, SetupFreshConnection} from "./common_webrtc.js";
 import connectionFuncSig from "./broadcast.js";
 import actionToHandler from "../utils/action_to_handler.js";
-import {delay} from "../utils/timer.js";
+import {delay, delayReject} from "../utils/timer.js";
 
 import LZString from "lz-string";
 
@@ -147,7 +147,8 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         }
 
         console.error("setup gameinit 23");
-        const offerAndCandidates = await clientOfferPromise(window, networkPromise.promise);
+        const offerPromise = Promise.race([networkPromise.promise, delayReject(5000)]);
+        const offerAndCandidates = await clientOfferPromise(window, offerPromise);
         console.error("setup gameinit 24");
         serverId = offerAndCandidates.id;
         const answer = await processOffer(offerAndCandidates);
