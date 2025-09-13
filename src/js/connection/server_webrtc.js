@@ -1,46 +1,16 @@
 import handlersFunc from "../utils/handlers.js";
-import {processCandidates, SetupFreshConnection} from "./common_webrtc.js";
 
 const connectionFunc = function (id, logger) {
     logger.log("Webrtc connection " + id);
     const handlers = handlersFunc(["open", "error", "close", "join", "gameinit", "disconnect"]);
-
-    const candidateWaiter = Promise.withResolvers();
-    const dataChanelWaiter = Promise.withResolvers();
+    const on = handlers.on;
 
     const clients = {};
-    const localCandidates = [];
-    let dataChannel = null;
-    let peerConnection = null;
-    let offer = null;
 
     let externalHandlers = null;
 
     function registerHandler(handler) {
         externalHandlers = handler;
-    }
-
-    function on(name, f) {
-        return handlers.on(name, f);
-    }
-
-
-    async function placeOfferAndWaitCandidates() {
-        peerConnection = SetupFreshConnection(id, logger, localCandidates, candidateWaiter);
-        // window.pc = peerConnection;
-
-        dataChannel = peerConnection.createDataChannel("gamechannel"+id);
-
-        logger.log("datachanid " + dataChannel.id);
-
-        setupDataChannel(dataChannel, id, clients);
-
-        // const sdpConstraints = {offerToReceiveAudio: false, offerToReceiveVideo: false};
-
-        offer = await peerConnection.createOffer();
-        // await delay(1000);
-        await peerConnection.setLocalDescription(offer);
-        return candidateWaiter.promise;
     }
 
     const sendRawAll = (action, data, ignore) => {
@@ -73,10 +43,24 @@ const connectionFunc = function (id, logger) {
         return client.dc.send(JSON.stringify(json));
     };
 
-    function setupDataChannel(dataChannel, id, clients) {
-        dataChannel.onmessage = function (e) {
-            logger.log("get data " + e.data);
-            const json = JSON.parse(e.data);
+    function connect(signaling, clientId) {
+        logger.log("bind signal2");
+        signaling.on("message", (json) => {
+            logger.log("Received message", json);
+            if (json.from === id) {
+                logger.error("same user");
+                return;
+            }
+
+            if (json.to !== id && json.to !== "all") {
+                logger.log("another user");
+                return;
+            }
+
+            if (json.ignore && Array.isArray(json.ignore) && json.ignore.includes(id)) {
+                logger.log("user in ignore list");
+                return;
+            }
             if (handlers.hasAction(json.action)) {
                 logger.log("handlers.actionKeys");
                 return handlers.call(json.action, json);
@@ -86,45 +70,8 @@ const connectionFunc = function (id, logger) {
                 return externalHandlers.call(json.action, json.data);
             }
             logger.log("Unknown action " + json.action);
-        };
-
-        dataChannel.onopen = function () {
-            logger.log("------ DATACHANNEL OPENED ------");
-            // TODO make sendRawTo to send to this dataChannel
-            dataChanelWaiter.resolve({sendRawAll, sendRawTo, on});
-            return handlers.call("open", {sendRawTo, id});
-        };
-
-        dataChannel.onclose = async function () {
-            logger.log("------ DATACHANNEL CLOSED ------");
-            await handlers.call("disconnect", id);
-            delete clients[id];
-        };
-
-        dataChannel.onerror = function () {
-            logger.error("DC ERROR!!!");
-            return handlers.call("disconnect", id);
-        };
-    }
-
-    async function setAnswerAndCand(data) {
-        const id = data.id;
-        const client = clients[data.id];
-        if (client) {
-            console.error("Close old client");
-            client.pc.close();
-        }
-        clients[id] = {pc: peerConnection, dc: dataChannel};
-        const answer = {type: "answer", sdp: data.sdp};
-        await peerConnection.setRemoteDescription(answer);
-        await processCandidates(data.c, peerConnection);
-    }
-
-    function getOfferAndCands() {
-        return {
-            offer,
-            c: localCandidates
-        };
+        });
+        clients[clientId] = {dc: signaling};
     }
 
     return {
@@ -132,9 +79,7 @@ const connectionFunc = function (id, logger) {
         registerHandler,
         sendRawTo,
         sendRawAll,
-        placeOfferAndWaitCandidates,
-        setAnswerAndCand,
-        getOfferAndCands
+        connect
     };
 };
 

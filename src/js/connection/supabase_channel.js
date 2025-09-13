@@ -12,7 +12,8 @@ function createSupaClient() {
 }
 
 function createSignalingChannelWithNameByClient(name, id, logger, supabase) {
-    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"], null, "supaChan");
+    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
+    const on = handlers.on;
     const myChannel = supabase.channel(name);
     let readyCounter = 0;
     let needClose = true;
@@ -72,7 +73,6 @@ function createSignalingChannelWithNameByClient(name, id, logger, supabase) {
 
     // const getName = () => name;
 
-    const on = handlers.on;
     const reset = handlers.reset;
     return {on, send, close, ready, reset};
 }

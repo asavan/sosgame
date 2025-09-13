@@ -20,7 +20,7 @@ async function clientOfferPromise(window, networkOfferPromise) {
 }
 
 export function createDataChannel(window, settings, id, logger, signalingChan) {
-    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"], null, "datachan");
+    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
     let isConnected = !!signalingChan;
     let dataChannel = null;
     let serverId = null;

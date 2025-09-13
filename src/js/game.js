@@ -7,7 +7,7 @@ import handleClick from "./views/click.js";
 function drawDigits(presenter, digits) {
     for (let i = 0; i < 2; i++) {
         const tile = digits.childNodes[i];
-        if (presenter.getActiveDigitIndex() === i) {
+        if (presenter.isActiveDigit(i)) {
             tile.classList.add("active");
             tile.classList.add(presenter.currentColor());
         } else {
@@ -48,6 +48,7 @@ function onGameEndDraw(res, presenter, overlay, btnInstall, field) {
     overlay.classList.add("show");
     btnInstall.classList.remove("hidden2");
     field.classList.add("disabled");
+    return Promise.resolve();
 }
 
 function draw(presenter, box) {
@@ -102,12 +103,10 @@ export default function game(_window, document, settings, presenter) {
     root.style.setProperty("--field-size", presenter.size());
     // field.classList.remove("disabled");
 
-    const handlers = handlersFunc(["message", "gameover", "started", "winclosed"], null, "gamehandler");
+    const handlers = handlersFunc(["message", "gameover", "started", "winclosed"]);
+    const on = handlers.on;
     const overlay = setupOverlay(document, handlers);
 
-    function on(name, f) {
-        return handlers.on(name, f);
-    }
     const actionKeys = handlers.actionKeys;
 
     const redraw = () => {
@@ -170,7 +169,7 @@ export default function game(_window, document, settings, presenter) {
     async function onMessage(data) {
         const {res, position, digit, playerId} = {...data};
         console.log("onMessage", res, position, digit, playerId);
-        const result = await presenter.setMove(position, digit, playerId);
+        const result = await presenter.setMoveAsync(position, digit, playerId);
         if (settings.logicDebug) {
             assert(res === result.res, "Bad move");
         }

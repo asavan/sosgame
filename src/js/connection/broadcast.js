@@ -5,15 +5,12 @@ export default function connectionFunc(id, logger, signaling, logname) {
         throw new Error("No signaling");
     }
     const handlers = handlersFunc(["close", "disconnect", "error", "join", "gameinit", "reconnect"]);
+    const on = handlers.on;
 
     let externalHandlers = null;
 
     function registerHandler(handler) {
         externalHandlers = handler;
-    }
-
-    function on(name, f) {
-        return handlers.on(name, f);
     }
 
     async function connect() {

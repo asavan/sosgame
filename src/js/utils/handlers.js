@@ -1,9 +1,6 @@
-import PromiseQueue from "./async-queue.js";
 import {assert} from "./helper.js";
 
-const defaultQueue = PromiseQueue(console);
-
-export default function handlersFunc(arr, queue = defaultQueue) {
+export default function handlersFunc(arr, queue) {
     const handlers = {};
     for (const f of arr) {
         handlers[f] = [];

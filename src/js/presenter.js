@@ -1,5 +1,6 @@
 import fieldObj from "./field.js";
 import handlersFunc from "./utils/handlers.js";
+import PromiseQueue from "./utils/async-queue.js";
 
 function cell(isLastMove, isActive, value, colors, playerIdx) {
     const text = value;
@@ -36,8 +37,8 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
 
     let field = fieldObj.field(fieldArr);
 
-    const handlers = handlersFunc(["moveEnd", "nextPlayer", "gameover"], null, "presenter");
-
+    const presenterQueue = PromiseQueue(console);
+    const handlers = handlersFunc(["moveEnd", "nextPlayer", "gameover"]);
     const on = handlers.on;
 
     function* enumerate() {
@@ -101,9 +102,11 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         return {res, position, digit, playerId, clientId};
     };
 
-    const tryMove = function () {
-        return setMove(activeCellIndex, activeDigitIndex, currentUserIdx);
-    };
+    const setMoveAsync = (position, digit, playerIdx) =>
+        presenterQueue.add(() => setMove(position, digit, playerIdx));
+
+    const tryMove = () =>
+        setMoveAsync(activeCellIndex, activeDigitIndex, currentUserIdx);
 
     const isGameOver = () => gameover;
 
@@ -114,7 +117,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         activeDigitIndex = ind;
     };
 
-    const getActiveDigitIndex = () => activeDigitIndex;
+    const isActiveDigit = (pos) => pos === activeDigitIndex;
 
     const setClientIndex = (ind) => {
         clientUserIdx = ind;
@@ -197,12 +200,12 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
         on,
         size,
         tryMove,
-        setMove,
+        setMoveAsync,
         enum1,
         setActivePosition,
         setActiveDigitIndex,
         currentColor,
-        getActiveDigitIndex,
+        isActiveDigit,
         endMessage,
         endMessage2,
         toJson,

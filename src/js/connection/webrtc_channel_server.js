@@ -5,7 +5,7 @@ import actionToHandler from "../utils/action_to_handler.js";
 import {delay, delayReject} from "../utils/timer.js";
 
 export function createDataChannel(window, settings, id, logger, signalingChan) {
-    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"], null, "datachan");
+    const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
     let isConnected = !!signalingChan;
     let dataChannel = null;
     let clientId = null;
@@ -20,7 +20,7 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
 
     const connectionPromise = Promise.withResolvers();
 
-    const send = (action, data) => {
+    const send = (action, data, to, ignore) => {
         if (!isConnected) {
             console.error("Not connected");
             return false;
@@ -29,12 +29,17 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
             console.error("No client");
             console.trace("How");
         }
+        if (to !== "all" && to !== clientId) {
+            console.error("Bad client");
+            console.trace("Bad client");
+        }
         if (!dataChannel) {
             console.error("Not data channel");
             return signalingChan.send(action, data, clientId);
         }
-        const json = {from: id, to: clientId, action, data};
-        logger.log("Sending [" + id + "] to [" + clientId + "]: " + JSON.stringify(data));
+        // const json = {from: id, to: clientId, action, data};
+        const json = {from: id, to, action, data, ignore};
+        logger.log("Sending [" + id + "] to [" + to + "]: " + JSON.stringify(data));
         const str = JSON.stringify(json);
         return dataChannel.send(str);
     };

@@ -38,7 +38,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     const lobby = lobbyFunc({}, presenter.getClientIndex());
     lobby.addClient(myId, myId);
 
-    const connectionLogger = loggerFunc(document, settings, 1);
+    const connectionLogger = loggerFunc(document, settings, 10);
 
     game.on("winclosed", () => {
         presenter.nextRound();
