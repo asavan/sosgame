@@ -116,13 +116,13 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         const sigConnectionPromise = Promise.withResolvers();
         if (signalingChan) {
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
-            sigConnection.on("gameinit", (data) => {
+            sigConnection.on("gameinit", async (data) => {
                 console.log(data);
                 serverId = data.from;
                 sigConnection.dispose();
-                connectionPromise.reject("timeout3");
                 networkPromise.reject("timeout");
-                return Promise.resolve();
+                await Promise.race([networkPromise.promise, Promise.resolve()]);
+                connectionPromise.reject("timeout3");
             });
             const actions = {
                 "offer_and_cand": (data) => {

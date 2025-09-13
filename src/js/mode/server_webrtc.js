@@ -1,6 +1,3 @@
-import connectionFunc from "../connection/server_webrtc.js";
-import connectionFuncSig from "../connection/broadcast.js";
-
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
 import {removeElem} from "../utils/helper.js";
@@ -11,7 +8,8 @@ import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./server_helper.js";
 import createSignalingChannel from "../connection/channel_with_name.js";
-import actionToHandler from "../utils/action_to_handler.js";
+import {createDataChannel} from "../connection/webrtc_channel_server.js";
+import connectionFunc from "../connection/broadcast.js";
 
 function showReadBtn(window, document, logger) {
     const barCodeReady = Promise.withResolvers();
@@ -35,20 +33,7 @@ function showReadBtn(window, document, logger) {
     return barCodeReady.promise;
 }
 
-export default async function gameMode(window, document, settings, gameFunction) {
-    const networkLogger = loggerFunc(document, settings);
-    addSettingsButton(document, settings);
-    const myId = netObj.getMyId(window, settings, Math.random);
-    const connection = connectionFunc(myId, networkLogger);
-    const mainSection = document.querySelector(".game");
-    mainSection.classList.add("hidden");
-
-    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
-    const offerPromise = connection.placeOfferAndWaitCandidates();
-    const timer = delay(2000);
-    await Promise.race([offerPromise, timer]);
-    const dataToSend = connection.getOfferAndCands();
-    dataToSend.id = myId;
+function showQr(window, document, dataToSend) {
     const currentUrl = new URL(window.location.href);
     const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
     const baseUrl = urlWithoutParams || "https://asavan.github.io/sosgame/";
@@ -56,58 +41,41 @@ export default async function gameMode(window, document, settings, gameFunction)
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
     const url2 = baseUrl + "?c=" + encoded2;
     const qr = makeQrPlain(url2, document, ".qrcode");
+    console.log(qr);
+    return qr;
+}
 
+export default async function gameMode(window, document, settings, gameFunction) {
+    const networkLogger = loggerFunc(document, settings);
+    addSettingsButton(document, settings);
+    const myId = netObj.getMyId(window, settings, Math.random);
+    const mainSection = document.querySelector(".game");
+    mainSection.classList.add("hidden");
+
+    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
+    const sigChan = await Promise.race([gameChannelPromise, delay(5000)]).catch(() => null);
+    const dataChan = createDataChannel(window, settings, myId, networkLogger, sigChan);
+    const dataToSend = await dataChan.getDataToSend();
+    const qr = showQr(window, document, dataToSend);
     const answerAndCandPromise = Promise.withResolvers();
-    let clientId = null;
-    gameChannelPromise.then(chan => {
-        const sigConnection = connectionFuncSig(myId, networkLogger, chan);
-
-        const actions = {
-            "offer_and_cand": (data) => {
-                answerAndCandPromise.resolve(data);
-                delay(2000).then(() => {
-                    // TODO send only if not opened yet. Send not to all.
-                    if (clientId != null) {
-                        sigConnection.sendRawTo("stop_waiting", {}, clientId);
-                    }
-                });
-                return Promise.resolve();
-            }
-        };
-        const handlers = actionToHandler(actions);
-
-        sigConnection.on("join", (data) => {
-            networkLogger.log(data);
-            if (clientId == null) {
-                clientId = data.from;
-            }
-            if (clientId === data.from) {
-                sigConnection.sendRawTo("offer_and_cand", dataToSend, clientId);
-            }
-            return Promise.resolve();
-        });
-
-        sigConnection.registerHandler(handlers);
-        return sigConnection.connect();
-    }).catch(err => {
-        networkLogger.log(err);
-    });
-    const gamePromise = Promise.withResolvers();
-    connection.on("open", (openCon) => {
-        removeElem(qr);
-        const game = beginGame(window, document, settings, gameFunction, connection, openCon, myId);
-        gamePromise.resolve(game);
-        return Promise.resolve();
-    });
-
+    let commChan = null;
     showReadBtn(window, document, networkLogger).then((answerAndCand) => {
         networkLogger.log(answerAndCand);
         answerAndCandPromise.resolve(answerAndCand);
     }).catch(err => {
         networkLogger.error(err);
     });
-    const answerAndCand = await answerAndCandPromise.promise;
-    await connection.setAnswerAndCand(answerAndCand);
-    networkLogger.log("after set", answerAndCand);
-    return gamePromise.promise;
+    try {
+        await dataChan.connect(dataToSend, answerAndCandPromise);
+        commChan = dataChan;
+    } catch (err) {
+        networkLogger.error(err);
+        commChan = sigChan;
+    }
+
+    const connection = connectionFunc(myId, networkLogger, commChan, "serverCon");
+    removeElem(qr);
+    const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
+    await connection.connect();
+    return game;
 }
