@@ -10,6 +10,7 @@ import {beginGame} from "./server_helper.js";
 import createSignalingChannel from "../connection/channel_with_name.js";
 import {createDataChannel} from "../connection/webrtc_channel_server.js";
 import connectionFunc from "../connection/broadcast.js";
+import connectionFuncRtc from "../connection/server_webrtc.js";
 
 function showReadBtn(window, document, logger) {
     const barCodeReady = Promise.withResolvers();
@@ -58,7 +59,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const dataToSend = await dataChan.getDataToSend();
     const qr = showQr(window, document, dataToSend);
     const answerAndCandPromise = Promise.withResolvers();
-    let commChan = null;
+    let connection = null;
     showReadBtn(window, document, networkLogger).then((answerAndCand) => {
         networkLogger.log(answerAndCand);
         answerAndCandPromise.resolve(answerAndCand);
@@ -67,13 +68,14 @@ export default async function gameMode(window, document, settings, gameFunction)
     });
     try {
         await dataChan.connect(dataToSend, answerAndCandPromise);
-        commChan = dataChan;
+        connection = connectionFuncRtc(myId, networkLogger);
+        await dataChan.ready();
+        connection.addChan(dataChan, dataChan.getOtherId());
     } catch (err) {
         networkLogger.error(err);
-        commChan = sigChan;
+        connection = connectionFunc(myId, networkLogger, sigChan, "serverCon");
     }
 
-    const connection = connectionFunc(myId, networkLogger, commChan, "serverCon");
     removeElem(qr);
     const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
     await connection.connect();

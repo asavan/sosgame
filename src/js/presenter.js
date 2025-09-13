@@ -168,7 +168,7 @@ export function presenterFunc({currentUserIdx, clientUserIdx, playersSize,
     const getPlayersSize = () => playersSize;
 
     const toJson = (externalClientIndex) => ({currentUserIdx, clientUserIdx: externalClientIndex, playersSize,
-        activeCellIndex, activeDigitIndex, lastMove, gameover, fieldArr: field.toArr(), movesIdx});
+        activeCellIndex, activeDigitIndex, lastMove, gameover, fieldArr: field.toArr(), movesIdx, moveCount});
 
     const isMyMove = () => !gameover && currentUserIdx === clientUserIdx;
 

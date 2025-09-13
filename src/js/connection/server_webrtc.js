@@ -15,7 +15,6 @@ const connectionFunc = function (id, logger) {
 
     const sendRawAll = (action, data, ignore) => {
         logger.log("sending", data);
-        const json = {from: id, to: "all", action, data};
         for (const [id, client] of Object.entries(clients)) {
             if (ignore && ignore.includes(id)) {
                 logger.log("ignore " + id);
@@ -23,7 +22,7 @@ const connectionFunc = function (id, logger) {
             }
             if (client.dc) {
                 try {
-                    client.dc.send(JSON.stringify(json));
+                    client.dc.send(action, data, id);
                 } catch (e) {
                     logger.log(e, client);
                 }
@@ -34,18 +33,19 @@ const connectionFunc = function (id, logger) {
     };
 
     const sendRawTo = (action, data, to) => {
-        const json = {from: id, to, action, data};
         const client = clients[to];
         if (!client || !client.dc) {
             logger.log("No chanel " + to);
+            console.trace("No client");
             return;
         }
-        return client.dc.send(JSON.stringify(json));
+        return client.dc.send(action, data, to);
     };
 
-    function connect(signaling, clientId) {
-        logger.log("bind signal2");
-        signaling.on("message", (json) => {
+    function addChan(chan, clientId) {
+        logger.log("bind signal2", clientId);
+        clients[clientId] = {dc: chan};
+        chan.on("message", (json) => {
             logger.log("Received message", json);
             if (json.from === id) {
                 logger.error("same user");
@@ -71,15 +71,17 @@ const connectionFunc = function (id, logger) {
             }
             logger.log("Unknown action " + json.action);
         });
-        clients[clientId] = {dc: signaling};
     }
+
+    const connect = () => Promise.resolve();
 
     return {
         on,
         registerHandler,
         sendRawTo,
         sendRawAll,
-        connect
+        connect,
+        addChan
     };
 };
 

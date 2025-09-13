@@ -29,8 +29,11 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
             console.error("No client");
             console.trace("How");
         }
+        if (to === undefined) {
+            to = clientId;
+        }
         if (to !== "all" && to !== clientId) {
-            console.error("Bad client");
+            console.error("Bad client", to, clientId);
             console.trace("Bad client");
         }
         if (!dataChannel) {
@@ -63,6 +66,7 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
     }
 
     async function setAnswerAndCand(data) {
+        clientId = data.id;
         const answer = {type: "answer", sdp: data.sdp};
         await peerConnection.setRemoteDescription(answer);
         await processCandidates(data.c, peerConnection);
@@ -166,5 +170,8 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         await setAnswerAndCand(answerAndCand);
         logger.log("after set", answerAndCand);
     }
-    return {on, send, close, ready, connect, getDataToSend};
+
+    const getOtherId = () => clientId;
+
+    return {on, send, close, ready, connect, getDataToSend, getOtherId};
 }
