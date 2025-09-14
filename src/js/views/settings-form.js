@@ -25,8 +25,8 @@ export default function createBooleanForm(obj, options = {}) {
     form.className = config.containerClass;
 
     // Create form fields for each boolean property
-    Object.keys(obj).forEach(key => {
-        const value = obj[key];
+    for (const [key, value] of Object.entries(obj)) {
+        // const value = obj[key];
 
         // Validate that the value is boolean
         if (typeof value !== "boolean") {
@@ -67,8 +67,7 @@ export default function createBooleanForm(obj, options = {}) {
         fieldDiv.append(input);
         fieldDiv.append(label);
         form.append(fieldDiv);
-    });
-
+    }
 
     return {
         form: form,

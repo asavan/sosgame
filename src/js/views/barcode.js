@@ -20,7 +20,10 @@ export default async function scanBarcode(window, document, logger) {
             if (barcodes.length > 0) {
                 logger.log(barcodes);
                 // Process the detected barcodes
-                stream.getTracks().forEach(track => track.stop()); // Stop the camera when done
+                const tracks = stream.getTracks();
+                for (const track of tracks) {
+                    track.stop();
+                }
                 video.remove();
                 codesPromise.resolve(barcodes[0].rawValue);
             } else {
