@@ -4,24 +4,9 @@ import connectionFuncSig from "./broadcast.js";
 import actionToHandler from "../utils/action_to_handler.js";
 import {delay, delayReject} from "../utils/timer.js";
 
-import LZString from "lz-string";
-
-async function clientOfferPromise(window, networkOfferPromise) {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const connectionStr = urlParams.get("c");
-    if (!connectionStr) {
-        const offerAndCandidates = await networkOfferPromise;
-        return offerAndCandidates;
-    }
-    const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);
-    const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
-    return offerAndCandidates;
-}
-
-export function createDataChannel(window, settings, id, logger, signalingChan) {
+export function createDataChannel(id, logger) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
-    let isConnected = !!signalingChan;
+    let isConnected = false;
     let dataChannel = null;
     let serverId = null;
 
@@ -41,7 +26,7 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         }
         if (!dataChannel) {
             console.error("Not data channel");
-            return signalingChan.send(action, data, serverId);
+            return false;
         }
         const json = {from: id, to: serverId, action, data};
         logger.log("Sending [" + id + "] to [" + serverId + "]: " + JSON.stringify(data));
@@ -78,9 +63,6 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         dataChannel.onopen = function () {
             logger.log("------ DATACHANNEL OPENED ------");
             isConnected = true;
-            if (signalingChan) {
-                signalingChan.close();
-            }
             connectionPromise.resolve(id);
             return handlers.call("open", id);
         };
@@ -111,8 +93,7 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
 
     const ready = () => connectionPromise.promise;
 
-    async function connect() {
-        const networkPromise = Promise.withResolvers();
+    async function connect(networkPromise, signalingChan) {
         const sigConnectionPromise = Promise.withResolvers();
         if (signalingChan) {
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
@@ -146,7 +127,7 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         }
 
         const offerPromise = Promise.race([networkPromise.promise, delayReject(5000)]);
-        const offerAndCandidates = await clientOfferPromise(window, offerPromise);
+        const offerAndCandidates = await offerPromise;
         serverId = offerAndCandidates.id;
         const answer = await processOffer(offerAndCandidates);
         const timer = delay(2000);

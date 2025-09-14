@@ -2,7 +2,7 @@ import connectionFunc from "../connection/broadcast.js";
 
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
-import {delay} from "../utils/timer.js";
+import {delay, delayReject} from "../utils/timer.js";
 
 import LZString from "lz-string";
 import {showGameView} from "../views/section_view.js";
@@ -20,6 +20,18 @@ function showQr(document, dataToSend) {
     console.log(qr);
 }
 
+function clientOfferPromise(window, offerPromise) {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const connectionStr = urlParams.get("c");
+    if (!connectionStr) {
+        return;
+    }
+    const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);
+    const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
+    offerPromise.resolve(offerAndCandidates);
+}
+
 export default async function gameMode(window, document, settings, gameFunction) {
     addSettingsButton(document, settings);
     const mainSection = document.querySelector(".game");
@@ -27,14 +39,20 @@ export default async function gameMode(window, document, settings, gameFunction)
     const networkLogger = loggerFunc(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
-    const sigChan = await Promise.race([gameChannelPromise, delay(5000)]).catch(() => null);
-    const dataChan = createDataChannel(window, settings, myId, networkLogger, sigChan);
+    const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
+    const dataChan = createDataChannel(myId, networkLogger);
+    const offerPromise = Promise.withResolvers();
+    clientOfferPromise(window, offerPromise);
     let commChan = null;
     const gamePromise = Promise.withResolvers();
     try {
-        const dataToSend = await dataChan.connect();
+        const dataToSend = await dataChan.connect(offerPromise, sigChan);
         commChan = dataChan;
         showQr(document, dataToSend);
+        await dataChan.ready();
+        if (sigChan) {
+            sigChan.close();
+        }
     } catch (err) {
         networkLogger.error(err);
         commChan = sigChan;
