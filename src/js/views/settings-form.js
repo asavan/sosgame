@@ -1,3 +1,12 @@
+// Helper function to format field names as labels
+function formatLabel(str) {
+    return str
+        .replaceAll(/([A-Z])/g, " $1") // Add space before capital letters
+        .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+        .replaceAll("_", " "); // Replace underscores with spaces
+}
+
+
 export default function createBooleanForm(obj, options = {}) {
     // Default options
     const config = {
@@ -55,18 +64,11 @@ export default function createBooleanForm(obj, options = {}) {
         label.className = config.labelClass;
 
         // Append input and label to field container
-        fieldDiv.appendChild(input);
-        fieldDiv.appendChild(label);
-        form.appendChild(fieldDiv);
+        fieldDiv.append(input);
+        fieldDiv.append(label);
+        form.append(fieldDiv);
     });
 
-    // Helper function to format field names as labels
-    function formatLabel(str) {
-        return str
-            .replace(/([A-Z])/g, " $1") // Add space before capital letters
-            .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
-            .replace(/_/g, " "); // Replace underscores with spaces
-    }
 
     return {
         form: form,
@@ -75,7 +77,7 @@ export default function createBooleanForm(obj, options = {}) {
                 container = document.querySelector(container);
             }
             if (container) {
-                container.appendChild(form);
+                container.append(form);
             }
             return this;
         },
@@ -89,9 +91,7 @@ export default function createBooleanForm(obj, options = {}) {
             }
         },
         destroy: function() {
-            if (form.parentNode) {
-                form.parentNode.removeChild(form);
-            }
+            form.remove();
         }
     };
 }

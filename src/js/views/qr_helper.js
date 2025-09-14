@@ -79,7 +79,7 @@ export function makeQrPlain(urlStr, document, selector) {
         return el;
     }
     const divToRender = document.createElement("div");
-    el.appendChild(divToRender);
+    el.append(divToRender);
     return makeQrElement(urlStr, divToRender);
 }
 

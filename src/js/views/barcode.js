@@ -10,12 +10,12 @@ export default async function scanBarcode(window, document, logger) {
         const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}});
         const video = document.createElement("video");
         video.srcObject = stream;
-        videoCont.appendChild(video);
+        videoCont.append(video);
         // video.autoplay = true;
         await video.play();
         const codesPromise = Promise.withResolvers();
 
-        async function detect(codesPromise) {
+        const detect = async (codesPromise) => {
             const barcodes = await barcodeDetector.detect(video);
             if (barcodes.length > 0) {
                 logger.log(barcodes);
@@ -31,7 +31,7 @@ export default async function scanBarcode(window, document, logger) {
                 });
             }
             return codesPromise;
-        }
+        };
 
         detect(codesPromise);
         return codesPromise.promise;

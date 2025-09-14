@@ -2,7 +2,7 @@ const modes = [import("./client_webrtc.js"), import("./hotseat.js")];
 
 const runSafe = async (index, window, document, settings, gameFunction) => {
     if (index >= modes.length) {
-        return Promise.reject(new Error("No such mode"));
+        throw new Error("No such mode");
     }
     const modeName = modes[index];
     const mode = await modeName;

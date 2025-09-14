@@ -53,7 +53,7 @@ async function prepareLobbyClient(id, settings, logger, supabaseClient) {
         logger.log(servers);
         // TODO show every service and make user choose
         supabaseClient.removeAllChannels();
-        return Promise.reject(id);
+        throw new Error("Bad servers number");
     }
     const serverId = servers[0];
     return serverId;

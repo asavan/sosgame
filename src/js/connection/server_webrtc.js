@@ -73,7 +73,7 @@ const connectionFunc = function (id, logger) {
         });
     }
 
-    const connect = () => Promise.resolve();
+    const connect = Promise.resolve;
 
     return {
         on,

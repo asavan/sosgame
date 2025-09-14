@@ -31,21 +31,17 @@ export default function handlersFunc(arr, queue) {
             console.trace("No handlers " + name);
             return Promise.resolve();
         }
-        // console.log("call ", name, arg, callbacks.length, handName);
         const operation = () => {
             const promises = callbacks.map(f => Promise.try(f, arg));
-            assert(callbacks.length !== 0, "No handlers2 " + name);
+            assert(callbacks.length > 0, "No handlers2 " + name);
             assert(promises[0] !== undefined, "No handlers3 " + name);
             return Promise.allSettled(promises);
         };
 
         if (queue) {
-            // console.error("run in queue " + name);
             return queue.add(operation);
-        } else {
-            // console.error("run sync");
-            return operation();
         }
+        return operation();
     };
 
     return {
