@@ -4,9 +4,9 @@ import connectionFuncSig from "./broadcast.js";
 import actionToHandler from "../utils/action_to_handler.js";
 import {delay, delayReject} from "../utils/timer.js";
 
-export function createDataChannel(window, settings, id, logger, signalingChan) {
+export function createDataChannel(id, logger) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
-    let isConnected = !!signalingChan;
+    let isConnected = false;
     let dataChannel = null;
     let clientId = null;
 
@@ -38,7 +38,7 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         }
         if (!dataChannel) {
             console.error("Not data channel");
-            return signalingChan.send(action, data, clientId);
+            return false;
         }
         // const json = {from: id, to: clientId, action, data};
         const json = {from: id, to, action, data, ignore};
@@ -49,7 +49,6 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
 
     async function placeOfferAndWaitCandidates() {
         peerConnection = SetupFreshConnection(id, logger, localCandidates, candidateWaiter);
-        // window.pc = peerConnection;
 
         dataChannel = peerConnection.createDataChannel("gamechannel"+id);
 
@@ -93,9 +92,6 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         dataChannel.onopen = function () {
             logger.log("------ DATACHANNEL OPENED ------");
             isConnected = true;
-            if (signalingChan) {
-                signalingChan.close();
-            }
             connectionPromise.resolve(id);
             return handlers.call("open", id);
         };
@@ -135,7 +131,7 @@ export function createDataChannel(window, settings, id, logger, signalingChan) {
         return dataToSend;
     }
 
-    async function connect(dataToSend, answerAndCandPromise) {
+    async function connect(dataToSend, answerAndCandPromise, signalingChan) {
         if (signalingChan) {
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
 

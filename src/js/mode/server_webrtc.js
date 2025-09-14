@@ -55,7 +55,7 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
     const sigChan = await Promise.race([gameChannelPromise, delay(5000)]).catch(() => null);
-    const dataChan = createDataChannel(window, settings, myId, networkLogger, sigChan);
+    const dataChan = createDataChannel(myId, networkLogger);
     const dataToSend = await dataChan.getDataToSend();
     const qr = showQr(window, document, dataToSend);
     const answerAndCandPromise = Promise.withResolvers();
@@ -67,9 +67,12 @@ export default async function gameMode(window, document, settings, gameFunction)
         networkLogger.error(err);
     });
     try {
-        await dataChan.connect(dataToSend, answerAndCandPromise);
+        await dataChan.connect(dataToSend, answerAndCandPromise, sigChan);
         connection = connectionFuncRtc(myId, networkLogger);
         await dataChan.ready();
+        if (sigChan) {
+            sigChan.close();
+        }
         connection.addChan(dataChan, dataChan.getOtherId());
     } catch (err) {
         networkLogger.error(err);
