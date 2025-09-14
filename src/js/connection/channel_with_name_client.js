@@ -4,10 +4,10 @@ import supaLobby from "../connection/supabase_lobby.js";
 import {delayReject} from "../utils/timer.js";
 
 
-export default async function createSignalingChannel(id, location, settings, logger) {
+export default async function createSignalingChannel(id, location, settings, logger, serverId) {
     const socketUrl = netObj.getWebSocketUrl(settings, location);
     if (!socketUrl) {
-        return supaLobby.makeSupaChanClient(id, settings, logger);
+        return supaLobby.makeSupaChanClient(id, settings, logger, serverId);
     }
     try {
         const chan = wsChannel(id, socketUrl, logger);
@@ -15,6 +15,6 @@ export default async function createSignalingChannel(id, location, settings, log
         return chan;
     } catch (err) {
         logger.error(err);
-        return supaLobby.makeSupaChanClient(id, settings, logger);
+        return supaLobby.makeSupaChanClient(id, settings, logger, serverId);
     }
 }

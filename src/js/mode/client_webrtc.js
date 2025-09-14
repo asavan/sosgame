@@ -38,11 +38,13 @@ export default async function gameMode(window, document, settings, gameFunction)
     mainSection.classList.add("hidden");
     const networkLogger = loggerFunc(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
-    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
-    const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
-    const dataChan = createDataChannel(myId, networkLogger);
     const offerPromise = Promise.withResolvers();
     clientOfferPromise(window, offerPromise);
+    const serverId = await Promise.race([offerPromise.promise, Promise.resolve(null)]).then(data => data?.id);
+    console.error("server", serverId);
+    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger, serverId);
+    const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
+    const dataChan = createDataChannel(myId, networkLogger);
     let commChan = null;
     const gamePromise = Promise.withResolvers();
     try {

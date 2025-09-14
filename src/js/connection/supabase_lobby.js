@@ -17,7 +17,7 @@ async function makeSupaChanServer(id, settings, logger) {
         if (json.action === "join") {
             lobbyChanel.send("in_lobby", {}, json.from);
         }
-        logger.log("unknown action");
+        logger.log("unknown action " + json.action);
     });
 
     await Promise.all([chan.ready(), lobbyChanel.ready()]);
@@ -27,9 +27,8 @@ async function makeSupaChanServer(id, settings, logger) {
     return chan;
 }
 
-async function makeSupaChanClient(id, settings, logger) {
+async function prepareLobbyClient(id, settings, logger, supabaseClient) {
     const lobbyName = supaChannel.getConnectionUrl("lobby", settings);
-    const supabaseClient = supaChannel.createSupaClient();
     const lobbyChanel = supaChannel.createSignalingChannelWithNameByClient(lobbyName, id, logger, supabaseClient);
 
     const servers = [];
@@ -57,7 +56,15 @@ async function makeSupaChanClient(id, settings, logger) {
         return Promise.reject(id);
     }
     const serverId = servers[0];
-    logger.log("connected2", serverId);
+    return serverId;
+}
+
+async function makeSupaChanClient(id, settings, logger, serverId) {
+    const supabaseClient = supaChannel.createSupaClient();
+    if (!serverId) {
+        serverId = await prepareLobbyClient(id, settings, logger, supabaseClient);
+    }
+    logger.log("client try connect to " + serverId);
     const gameChannel = supaChannel.createSignalingChannelWithNameByClient(
         supaChannel.getConnectionUrl(serverId, settings), id, logger, supabaseClient);
     gameChannel.getServerId = () => serverId;
