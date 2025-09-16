@@ -134,13 +134,14 @@ export function createDataChannel(id, logger) {
     async function connect(dataToSend, answerAndCandPromise, signalingChan) {
         if (signalingChan) {
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
-
+            const openConPromise = Promise.withResolvers();
             const actions = {
-                "offer_and_cand": (data) => {
+                "offer_and_cand": async (data) => {
                     answerAndCandPromise.resolve(data);
+                    const openCon = await openConPromise.promise;
                     return Promise.race([connectionPromise.promise, delayReject(2000)]).catch(() => {
                         if (clientId != null) {
-                            sigConnection.sendRawTo("stop_waiting", {}, clientId);
+                            openCon.sendRawTo("stop_waiting", {}, clientId);
                             connectionPromise.reject("timeout7");
                         }
                     });
@@ -148,19 +149,18 @@ export function createDataChannel(id, logger) {
             };
             const handlers = actionToHandler(actions);
 
-            sigConnection.on("join", (data) => {
+            sigConnection.on("join", async (data) => {
                 logger.log(data);
-                if (clientId == null) {
-                    clientId = data.from;
-                }
+                const openCon = await openConPromise.promise;
+                clientId ??= data.from;
                 if (clientId === data.from) {
-                    sigConnection.sendRawTo("offer_and_cand", dataToSend, clientId);
+                    openCon.sendRawTo("offer_and_cand", dataToSend, clientId);
                 }
-                return Promise.resolve();
             });
 
-            sigConnection.registerHandler(handlers);
-            await sigConnection.connect();
+            const openCon = await sigConnection.connect();
+            openConPromise.resolve(openCon);
+            openCon.registerHandler(handlers);
         }
         const answerAndCand = await answerAndCandPromise.promise;
         await setAnswerAndCand(answerAndCand);

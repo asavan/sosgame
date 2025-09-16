@@ -4,6 +4,7 @@ import netObj from "./net.js";
 import connectionFunc from "../connection/broadcast.js";
 import {beginGame} from "./client_helper.js";
 import supaLobby from "../connection/supabase_lobby.js";
+import {assert} from "../utils/helper.js";
 
 export default async function gameMode(window, document, settings, gameFunction) {
     const networkLogger = loggerFunc(document, settings);
@@ -21,6 +22,12 @@ export default async function gameMode(window, document, settings, gameFunction)
             networkLogger, openCon, data.data);
         gamePromise.resolve(game);
     });
+
+    connection.on("reconnect", (data) => {
+        assert(data.data.serverId === data.from, `Different server ${data}`);
+        window.location.reload();
+    });
+
     const openCon = await connection.connect();
     openConPromise.resolve(openCon);
     openCon.sendRawTo("join", {}, gameChannel.getServerId());

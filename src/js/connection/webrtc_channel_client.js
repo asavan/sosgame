@@ -121,7 +121,7 @@ export function createDataChannel(id, logger) {
             const openCon = await sigConnection.connect();
             sigConnectionPromise.resolve(openCon);
             // TODO join should be to specific server
-            sigConnection.sendRawAll("join", {});
+            openCon.sendRawAll("join", {});
         } else {
             networkPromise.reject("No chan");
             // sigConnectionPromise.reject("No chan");
@@ -140,8 +140,8 @@ export function createDataChannel(id, logger) {
             dataToSend.c = cands;
         }
         if (signalingChan) {
-            const sigConnection = await sigConnectionPromise.promise;
-            sigConnection.sendRawTo("offer_and_cand", dataToSend, serverId);
+            const openCon = await sigConnectionPromise.promise;
+            openCon.sendRawTo("offer_and_cand", dataToSend, serverId);
         }
 
         return dataToSend;

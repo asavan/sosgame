@@ -70,10 +70,11 @@ export default async function gameMode(window, document, settings, gameFunction)
         gamePromise.resolve(game);
     });
 
-    connection.on("reconnect", (data) => {
+    connection.on("reconnect", async (data) => {
         assert(data.data.serverId === data.from, `Different server ${data}`);
+        const openCon = await openConPromise.promise;
         // window.location.reload();
-        connection.sendRawTo("join", {}, data.data.serverId);
+        openCon.sendRawTo("join", {}, data.data.serverId);
         // TODO
     });
 

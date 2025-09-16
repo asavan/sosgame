@@ -29,7 +29,6 @@ export default async function gameMode(window, document, settings, gameFunction)
     connection.on("reconnect", (data) => {
         assert(data.data.serverId === data.from, `Different server ${data}`);
         window.location.reload();
-        // con.sendRawTo("join", {}, data.data.serverId);
     });
 
     await gameChannel.ready();
