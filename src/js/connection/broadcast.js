@@ -13,6 +13,13 @@ export default function connectionFunc(id, logger, signaling, logname) {
         externalHandlers = handler;
     }
 
+    const sendRawAll = (type, data, ignore) => {
+        logger.log(data);
+        return signaling.send(type, data, "all", ignore);
+    };
+
+    const sendRawTo = (type, data, to) => signaling.send(type, data, to);
+
     async function connect() {
         logger.log("bind signal", logname);
         signaling.on("message", (json) => {
@@ -40,23 +47,9 @@ export default function connectionFunc(id, logger, signaling, logname) {
             }
             logger.log("Unknown action " + json.action);
         });
-
-        const sendRawAll = (type, data, ignore) => {
-            logger.log(data);
-            return signaling.send(type, data, "all", ignore);
-        };
-
-        const sendRawTo = (type, data, to) => signaling.send(type, data, to);
         await signaling.ready();
-        return {sendRawAll, sendRawTo};
+        return {sendRawAll, sendRawTo, registerHandler};
     }
-
-    const sendRawAll = (type, data, ignore) => {
-        logger.log(data);
-        return signaling.send(type, data, "all", ignore);
-    };
-
-    const sendRawTo = (type, data, to) => signaling.send(type, data, to);
 
     const dispose = () => {
         for (const action of handlers.actionKeys()) {

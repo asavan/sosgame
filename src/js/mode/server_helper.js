@@ -12,8 +12,8 @@ function reconnect(con, serverId) {
     return con.sendRawAll("reconnect", toSend);
 }
 
-function setupGameToConnectionSend(game, con, lobby, logger) {
-    for (const handlerName of game.actionKeys()) {
+function setupGameToConnectionSend(game, con, lobby, logger, actionKeys) {
+    for (const handlerName of actionKeys) {
         logger.log("register " + handlerName);
         game.on(handlerName, (n) => {
             let ignore;
@@ -72,7 +72,7 @@ export function connectNetworkAndGame(document, game, presenter, myId, settings,
     const actions = actionsFunc(game);
     const gameHandler = actionToHandler(actions);
     connection.registerHandler(gameHandler);
-    setupGameToConnectionSend(game, connection, lobby, connectionLogger);
+    setupGameToConnectionSend(game, connection, lobby, connectionLogger, Object.keys(actions));
 }
 
 export function beginGame(window, document, settings, gameFunction, connection, openCon, myId) {

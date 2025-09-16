@@ -12,14 +12,17 @@ export default async function gameMode(window, document, settings, gameFunction)
     const gameChannel = await supaLobby.makeSupaChanClient(myId, settings, networkLogger);
 
     const connection = connectionFunc(myId, networkLogger, gameChannel);
+    const openConPromise = Promise.withResolvers();
     const gamePromise = Promise.withResolvers();
-    connection.on("gameinit", (data) => {
+    connection.on("gameinit", async (data) => {
         networkLogger.log("init", data);
+        const openCon = await openConPromise.promise;
         const game = beginGame(window, document, settings, gameFunction,
-            networkLogger, connection, connection, data);
+            networkLogger, openCon, data.data);
         gamePromise.resolve(game);
     });
-    await connection.connect();
-    connection.sendRawTo("join", {}, gameChannel.getServerId());
+    const openCon = await connection.connect();
+    openConPromise.resolve(openCon);
+    openCon.sendRawTo("join", {}, gameChannel.getServerId());
     return gamePromise.promise;
 }

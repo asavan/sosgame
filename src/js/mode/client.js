@@ -18,9 +18,11 @@ export default async function gameMode(window, document, settings, gameFunction)
     const gameChannel = createSignalingChannel(myId, socketUrl, networkLogger);
     const connection = connectionFunc(myId, networkLogger, gameChannel);
 
-    connection.on("gameinit", (data) => {
+    const openConPromise = Promise.withResolvers();
+    connection.on("gameinit", async (data) => {
+        const openCon = await openConPromise.promise;
         const game = beginGame(window, document, settings, gameFunction,
-            networkLogger, connection, connection, data);
+            networkLogger, openCon, data.data);
         gamePromise.resolve(game);
     });
 
@@ -31,8 +33,9 @@ export default async function gameMode(window, document, settings, gameFunction)
     });
 
     await gameChannel.ready();
-    await connection.connect();
+    const openCon = await connection.connect();
+    openConPromise.resolve(openCon);
     networkLogger.log("connected");
-    connection.sendRawAll("join");
+    openCon.sendRawAll("join", {});
     return gamePromise.promise;
 }

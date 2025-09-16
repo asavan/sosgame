@@ -1,18 +1,31 @@
 import presenterObj from "../presenter.js";
 import actionsFunc from "../actions.js";
-import netObj from "./net.js";
 import {showGameView} from "../views/section_view.js";
 import actionToHandler from "../utils/action_to_handler.js";
+import {wrapClientConnection} from "../connection/client_wrap_connection.js";
 
-export function beginGame(window, document, settings, gameFunction, logger, connection, con, data) {
+function setupGameToConnectionSendClient(game, con, logger, actionKeys) {
+    for (const handlerName of actionKeys) {
+        game.on(handlerName, (n) => {
+            if (!n || (n.playerId !== null && n.playerId !== n.clientId)) {
+                logger.log("ignore", n);
+                return;
+            }
+            con.sendRawClient(handlerName, n);
+        });
+    }
+}
+
+export function beginGame(window, document, settings, gameFunction, logger, openCon, data) {
     logger.log("gameinit", data);
     showGameView(document);
-    const presenter = presenterObj.presenterFunc(data.data.presenter, settings);
+    const presenter = presenterObj.presenterFunc(data.presenter, settings);
     const game = gameFunction(window, document, settings, presenter);
     const actions = actionsFunc(game);
     const gameHandler = actionToHandler(actions);
-    connection.registerHandler(gameHandler);
-    netObj.setupGameToConnectionSendClient(game, con, logger, data.data);
+    openCon.registerHandler(gameHandler);
+    const wrapConnecton = wrapClientConnection(openCon, data.serverId);
+    setupGameToConnectionSendClient(game, wrapConnecton, logger, Object.keys(actions));
 
     if (settings.fastRestart) {
         game.on("winclosed", () => {
@@ -20,4 +33,5 @@ export function beginGame(window, document, settings, gameFunction, logger, conn
             game.redraw();
         });
     }
+    return game;
 }

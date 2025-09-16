@@ -118,8 +118,9 @@ export function createDataChannel(id, logger) {
             };
             const handlers = actionToHandler(actions);
             sigConnection.registerHandler(handlers);
-            await sigConnection.connect();
-            sigConnectionPromise.resolve(sigConnection);
+            const openCon = await sigConnection.connect();
+            sigConnectionPromise.resolve(openCon);
+            // TODO join should be to specific server
             sigConnection.sendRawAll("join", {});
         } else {
             networkPromise.reject("No chan");

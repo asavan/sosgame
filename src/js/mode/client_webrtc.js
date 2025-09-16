@@ -42,7 +42,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const offerPromise = Promise.withResolvers();
     clientOfferPromise(window, offerPromise);
     const serverId = await Promise.race([offerPromise.promise, Promise.resolve(null)]).then(data => data?.id);
-    console.error("server", serverId);
+    networkLogger.log("maybe server " + serverId);
     const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger, serverId);
     const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
     const dataChan = createDataChannel(myId, networkLogger);
@@ -61,26 +61,28 @@ export default async function gameMode(window, document, settings, gameFunction)
         commChan = sigChan;
     }
 
-    const connection = connectionFunc(myId, networkLogger, commChan, "secondName");
-
-    connection.on("gameinit", (data) => {
+    const connection = connectionFunc(myId, networkLogger, commChan, "clientRtcBroadConn");
+    const openConPromise = Promise.withResolvers();
+    connection.on("gameinit", async (data) => {
+        const openCon = await openConPromise.promise;
         const game = beginGame(window, document, settings, gameFunction,
-            networkLogger, connection, connection, data);
+            networkLogger, openCon, data.data);
         gamePromise.resolve(game);
-        return Promise.resolve();
     });
 
     connection.on("reconnect", (data) => {
         assert(data.data.serverId === data.from, `Different server ${data}`);
-        window.location.reload();
-        // con.sendRawTo("join", {}, data.data.serverId);
+        // window.location.reload();
+        connection.sendRawTo("join", {}, data.data.serverId);
+        // TODO
     });
 
     const runAsync = async () => {
-        await connection.connect();
+        const openCon = await connection.connect();
+        openConPromise.resolve(openCon);
         networkLogger.log("open");
         showGameView(document);
-        connection.sendRawTo("join", {}, "all");
+        openCon.sendRawAll("join", {});
         networkLogger.log("after send");
         return delayReject(5000);
     };
