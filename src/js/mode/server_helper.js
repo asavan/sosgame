@@ -14,28 +14,30 @@ function reconnect(con, serverId) {
 
 function setupGameToConnectionSend(game, con, lobby, logger) {
     for (const handlerName of game.actionKeys()) {
-        logger.log("register", handlerName);
+        logger.log("register " + handlerName);
         game.on(handlerName, (n) => {
             let ignore;
             if (n && n.playerId !== undefined) {
                 const toIgnore = lobby.idByInd(n.playerId);
                 ignore = [toIgnore];
+                if (lobby.isAllIgnored(ignore)) {
+                    logger.log("ignore " + handlerName);
+                    return;
+                }
             }
-            logger.log("call", handlerName);
+            logger.log("send " + handlerName);
             try {
                 con.sendRawAll(handlerName, n, ignore);
             } catch (e) {
                 logger.error(e);
             }
-            logger.log("after call", handlerName);
+            logger.log("after call " + handlerName);
         });
     }
-    // return Promise.resolve();
-    // return reconnect(con, serverId);
 }
 
 export function connectNetworkAndGame(document, game, presenter, myId, settings, con, connection) {
-    const lobby = lobbyFunc({}, presenter.getClientIndex());
+    const lobby = lobbyFunc({}, presenter.getClientIndex(), myId);
     lobby.addClient(myId, myId);
 
     const connectionLogger = loggerFunc(document, settings, 10);

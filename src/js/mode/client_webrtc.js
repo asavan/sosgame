@@ -2,7 +2,7 @@ import connectionFunc from "../connection/broadcast.js";
 
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
-import {delay, delayReject} from "../utils/timer.js";
+import {delayReject} from "../utils/timer.js";
 
 import LZString from "lz-string";
 import {showGameView} from "../views/section_view.js";
@@ -12,6 +12,7 @@ import {beginGame} from "./client_helper.js";
 
 import createSignalingChannel from "../connection/channel_with_name_client.js";
 import {createDataChannel} from "../connection/webrtc_channel_client.js";
+import {assert} from "../utils/helper.js";
 
 function showQr(document, dataToSend) {
     const jsonString = JSON.stringify(dataToSend);
@@ -69,14 +70,19 @@ export default async function gameMode(window, document, settings, gameFunction)
         return Promise.resolve();
     });
 
+    connection.on("reconnect", (data) => {
+        assert(data.data.serverId === data.from, `Different server ${data}`);
+        window.location.reload();
+        // con.sendRawTo("join", {}, data.data.serverId);
+    });
+
     const runAsync = async () => {
         await connection.connect();
         networkLogger.log("open");
         showGameView(document);
         connection.sendRawTo("join", {}, "all");
         networkLogger.log("after send");
-        await delay(5000);
-        gamePromise.reject("timeout6");
+        return delayReject(5000);
     };
     runAsync().catch((err) => {
         gamePromise.reject(err);

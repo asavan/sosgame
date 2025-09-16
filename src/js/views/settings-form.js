@@ -31,7 +31,7 @@ export default function createBooleanForm(obj, options = {}) {
         // Validate that the value is boolean
         if (typeof value !== "boolean") {
             // console.warn(`Property "${key}" is not a boolean, skipping...`);
-            return;
+            continue;
         }
 
         // Create field container
@@ -79,15 +79,6 @@ export default function createBooleanForm(obj, options = {}) {
                 container.append(form);
             }
             return this;
-        },
-        updateField: function(key, value) {
-            if (key in obj && typeof value === "boolean") {
-                obj[key] = value;
-                const input = form.querySelector(`input[name="${key}"]`);
-                if (input) {
-                    input.checked = value;
-                }
-            }
         },
         destroy: function() {
             form.remove();

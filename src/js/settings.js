@@ -5,6 +5,7 @@ export default {
     logger: "",
     networkDebug: false,
     logicDebug: true,
+    fastRestart: false,
     colorOrder: ["blue", "red", "green", "yellow"],
     color: "blue",
     gameChanPrefix: "sos_",

@@ -8,6 +8,7 @@ const connectionFunc = function (id, logger) {
     const clients = {};
 
     let externalHandlers = null;
+    const alwaysResolved = Promise.resolve();
 
     function registerHandler(handler) {
         externalHandlers = handler;
@@ -73,7 +74,7 @@ const connectionFunc = function (id, logger) {
         });
     }
 
-    const connect = Promise.resolve;
+    const connect = () => alwaysResolved;
 
     return {
         on,

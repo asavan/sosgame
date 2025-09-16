@@ -3,10 +3,10 @@ import fullScreen from "./fullscreen.js";
 
 export default function addSettingsButton(document, settings) {
     const maxBtn = document.querySelector("#maximize-btn");
-    const minBtn = document.querySelector("#minimize-btn");
     const resizeBtn = document.querySelector("#resize-btn");
     const qrBtn = document.querySelector(".qr-btn");
-    if (settings.mode === "server" || settings.mode === "swrtc") {
+    let formInstance = null;
+    if (settings.mode === "server" || settings.mode === "swrtc" || settings.mode === "ssupa") {
         resizeBtn.classList.add("hidden");
         maxBtn.classList.remove("hidden");
         qrBtn.classList.remove("hidden");
@@ -19,16 +19,15 @@ export default function addSettingsButton(document, settings) {
 
     maxBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        minBtn.classList.remove("hidden");
         const controlPanel = document.querySelector("#control-panel");
-        controlPanel.classList.remove("minimized");
-        const formInstance = createBooleanForm(settings);
-        formInstance.appendTo(".panel-content");
-        minBtn.addEventListener("click", e => {
-            e.preventDefault();
-            minBtn.classList.add("hidden");
+        if (formInstance) {
             controlPanel.classList.add("minimized");
             formInstance.destroy();
-        });
+            formInstance = null;
+        } else {
+            controlPanel.classList.remove("minimized");
+            formInstance = createBooleanForm(settings);
+            formInstance.appendTo(".panel-content");
+        }
     });
 }

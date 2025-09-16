@@ -23,7 +23,8 @@ export default function ai(window, document, settings, gameFunction) {
         const presenter = presenterObj.presenterFuncDefault(settings);
         const game = gameFunction(window, document, settings, presenter);
         const userInd = presenter.getClientIndex();
-        const lobby = lobbyFunc({}, userInd);
+        const myId = "user";
+        const lobby = lobbyFunc({}, userInd, myId);
         lobby.addClient("user", "user");
 
         for (let i = 1; i < presenter.getPlayersSize(); ++i) {

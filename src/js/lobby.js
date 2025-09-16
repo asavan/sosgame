@@ -1,6 +1,6 @@
 import {assert} from "./utils/helper.js";
 
-export default function lobby(clients, shift = 0) {
+export default function lobby(clients, shift = 0, myId) {
     const clientsArr = [];
     for (const [key,] of Object.entries(clients)) {
         clientsArr.push(key);
@@ -28,6 +28,14 @@ export default function lobby(clients, shift = 0) {
         const id = clientsArr[ind];
         assert(id, "Bad Index");
         return getById(id);
+    };
+
+    const isAllIgnored = (toIgnore) => {
+        const toSend = new Set(clientsArr);
+        const toIgnoreSet = new Set(toIgnore);
+        toIgnoreSet.add(myId);
+        const diff = toSend.difference(toIgnoreSet);
+        return diff.size === 0;
     };
 
     // TODO maybe use splice instead
@@ -76,6 +84,7 @@ export default function lobby(clients, shift = 0) {
         swapById,
         indById,
         idByInd,
+        isAllIgnored,
         size
     };
 }

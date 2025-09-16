@@ -13,4 +13,11 @@ export function beginGame(window, document, settings, gameFunction, logger, conn
     const gameHandler = actionToHandler(actions);
     connection.registerHandler(gameHandler);
     netObj.setupGameToConnectionSendClient(game, con, logger, data.data);
+
+    if (settings.fastRestart) {
+        game.on("winclosed", () => {
+            presenter.nextRound();
+            game.redraw();
+        });
+    }
 }

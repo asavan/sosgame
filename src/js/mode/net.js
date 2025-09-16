@@ -35,7 +35,7 @@ function setupGameToConnectionSendClient(game, con, logger, data) {
     for (const handlerName of game.actionKeys()) {
         game.on(handlerName, (n) => {
             if (!n || (n.playerId !== null && n.playerId !== data.joinedInd)) {
-                logger.log("ignore");
+                logger.log("ignore", n);
                 return;
             }
             con.sendRawTo(handlerName, n, data.serverId);
