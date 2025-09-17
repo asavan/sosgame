@@ -10,15 +10,23 @@ export function createDataChannel(id, logger) {
     let dataChannel = null;
     let clientId = null;
 
-    const candidateWaiter = Promise.withResolvers();
+    let candidateWaiter = Promise.withResolvers();
+    let offerWaiter = Promise.withResolvers();
+    let answerAndCandPromise = Promise.withResolvers();
 
     let peerConnection = null;
-    let offer = null;
 
+    let connectionPromise = Promise.withResolvers();
 
-    const localCandidates = [];
+    const resetPromises = () => {
+        candidateWaiter = Promise.withResolvers();
+        answerAndCandPromise = Promise.withResolvers();
+        connectionPromise = Promise.withResolvers();
+        offerWaiter = Promise.withResolvers();
+        return updateOffer();
+    }
 
-    const connectionPromise = Promise.withResolvers();
+    const resolveExternal = (data) => answerAndCandPromise.resolve(data);
 
     const send = (action, data, to, ignore) => {
         if (!isConnected) {
@@ -47,8 +55,21 @@ export function createDataChannel(id, logger) {
         return dataChannel.send(str);
     };
 
-    async function placeOfferAndWaitCandidates() {
-        peerConnection = SetupFreshConnection(id, logger, localCandidates, candidateWaiter);
+    function setupConnection() {
+        let localCandidates = [];
+        const candidateAdder = {
+            add : (cand) => {
+                localCandidates.push(cand);
+            },
+            done: () => {
+                candidateWaiter.resolve(localCandidates);
+            },
+            resetCands : () => {
+                localCandidates = [];
+                resetPromises();
+            }
+        };
+        peerConnection = SetupFreshConnection(id, logger, candidateAdder);
 
         dataChannel = peerConnection.createDataChannel("gamechannel"+id);
 
@@ -58,10 +79,15 @@ export function createDataChannel(id, logger) {
 
         // const sdpConstraints = {offerToReceiveAudio: false, offerToReceiveVideo: false};
 
-        offer = await peerConnection.createOffer();
+
+    }
+
+    async function updateOffer() {
+        const offer = await peerConnection.createOffer();
         // await delay(1000);
         await peerConnection.setLocalDescription(offer);
-        return getCandidates();
+        offerWaiter.resolve(offer);
+        return offer;
     }
 
     async function setAnswerAndCand(data) {
@@ -71,15 +97,16 @@ export function createDataChannel(id, logger) {
         await processCandidates(data.c, peerConnection);
     }
 
-    function getOfferAndCands() {
+    async function getOfferAndCands() {
+        const timer = delayReject(3000);
+        const offer = await offerWaiter.promise;
+        const cands = await Promise.race([candidateWaiter.promise, timer]).catch(() => []);
+        logger.log("cands", cands);
         return {
             offer,
-            c: localCandidates
+            c: cands,
+            id
         };
-    }
-
-    function getCandidates() {
-        return candidateWaiter.promise;
     }
 
     function setupDataChannel(dataChannel) {
@@ -123,15 +150,13 @@ export function createDataChannel(id, logger) {
     const ready = () => connectionPromise.promise;
 
     async function getDataToSend() {
-        const offerPromise = placeOfferAndWaitCandidates();
-        const timer = delay(2000);
-        await Promise.race([offerPromise, timer]);
-        const dataToSend = getOfferAndCands();
-        dataToSend.id = id;
+        setupConnection();
+        await updateOffer();
+        const dataToSend = await getOfferAndCands();
         return dataToSend;
     }
 
-    async function connect(dataToSend, answerAndCandPromise, signalingChan) {
+    async function connect(dataToSend, signalingChan) {
         if (signalingChan) {
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
             const openConPromise = Promise.withResolvers();
@@ -169,5 +194,5 @@ export function createDataChannel(id, logger) {
 
     const getOtherId = () => clientId;
 
-    return {on, send, close, ready, connect, getDataToSend, getOtherId};
+    return {on, send, close, ready, connect, getDataToSend, getOtherId, resolveExternal};
 }

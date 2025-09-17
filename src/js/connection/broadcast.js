@@ -10,6 +10,7 @@ export default function connectionFunc(id, logger, signaling, logname) {
     let externalHandlers = null;
 
     function registerHandler(handler) {
+        logger.log("register1 " + logname);
         externalHandlers = handler;
     }
 

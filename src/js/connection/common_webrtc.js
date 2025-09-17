@@ -8,9 +8,8 @@ export async function processCandidates(candidates, peerConnection) {
     }
 }
 
-export function SetupFreshConnection(id, logger, localCandidates, candidateWaiter) {
-    const peerConnection = new RTCPeerConnection(null);
-    // window.pc = peerConnection;
+export function SetupFreshConnection(id, logger, candidateAdder) {
+    const peerConnection = new RTCPeerConnection();
 
     peerConnection.onicecandidate = e => {
         logger.log("Received icecandidate", id, e);
@@ -27,10 +26,12 @@ export function SetupFreshConnection(id, logger, localCandidates, candidateWaite
             message.sdpMid = e.candidate.sdpMid;
             message.sdpMLineIndex = e.candidate.sdpMLineIndex;
         }
-        localCandidates.push(message);
+        candidateAdder.add(message);
+        // localCandidates.push(message);
 
         if (!e.candidate) {
-            candidateWaiter.resolve(localCandidates);
+            candidateAdder.done();
+            // candidateWaiter.resolve(localCandidates);
         }
     };
 
@@ -38,7 +39,8 @@ export function SetupFreshConnection(id, logger, localCandidates, candidateWaite
         logger.log("connection statechange", e);
         if (peerConnection.iceConnectionState === "failed") {
             logger.error("failed iceConnectionState");
-            // peerConnection.restartIce();
+            peerConnection.restartIce();
+            candidateAdder.resetCands();
         }
     };
 

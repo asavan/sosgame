@@ -58,21 +58,20 @@ export default async function gameMode(window, document, settings, gameFunction)
     const dataChan = createDataChannel(myId, networkLogger);
     const dataToSend = await dataChan.getDataToSend();
     const qr = showQr(window, document, dataToSend);
-    const answerAndCandPromise = Promise.withResolvers();
     let connection = null;
     showReadBtn(window, document, networkLogger).then((answerAndCand) => {
         networkLogger.log(answerAndCand);
-        answerAndCandPromise.resolve(answerAndCand);
+        dataChan.resolveExternal(answerAndCand);
     }).catch(err => {
         networkLogger.error(err);
     });
     try {
-        await dataChan.connect(dataToSend, answerAndCandPromise, sigChan);
+        await dataChan.connect(dataToSend, sigChan);
         connection = connectionFuncRtc(myId, networkLogger);
         await dataChan.ready();
-        if (sigChan) {
-            sigChan.close();
-        }
+        // if (sigChan) {
+        //     sigChan.close();
+        // }
         connection.addChan(dataChan, dataChan.getOtherId());
     } catch (err) {
         networkLogger.error(err);

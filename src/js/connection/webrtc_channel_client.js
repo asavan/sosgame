@@ -35,7 +35,19 @@ export function createDataChannel(id, logger) {
     };
 
     async function processOffer(offerAndCandidates) {
-        const peerConnection = SetupFreshConnection(id, logger, localCandidates, candidateWaiter);
+        const candidateAdder = {
+            add : (cand) => {
+                localCandidates.push(cand);
+            },
+            done: () => {
+                candidateWaiter.resolve(localCandidates);
+            },
+            resetCands : () => {
+                // TODO
+                logger.error("Try to reset");
+            }
+        };
+        const peerConnection = SetupFreshConnection(id, logger, candidateAdder);
 
         peerConnection.ondatachannel = (ev) => {
             dataChannel = ev.channel;
@@ -94,6 +106,7 @@ export function createDataChannel(id, logger) {
     const ready = () => connectionPromise.promise;
 
     async function connect(networkPromise, signalingChan) {
+        logger.log("client connect");
         const sigConnectionPromise = Promise.withResolvers();
         if (signalingChan) {
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
@@ -130,6 +143,7 @@ export function createDataChannel(id, logger) {
         const offerPromise = Promise.race([networkPromise.promise, delayReject(5000)]);
         const offerAndCandidates = await offerPromise;
         serverId = offerAndCandidates.id;
+        logger.log("get offer promise", offerAndCandidates);
         const answer = await processOffer(offerAndCandidates);
         const timer = delay(2000);
         const candidatesPromice = getCandidates();
