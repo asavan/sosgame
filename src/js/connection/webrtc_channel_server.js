@@ -2,7 +2,7 @@ import handlersFunc from "../utils/handlers.js";
 import {processCandidates, SetupFreshConnection} from "./common_webrtc.js";
 import connectionFuncSig from "./broadcast.js";
 import actionToHandler from "../utils/action_to_handler.js";
-import {delay, delayReject} from "../utils/timer.js";
+import {delayReject} from "../utils/timer.js";
 
 export function createDataChannel(id, logger) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
@@ -24,7 +24,7 @@ export function createDataChannel(id, logger) {
         connectionPromise = Promise.withResolvers();
         offerWaiter = Promise.withResolvers();
         return updateOffer();
-    }
+    };
 
     const resolveExternal = (data) => answerAndCandPromise.resolve(data);
 
@@ -60,7 +60,7 @@ export function createDataChannel(id, logger) {
         localCandidates = [];
         resetPromises();
         processAns();
-    }
+    };
 
     function setupConnection() {
 
