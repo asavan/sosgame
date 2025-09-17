@@ -1,7 +1,7 @@
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
 import {removeElem} from "../utils/helper.js";
-import {delay} from "../utils/timer.js";
+import {delayReject} from "../utils/timer.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
 import loggerFunc from "../views/logger.js";
@@ -54,7 +54,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     mainSection.classList.add("hidden");
 
     const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
-    const sigChan = await Promise.race([gameChannelPromise, delay(5000)]).catch(() => null);
+    const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
     const dataChan = createDataChannel(myId, networkLogger);
     const dataToSend = await dataChan.getDataToSend();
     const qr = showQr(window, document, dataToSend);
@@ -66,7 +66,8 @@ export default async function gameMode(window, document, settings, gameFunction)
         networkLogger.error(err);
     });
     try {
-        await dataChan.connect(dataToSend, sigChan);
+        await dataChan.setupChan(dataToSend, sigChan);
+        await dataChan.processAns();
         connection = connectionFuncRtc(myId, networkLogger);
         await dataChan.ready();
         // if (sigChan) {

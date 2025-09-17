@@ -55,8 +55,15 @@ export function createDataChannel(id, logger) {
         return dataChannel.send(str);
     };
 
+    let localCandidates = [];
+    const resetCands = () => {
+        localCandidates = [];
+        resetPromises();
+        processAns();
+    }
+
     function setupConnection() {
-        let localCandidates = [];
+
         const candidateAdder = {
             add : (cand) => {
                 localCandidates.push(cand);
@@ -64,10 +71,7 @@ export function createDataChannel(id, logger) {
             done: () => {
                 candidateWaiter.resolve(localCandidates);
             },
-            resetCands : () => {
-                localCandidates = [];
-                resetPromises();
-            }
+            resetCands : resetCands
         };
         peerConnection = SetupFreshConnection(id, logger, candidateAdder);
 
@@ -131,6 +135,8 @@ export function createDataChannel(id, logger) {
 
         dataChannel.onerror = function () {
             logger.error("DC ERROR!!!");
+            peerConnection.restartIce();
+            resetCands();
         };
     }
 
@@ -156,15 +162,16 @@ export function createDataChannel(id, logger) {
         return dataToSend;
     }
 
-    async function connect(dataToSend, signalingChan) {
+    async function setupChan(dataToSend, signalingChan) {
         if (signalingChan) {
             const sigConnection = connectionFuncSig(id, logger, signalingChan);
             const openConPromise = Promise.withResolvers();
             const actions = {
                 "offer_and_cand": async (data) => {
+                    logger.log("offerCand", data);
                     answerAndCandPromise.resolve(data);
                     const openCon = await openConPromise.promise;
-                    return Promise.race([connectionPromise.promise, delayReject(2000)]).catch(() => {
+                    return Promise.race([connectionPromise.promise, delayReject(20000)]).catch(() => {
                         if (clientId != null) {
                             openCon.sendRawTo("stop_waiting", {}, clientId);
                             connectionPromise.reject("timeout7");
@@ -184,15 +191,20 @@ export function createDataChannel(id, logger) {
             });
 
             const openCon = await sigConnection.connect();
-            openConPromise.resolve(openCon);
             openCon.registerHandler(handlers);
+            openConPromise.resolve(openCon);
         }
+    }
+
+    async function processAns() {
+        logger.log("before before set");
         const answerAndCand = await answerAndCandPromise.promise;
+        logger.log("before set", answerAndCand);
         await setAnswerAndCand(answerAndCand);
         logger.log("after set", answerAndCand);
     }
 
     const getOtherId = () => clientId;
 
-    return {on, send, close, ready, connect, getDataToSend, getOtherId, resolveExternal};
+    return {on, send, close, ready, setupChan, getDataToSend, getOtherId, resolveExternal, processAns};
 }
