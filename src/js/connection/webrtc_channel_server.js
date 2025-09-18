@@ -56,10 +56,13 @@ export function createDataChannel(id, logger) {
     };
 
     let localCandidates = [];
-    const resetCands = () => {
+    const resetCands = async () => {
         localCandidates = [];
-        resetPromises();
-        processAns();
+        await resetPromises();
+        logger.log("Offer reseted");
+        await processAns();
+        logger.log("Ans reseted");
+        logger.log(dataChannel);
     };
 
     function setupConnection() {
@@ -77,7 +80,7 @@ export function createDataChannel(id, logger) {
 
         dataChannel = peerConnection.createDataChannel("gamechannel"+id);
 
-        logger.log("datachanid " + dataChannel.id);
+        logger.log("datachanid " + dataChannel.id, dataChannel.label);
 
         setupDataChannel(dataChannel);
 
@@ -122,21 +125,22 @@ export function createDataChannel(id, logger) {
 
         dataChannel.onopen = function () {
             logger.log("------ DATACHANNEL OPENED ------");
+            logger.log("datachanid " + dataChannel.id, dataChannel.label);
             isConnected = true;
             connectionPromise.resolve(id);
             return handlers.call("open", id);
         };
 
-        dataChannel.onclose = function () {
-            logger.log("------ DC closed! ------");
+        dataChannel.onclose = function (err) {
+            logger.error("------ DC closed! ------", dataChannel.readyState, err);
             isConnected = false;
             return handlers.call("close", id);
         };
 
-        dataChannel.onerror = function () {
-            logger.error("DC ERROR!!!");
-            peerConnection.restartIce();
-            resetCands();
+        dataChannel.onerror = function (err) {
+            logger.error("DC ERROR!!!", dataChannel.readyState, err);
+            // peerConnection.restartIce();
+            // resetCands();
         };
     }
 
@@ -146,6 +150,7 @@ export function createDataChannel(id, logger) {
         if (isConnected) {
             isConnected = false;
             if (dataChannel) {
+                logger.error("Try to close");
                 dataChannel.close();
             }
         }
@@ -171,7 +176,7 @@ export function createDataChannel(id, logger) {
                     logger.log("offerCand", data);
                     answerAndCandPromise.resolve(data);
                     const openCon = await openConPromise.promise;
-                    return Promise.race([connectionPromise.promise, delayReject(20000)]).catch(() => {
+                    return Promise.race([connectionPromise.promise, delayReject(2000000)]).catch(() => {
                         if (clientId != null) {
                             openCon.sendRawTo("stop_waiting", {}, clientId);
                             connectionPromise.reject("timeout7");

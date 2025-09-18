@@ -37,8 +37,9 @@ export function SetupFreshConnection(id, logger, candidateAdder) {
 
     peerConnection.oniceconnectionstatechange = (e) => {
         logger.log("connection statechange", peerConnection.iceConnectionState);
-        if (peerConnection.iceConnectionState === "failed") {
+        if (peerConnection.iceConnectionState === "failed" || peerConnection.iceConnectionState === "disconnected") {
             logger.error("failed iceConnectionState", e);
+            candidateAdder.resetCands();
         }
     };
 
