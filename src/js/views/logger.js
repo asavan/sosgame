@@ -1,4 +1,4 @@
-export default function loggerFunc(document, settings, level, el) {
+export default function loggerFunc(document, settings, level, el, markerName) {
     if (!level) {
         level = settings.logLevel;
     }
@@ -24,13 +24,13 @@ export default function loggerFunc(document, settings, level, el) {
             return;
         }
         logHtml(data);
-        return console.log(data, ...args);
+        return console.log(data, ...args, ...(markerName ? [markerName] : []));
     };
     const errorInner = (data, ...args) => {
         if (level >= settings.logLevel) {
             logHtml(data);
         }
-        console.trace(data);
+        // console.trace(data);
         return console.error(data, ...args);
     };
 

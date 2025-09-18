@@ -5,7 +5,6 @@ import {makeQrPlain} from "../views/qr_helper.js";
 import {delayReject} from "../utils/timer.js";
 
 import LZString from "lz-string";
-import {showGameView} from "../views/section_view.js";
 import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./client_helper.js";
@@ -14,11 +13,11 @@ import createSignalingChannel from "../connection/channel_with_name_client.js";
 import {createDataChannel} from "../connection/webrtc_channel_client.js";
 import {assert} from "../utils/helper.js";
 
-function showQr(document, dataToSend) {
+function showQr(document, dataToSend, logger) {
     const jsonString = JSON.stringify(dataToSend);
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
     const qr = makeQrPlain(encoded2, document, ".qrcode");
-    console.log(qr);
+    logger.log(qr);
 }
 
 function clientOfferPromise(window, offerPromise) {
@@ -34,10 +33,11 @@ function clientOfferPromise(window, offerPromise) {
 }
 
 export default async function gameMode(window, document, settings, gameFunction) {
+    console.time("loadgame");
     addSettingsButton(document, settings);
     const mainSection = document.querySelector(".game");
     mainSection.classList.add("hidden");
-    const mainLogger = loggerFunc(document, settings);
+    const mainLogger = loggerFunc(document, settings, 2, null, "mainLog");
     const myId = netObj.getMyId(window, settings, Math.random);
     const offerPromise = Promise.withResolvers();
     clientOfferPromise(window, offerPromise);
@@ -50,10 +50,11 @@ export default async function gameMode(window, document, settings, gameFunction)
     const dataChan = createDataChannel(myId, dataChanLogger);
     let commChan = null;
     const gamePromise = Promise.withResolvers();
+    const qrLogger = loggerFunc(document, settings, 1);
     try {
         const dataToSend = await dataChan.connect(offerPromise, sigChan);
         commChan = dataChan;
-        showQr(document, dataToSend);
+        showQr(document, dataToSend, qrLogger);
         await dataChan.ready();
         if (sigChan) {
             sigChan.close();
@@ -63,13 +64,15 @@ export default async function gameMode(window, document, settings, gameFunction)
         commChan = sigChan;
     }
 
-    const connection = connectionFunc(myId, mainLogger, commChan, "clientRtcBroadConn");
+    const connectionLogger = loggerFunc(document, settings, 1, null, "clientRtcBroadConn1");
+    const connection = connectionFunc(myId, connectionLogger, commChan);
     const openConPromise = Promise.withResolvers();
     connection.on("gameinit", async (data) => {
         const openCon = await openConPromise.promise;
         const game = beginGame(window, document, settings, gameFunction,
             mainLogger, openCon, data.data);
         gamePromise.resolve(game);
+        console.timeEnd("loadgame");
     });
 
     connection.on("reconnect", (data) => {
@@ -83,9 +86,8 @@ export default async function gameMode(window, document, settings, gameFunction)
     const runAsync = async () => {
         const openCon = await connection.connect();
         openConPromise.resolve(openCon);
-        showGameView(document);
         openCon.sendRawAll("join", {});
-        mainLogger.log("after send");
+        mainLogger.log("joined. Wait for gameinit");
         return delayReject(5000);
     };
     runAsync().catch((err) => {

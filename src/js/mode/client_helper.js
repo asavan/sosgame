@@ -17,7 +17,7 @@ function setupGameToConnectionSendClient(game, con, logger, actionKeys) {
 }
 
 export function beginGame(window, document, settings, gameFunction, logger, openCon, data) {
-    logger.log("gameinit", data);
+    logger.log("Start game", data);
     showGameView(document);
     const presenter = presenterObj.presenterFunc(data.presenter, settings);
     const game = gameFunction(window, document, settings, presenter);

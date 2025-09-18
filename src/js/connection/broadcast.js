@@ -1,6 +1,6 @@
 import handlersFunc from "../utils/handlers.js";
 
-export default function connectionFunc(id, logger, signaling, logname) {
+export default function connectionFunc(id, logger, signaling) {
     if (!signaling) {
         throw new Error("No signaling");
     }
@@ -10,21 +10,21 @@ export default function connectionFunc(id, logger, signaling, logname) {
     let externalHandlers = null;
 
     function registerHandler(handler) {
-        logger.log("register1 " + logname);
+        logger.log("register1");
         externalHandlers = handler;
     }
 
     const sendRawAll = (type, data, ignore) => {
-        logger.log(data);
+        logger.log("broad send", type, data);
         return signaling.send(type, data, "all", ignore);
     };
 
     const sendRawTo = (type, data, to) => signaling.send(type, data, to);
 
     async function connect() {
-        logger.log("bind signal", logname);
+        logger.log("bind signal");
         signaling.on("message", (json) => {
-            logger.log("Received message", json, logname);
+            logger.log("Received message", json);
             if (json.from === id) {
                 logger.error("same user");
                 return;
@@ -40,7 +40,7 @@ export default function connectionFunc(id, logger, signaling, logname) {
                 return;
             }
             if (handlers.hasAction(json.action)) {
-                logger.log("handlers.actionKeys", logname);
+                logger.log("handlers.actionKeys");
                 return handlers.call(json.action, json);
             }
             if (externalHandlers && externalHandlers.hasAction(json.action)) {
