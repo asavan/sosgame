@@ -64,7 +64,7 @@ const connectionFunc = function (id, logger) {
                 return;
             }
             if (handlers.hasAction(json.action)) {
-                logger.log("handlers.actionKeys");
+                logger.log("handlers.actionKeys1");
                 return handlers.call(json.action, json);
             }
             if (externalHandlers && externalHandlers.hasAction(json.action)) {

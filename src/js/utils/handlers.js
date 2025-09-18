@@ -28,7 +28,7 @@ export default function handlersFunc(arr, queue) {
     const call = (name, arg) => {
         const callbacks = getSafe(name);
         if (callbacks.length === 0) {
-            console.trace("No handlers " + name);
+            // console.trace("No handlers " + name);
             return Promise.resolve();
         }
         const operation = () => {

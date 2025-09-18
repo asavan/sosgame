@@ -37,15 +37,17 @@ export default async function gameMode(window, document, settings, gameFunction)
     addSettingsButton(document, settings);
     const mainSection = document.querySelector(".game");
     mainSection.classList.add("hidden");
-    const networkLogger = loggerFunc(document, settings);
+    const mainLogger = loggerFunc(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const offerPromise = Promise.withResolvers();
     clientOfferPromise(window, offerPromise);
     const serverId = await Promise.race([offerPromise.promise, Promise.resolve(null)]).then(data => data?.id);
-    networkLogger.log("maybe server " + serverId);
-    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger, serverId);
+    mainLogger.log("maybe server " + serverId);
+    const signalingLogger = loggerFunc(document, settings, 1);
+    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, signalingLogger, serverId);
     const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
-    const dataChan = createDataChannel(myId, networkLogger);
+    const dataChanLogger = loggerFunc(document, settings, 1);
+    const dataChan = createDataChannel(myId, dataChanLogger);
     let commChan = null;
     const gamePromise = Promise.withResolvers();
     try {
@@ -57,34 +59,33 @@ export default async function gameMode(window, document, settings, gameFunction)
             sigChan.close();
         }
     } catch (err) {
-        networkLogger.error(err);
+        mainLogger.error(err);
         commChan = sigChan;
     }
 
-    const connection = connectionFunc(myId, networkLogger, commChan, "clientRtcBroadConn");
+    const connection = connectionFunc(myId, mainLogger, commChan, "clientRtcBroadConn");
     const openConPromise = Promise.withResolvers();
     connection.on("gameinit", async (data) => {
         const openCon = await openConPromise.promise;
         const game = beginGame(window, document, settings, gameFunction,
-            networkLogger, openCon, data.data);
+            mainLogger, openCon, data.data);
         gamePromise.resolve(game);
     });
 
-    connection.on("reconnect", async (data) => {
+    connection.on("reconnect", (data) => {
         assert(data.data.serverId === data.from, `Different server ${data}`);
-        const openCon = await openConPromise.promise;
-        // window.location.reload();
-        openCon.sendRawTo("join", {}, data.data.serverId);
+        // const openCon = await openConPromise.promise;
+        window.location.reload();
+        // openCon.sendRawTo("join", {}, data.data.serverId);
         // TODO
     });
 
     const runAsync = async () => {
         const openCon = await connection.connect();
         openConPromise.resolve(openCon);
-        networkLogger.log("open");
         showGameView(document);
         openCon.sendRawAll("join", {});
-        networkLogger.log("after send");
+        mainLogger.log("after send");
         return delayReject(5000);
     };
     runAsync().catch((err) => {

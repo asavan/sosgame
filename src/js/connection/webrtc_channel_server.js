@@ -16,6 +16,8 @@ export function createDataChannel(id, logger) {
 
     let peerConnection = null;
 
+    let reconnectCounter = 0;
+
     let connectionPromise = Promise.withResolvers();
 
     const resetPromises = () => {
@@ -50,7 +52,8 @@ export function createDataChannel(id, logger) {
         }
         // const json = {from: id, to: clientId, action, data};
         const json = {from: id, to, action, data, ignore};
-        logger.log("Sending [" + id + "] to [" + to + "]: " + JSON.stringify(data));
+        logger.log("before send", action, dataChannel.readyState, dataChannel.label, dataChannel.id);
+        logger.log(action + " Sending1 [" + id + "] to [" + to + "]: " + JSON.stringify(data));
         const str = JSON.stringify(json);
         return dataChannel.send(str);
     };
@@ -82,7 +85,7 @@ export function createDataChannel(id, logger) {
 
         logger.log("datachanid " + dataChannel.id, dataChannel.label);
 
-        setupDataChannel(dataChannel);
+        setupDataChannel();
 
         // const sdpConstraints = {offerToReceiveAudio: false, offerToReceiveVideo: false};
 
@@ -116,7 +119,7 @@ export function createDataChannel(id, logger) {
         };
     }
 
-    function setupDataChannel(dataChannel) {
+    function setupDataChannel() {
         dataChannel.onmessage = function (e) {
             logger.log("data get " + e.data);
             const json = JSON.parse(e.data);
@@ -134,7 +137,13 @@ export function createDataChannel(id, logger) {
         dataChannel.onclose = function (err) {
             logger.error("------ DC closed! ------", dataChannel.readyState, err);
             isConnected = false;
-            return handlers.call("close", id);
+            const externalCloseCall = handlers.call("close", id);
+            ++reconnectCounter;
+            dataChannel = peerConnection.createDataChannel("chanReconnect" + reconnectCounter + id);
+            setupDataChannel();
+            peerConnection.restartIce();
+            resetCands();
+            return externalCloseCall;
         };
 
         dataChannel.onerror = function (err) {
@@ -167,38 +176,35 @@ export function createDataChannel(id, logger) {
         return dataToSend;
     }
 
-    async function setupChan(dataToSend, signalingChan) {
-        if (signalingChan) {
-            const sigConnection = connectionFuncSig(id, logger, signalingChan);
-            const openConPromise = Promise.withResolvers();
-            const actions = {
-                "offer_and_cand": async (data) => {
-                    logger.log("offerCand", data);
-                    answerAndCandPromise.resolve(data);
-                    const openCon = await openConPromise.promise;
-                    return Promise.race([connectionPromise.promise, delayReject(2000000)]).catch(() => {
-                        if (clientId != null) {
-                            openCon.sendRawTo("stop_waiting", {}, clientId);
-                            connectionPromise.reject("timeout7");
-                        }
-                    });
-                }
-            };
-            const handlers = actionToHandler(actions);
-
-            sigConnection.on("join", async (data) => {
-                logger.log(data);
+    async function setupChan(signalingChan) {
+        const sigConnection = connectionFuncSig(id, logger, signalingChan);
+        const openConPromise = Promise.withResolvers();
+        const actions = {
+            "offer_and_cand": async (data) => {
+                logger.log("offerCand", data);
+                answerAndCandPromise.resolve(data);
                 const openCon = await openConPromise.promise;
-                clientId ??= data.from;
-                if (clientId === data.from) {
-                    openCon.sendRawTo("offer_and_cand", dataToSend, clientId);
-                }
-            });
-
-            const openCon = await sigConnection.connect();
-            openCon.registerHandler(handlers);
-            openConPromise.resolve(openCon);
-        }
+                return Promise.race([connectionPromise.promise, delayReject(2000000)]).catch(() => {
+                    if (clientId != null) {
+                        openCon.sendRawTo("stop_waiting", {}, clientId);
+                        connectionPromise.reject("timeout7");
+                    }
+                });
+            }
+        };
+        const handlers = actionToHandler(actions);
+        sigConnection.on("join", async (data) => {
+            logger.log(data);
+            const openCon = await openConPromise.promise;
+            clientId ??= data.from;
+            if (clientId === data.from) {
+                const dataToSend = await getOfferAndCands();
+                openCon.sendRawTo("offer_and_cand", dataToSend, clientId);
+            }
+        });
+        const openCon = await sigConnection.connect();
+        openCon.registerHandler(handlers);
+        openConPromise.resolve(openCon);
     }
 
     async function processAns() {

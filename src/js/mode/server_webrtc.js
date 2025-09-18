@@ -42,41 +42,45 @@ function showQr(window, document, dataToSend) {
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
     const url2 = baseUrl + "?c=" + encoded2;
     const qr = makeQrPlain(url2, document, ".qrcode");
-    console.log(qr);
     return qr;
 }
 
 export default async function gameMode(window, document, settings, gameFunction) {
-    const networkLogger = loggerFunc(document, settings);
+    const mainLogger = loggerFunc(document, settings);
     addSettingsButton(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const mainSection = document.querySelector(".game");
     mainSection.classList.add("hidden");
 
-    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, networkLogger);
+    const signalingLogger = loggerFunc(document, settings, 1);
+    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, signalingLogger);
     const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
-    const dataChan = createDataChannel(myId, networkLogger);
+    const dataChanLogger = loggerFunc(document, settings, 1);
+    const connectionLogger = loggerFunc(document, settings, 1);
+    const dataChan = createDataChannel(myId, dataChanLogger);
     const dataToSend = await dataChan.getDataToSend();
     const qr = showQr(window, document, dataToSend);
     let connection = null;
-    showReadBtn(window, document, networkLogger).then((answerAndCand) => {
-        networkLogger.log(answerAndCand);
+    showReadBtn(window, document, mainLogger).then((answerAndCand) => {
+        mainLogger.log(answerAndCand);
         dataChan.resolveExternal(answerAndCand);
     }).catch(err => {
-        networkLogger.error(err);
+        mainLogger.error(err);
     });
     try {
-        await dataChan.setupChan(dataToSend, sigChan);
+        if (sigChan) {
+            await dataChan.setupChan(sigChan);
+        }
         await dataChan.processAns();
-        connection = connectionFuncRtc(myId, networkLogger);
+        connection = connectionFuncRtc(myId, connectionLogger);
         await dataChan.ready();
         // if (sigChan) {
         //     sigChan.close();
         // }
         connection.addChan(dataChan, dataChan.getOtherId());
     } catch (err) {
-        networkLogger.error(err);
-        connection = connectionFunc(myId, networkLogger, sigChan, "serverCon");
+        mainLogger.error(err);
+        connection = connectionFunc(myId, connectionLogger, sigChan, "serverCon");
     }
 
     removeElem(qr);
