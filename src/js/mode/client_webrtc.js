@@ -50,16 +50,12 @@ export default async function gameMode(window, document, settings, gameFunction)
     const dataChanLogger = loggerFunc(document, settings, 1);
     const dataChan = createDataChannel(myId, dataChanLogger);
     let commChan = null;
-    const gamePromise = Promise.withResolvers();
     const qrLogger = loggerFunc(document, settings, 1);
     try {
-        console.timeLog("loadgame", "c1");
         const dataToSend = await dataChan.connect(offerPromise, sigChan);
-        console.timeLog("loadgame", "c2");
         commChan = dataChan;
         showQr(document, dataToSend, qrLogger);
         await dataChan.ready();
-        console.timeLog("loadgame", "c3");
         if (sigChan) {
             sigChan.close();
         }
@@ -70,35 +66,21 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     const connectionLogger = loggerFunc(document, settings, 1, null, "clientRtcBroadConn1");
     const connection = connectionFunc(myId, connectionLogger, commChan);
-    const openConPromise = Promise.withResolvers();
-    connection.on("gameinit", async (data) => {
-        const openCon = await openConPromise.promise;
-        const game = beginGame(window, document, settings, gameFunction,
-            mainLogger, openCon, data.data);
-        gamePromise.resolve(game);
-        console.timeEnd("loadgame");
+    const gameInitPromise = Promise.withResolvers();
+    connection.on("gameinit", (data) => {
+        gameInitPromise.resolve(data);
     });
 
     connection.on("reconnect", (data) => {
         assert(data.data.serverId === data.from, `Different server ${data}`);
-        // const openCon = await openConPromise.promise;
         window.location.reload();
-        // openCon.sendRawTo("join", {}, data.data.serverId);
-        // TODO
     });
 
-    const runAsync = async () => {
-        console.timeLog("loadgame", "runAsync1");
-        const openCon = await connection.connect();
-        console.timeLog("loadgame", "runAsync2");
-        openConPromise.resolve(openCon);
-        openCon.sendRawAll("join", {});
-        console.timeLog("loadgame", "runAsync3");
-        mainLogger.log("joined. Wait for gameinit");
-        return delayReject(5000);
-    };
-    runAsync().catch((err) => {
-        gamePromise.reject(err);
-    });
-    return gamePromise.promise;
+    const openCon = await connection.connect();
+    openCon.sendRawAll("join", {});
+    mainLogger.log("joined. Wait for gameinit");
+    const gameInitData = await Promise.race([gameInitPromise.promise, delayReject(5000)]);
+    const game = beginGame(window, document, settings, gameFunction,
+        mainLogger, openCon, gameInitData.data);
+    return game;
 }
