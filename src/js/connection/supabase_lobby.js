@@ -47,7 +47,6 @@ async function prepareLobbyClient(id, settings, logger, supabaseClient) {
     await lobbyChanel.ready();
     lobbyChanel.send("join", {}, "all");
     await delay(500);
-    // await Promise.all([, delay(3000)]);
     logger.log("connected", id);
     if (servers.length !== 1) {
         logger.log(servers);

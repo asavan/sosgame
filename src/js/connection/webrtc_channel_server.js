@@ -62,10 +62,10 @@ export function createDataChannel(id, logger) {
     const resetCands = async () => {
         localCandidates = [];
         await resetPromises();
-        logger.log("Offer reseted");
+        logger.log("Offer reseted", peerConnection.iceConnectionState);
         await processAns();
-        logger.log("Ans reseted");
-        logger.log(dataChannel);
+        logger.log("Ans reseted", dataChannel.label, peerConnection.iceConnectionState);
+        console.timeLog("reconnect", "reset2");
     };
 
     function setupConnection() {
@@ -85,16 +85,13 @@ export function createDataChannel(id, logger) {
 
         logger.log("datachanid " + dataChannel.id, dataChannel.label);
 
-        setupDataChannel();
+        setupDataChannel(false);
 
         // const sdpConstraints = {offerToReceiveAudio: false, offerToReceiveVideo: false};
-
-
     }
 
     async function updateOffer() {
         const offer = await peerConnection.createOffer();
-        // await delay(1000);
         await peerConnection.setLocalDescription(offer);
         offerWaiter.resolve(offer);
         return offer;
@@ -108,7 +105,7 @@ export function createDataChannel(id, logger) {
     }
 
     async function getOfferAndCands() {
-        const timer = delayReject(3000);
+        const timer = delayReject(2000);
         const offer = await offerWaiter.promise;
         const cands = await Promise.race([candidateWaiter.promise, timer]).catch(() => []);
         logger.log("cands", cands);
@@ -119,7 +116,7 @@ export function createDataChannel(id, logger) {
         };
     }
 
-    function setupDataChannel() {
+    function setupDataChannel(isReconnect) {
         dataChannel.onmessage = function (e) {
             logger.log("data get " + e.data);
             const json = JSON.parse(e.data);
@@ -131,6 +128,9 @@ export function createDataChannel(id, logger) {
             logger.log("datachanid " + dataChannel.id, dataChannel.label);
             isConnected = true;
             connectionPromise.resolve(id);
+            if (isReconnect) {
+                console.timeEnd("reconnect");
+            }
             return handlers.call("open", id);
         };
 
@@ -139,8 +139,9 @@ export function createDataChannel(id, logger) {
             isConnected = false;
             const externalCloseCall = handlers.call("close", id);
             ++reconnectCounter;
+            console.time("reconnect");
             dataChannel = peerConnection.createDataChannel("chanReconnect" + reconnectCounter + id);
-            setupDataChannel();
+            setupDataChannel(true);
             peerConnection.restartIce();
             resetCands();
             return externalCloseCall;
@@ -184,7 +185,7 @@ export function createDataChannel(id, logger) {
                 logger.log("offerCand", data);
                 answerAndCandPromise.resolve(data);
                 const openCon = await openConPromise.promise;
-                return Promise.race([connectionPromise.promise, delayReject(2000000)]).catch(() => {
+                return Promise.race([connectionPromise.promise, delayReject(20000)]).catch(() => {
                     if (clientId != null) {
                         openCon.sendRawTo("stop_waiting", {}, clientId);
                         connectionPromise.reject("timeout7");
@@ -194,7 +195,7 @@ export function createDataChannel(id, logger) {
         };
         const handlers = actionToHandler(actions);
         sigConnection.on("join", async (data) => {
-            logger.log(data);
+            logger.log("onJoin", data);
             const openCon = await openConPromise.promise;
             clientId ??= data.from;
             if (clientId === data.from) {

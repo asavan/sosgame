@@ -46,16 +46,20 @@ export default async function gameMode(window, document, settings, gameFunction)
     const signalingLogger = loggerFunc(document, settings, 1);
     const gameChannelPromise = createSignalingChannel(myId, window.location, settings, signalingLogger, serverId);
     const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
+    console.timeLog("loadgame", "c0");
     const dataChanLogger = loggerFunc(document, settings, 1);
     const dataChan = createDataChannel(myId, dataChanLogger);
     let commChan = null;
     const gamePromise = Promise.withResolvers();
     const qrLogger = loggerFunc(document, settings, 1);
     try {
+        console.timeLog("loadgame", "c1");
         const dataToSend = await dataChan.connect(offerPromise, sigChan);
+        console.timeLog("loadgame", "c2");
         commChan = dataChan;
         showQr(document, dataToSend, qrLogger);
         await dataChan.ready();
+        console.timeLog("loadgame", "c3");
         if (sigChan) {
             sigChan.close();
         }
@@ -84,9 +88,12 @@ export default async function gameMode(window, document, settings, gameFunction)
     });
 
     const runAsync = async () => {
+        console.timeLog("loadgame", "runAsync1");
         const openCon = await connection.connect();
+        console.timeLog("loadgame", "runAsync2");
         openConPromise.resolve(openCon);
         openCon.sendRawAll("join", {});
+        console.timeLog("loadgame", "runAsync3");
         mainLogger.log("joined. Wait for gameinit");
         return delayReject(5000);
     };
