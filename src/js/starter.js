@@ -43,10 +43,6 @@ export default async function starter(window, document) {
         mode = await import("./mode/server_webrtc.js");
     } else if (settings.mode === "cwrtc") {
         mode = await import("./mode/client_webrtc.js");
-    } else if (settings.mode === "ssupa") {
-        mode = await import("./mode/supa_server.js");
-    } else if (settings.mode === "csupa") {
-        mode = await import("./mode/supa_client.js");
     } else if (settings.mode === "cauto") {
         mode = await import("./mode/client_auto.js");
     } else {

@@ -7,10 +7,7 @@ import LZString from "lz-string";
 import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./server_helper.js";
-import createSignalingChannel from "../connection/channel_with_name.js";
-import {createDataChannel} from "../connection/webrtc_channel_server.js";
-import connectionFunc from "../connection/broadcast.js";
-import connectionFuncRtc from "../connection/server_webrtc.js";
+import {createSignalingChannel, createDataChannelServer, broadcastConnectionFunc, rtcConnectionFunc} from "netutils";
 
 function showReadBtn(window, document, logger) {
     const barCodeReady = Promise.withResolvers();
@@ -57,7 +54,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
     const dataChanLogger = loggerFunc(document, settings, 1);
     const connectionLogger = loggerFunc(document, settings, 1);
-    const dataChan = createDataChannel(myId, dataChanLogger);
+    const dataChan = createDataChannelServer(myId, dataChanLogger);
     const dataToSend = await dataChan.getDataToSend();
     const qr = showQr(window, document, dataToSend);
     let connection = null;
@@ -72,7 +69,7 @@ export default async function gameMode(window, document, settings, gameFunction)
             await dataChan.setupChan(sigChan);
         }
         await dataChan.processAns();
-        connection = connectionFuncRtc(myId, connectionLogger);
+        connection = rtcConnectionFunc(myId, connectionLogger);
         await dataChan.ready();
         // if (sigChan) {
         //     sigChan.close();
@@ -80,7 +77,7 @@ export default async function gameMode(window, document, settings, gameFunction)
         connection.addChan(dataChan, dataChan.getOtherId());
     } catch (err) {
         mainLogger.error(err);
-        connection = connectionFunc(myId, connectionLogger, sigChan, "serverCon");
+        connection = broadcastConnectionFunc(myId, connectionLogger, sigChan);
     }
 
     removeElem(qr);

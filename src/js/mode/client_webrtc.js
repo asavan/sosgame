@@ -1,5 +1,3 @@
-import connectionFunc from "../connection/broadcast.js";
-
 import netObj from "./net.js";
 import {makeQrPlain} from "../views/qr_helper.js";
 import {delayReject} from "../utils/timer.js";
@@ -9,9 +7,9 @@ import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./client_helper.js";
 
-import createSignalingChannel from "../connection/channel_with_name_client.js";
-import {createDataChannel} from "../connection/webrtc_channel_client.js";
 import {assert} from "../utils/helper.js";
+
+import {createSignalingChannel, createDataChannelClient, broadcastConnectionFunc} from "netutils";
 
 function showQr(document, dataToSend, logger) {
     const jsonString = JSON.stringify(dataToSend);
@@ -48,7 +46,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
     console.timeLog("loadgame", "c0");
     const dataChanLogger = loggerFunc(document, settings, 1);
-    const dataChan = createDataChannel(myId, dataChanLogger);
+    const dataChan = createDataChannelClient(myId, dataChanLogger);
     let commChan = null;
     const qrLogger = loggerFunc(document, settings, 1);
     try {
@@ -65,7 +63,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     }
 
     const connectionLogger = loggerFunc(document, settings, 1, null, "clientRtcBroadConn1");
-    const connection = connectionFunc(myId, connectionLogger, commChan);
+    const connection = broadcastConnectionFunc(myId, connectionLogger, commChan);
     const gameInitPromise = Promise.withResolvers();
     connection.on("gameinit", (data) => {
         gameInitPromise.resolve(data);

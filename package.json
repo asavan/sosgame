@@ -1,6 +1,6 @@
 {
   "name": "sosgame",
-  "version": "0.1.12",
+  "version": "0.2.0",
   "author": "Alex Sav",
   "description": "Sos game",
   "private": true,
@@ -30,6 +30,7 @@
     "copy-webpack-plugin": "^13.0.1",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.2",
+    "devdeps": "github:asavan/dev-deps#14ea30719e2facee056e344e3f153087371574c3",
     "eslint": "^9.35.0",
     "globals": "^16.4.0",
     "html-inline-css-webpack-plugin": "^1.11.2",
@@ -51,7 +52,7 @@
   "dependencies": {
     "@akamfoad/qrcode": "^0.3.2",
     "@supabase/supabase-js": "^2.57.4",
-    "jsurl2": "^2.2.0",
+    "netutils": "github:asavan/netutils#208073a6222d91ac315c241adcd478192eae77e0",
     "lz-string": "^1.5.0"
   }
 }
