@@ -52,7 +52,7 @@
   "dependencies": {
     "@akamfoad/qrcode": "^0.3.2",
     "@supabase/supabase-js": "^2.57.4",
-    "netutils": "github:asavan/netutils#208073a6222d91ac315c241adcd478192eae77e0",
+    "netutils": "github:asavan/netutils#bfa47d22abbb2fccbfc60c82c02d66908a21a281",
     "lz-string": "^1.5.0"
   }
 }
