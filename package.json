@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@akamfoad/qrcode": "^0.3.2",
-    "netutils": "github:asavan/netutils#bfa47d22abbb2fccbfc60c82c02d66908a21a281",
+    "netutils": "github:asavan/netutils#3279e605af1a567a354348a936b8139ee071e7e4",
     "lz-string": "^1.5.0"
   }
 }

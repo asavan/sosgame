@@ -1,5 +1,4 @@
-import {assert} from "../utils/helper.js";
-import {delay} from "../utils/timer.js";
+import {assert, delay} from "netutils";
 import bot from "../bot/second_best_bot.js";
 import fieldObj from "../field.js";
 import lobbyFunc from "../lobby.js";
@@ -19,40 +18,38 @@ function botTryToMove(presenter, game) {
 }
 
 export default function ai(window, document, settings, gameFunction) {
-    return new Promise((resolve) => {
-        const presenter = presenterObj.presenterFuncDefault(settings);
-        const game = gameFunction(window, document, settings, presenter);
-        const userInd = presenter.getClientIndex();
-        const myId = "user";
-        const lobby = lobbyFunc({}, userInd, myId);
-        lobby.addClient("user", "user");
+    const presenter = presenterObj.presenterFuncDefault(settings);
+    const game = gameFunction(window, document, settings, presenter);
+    const userInd = presenter.getClientIndex();
+    const myId = "user";
+    const lobby = lobbyFunc({}, userInd, myId);
+    lobby.addClient("user", "user");
 
-        for (let i = 1; i < presenter.getPlayersSize(); ++i) {
-            const name = "bot" + i;
-            lobby.addClient(name, name);
-        }
+    for (let i = 1; i < presenter.getPlayersSize(); ++i) {
+        const name = "bot" + i;
+        lobby.addClient(name, name);
+    }
 
-        game.on("gameover", () => {
-            const btnAdd = document.querySelector(".butInstall");
-            btnAdd.classList.remove("hidden2");
-        });
-
-        game.on("message", async (data) => {
-            if (data.playerId !== userInd) {
-                return;
-            }
-            await delay(100);
-            await botTryToMove(presenter, game);
-        });
-
-        game.on("winclosed", () => {
-            presenter.nextRound();
-            game.redraw();
-            botTryToMove(presenter, game);
-        });
-        presenter.resetRound();
-        botTryToMove(presenter, game);
-        game.redraw();
-        resolve(game);
+    game.on("gameover", () => {
+        const btnAdd = document.querySelector(".butInstall");
+        btnAdd.classList.remove("hidden2");
     });
+
+    game.on("message", async (data) => {
+        if (data.playerId !== userInd) {
+            return;
+        }
+        await delay(100);
+        await botTryToMove(presenter, game);
+    });
+
+    game.on("winclosed", () => {
+        presenter.nextRound();
+        game.redraw();
+        botTryToMove(presenter, game);
+    });
+    presenter.resetRound();
+    botTryToMove(presenter, game);
+    game.redraw();
+    return Promise.resolve(game);
 }

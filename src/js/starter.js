@@ -1,7 +1,6 @@
-import {assert, parseSettings} from "./utils/helper.js";
+import {assert, loggerFunc, parseSettings} from "netutils";
 import gameFunction from "./game.js";
 import settings from "./settings.js";
-import loggerFunc from "./views/logger.js";
 
 function adjustSettings(settings) {
     if (settings.colorOrder.length > settings.playerLimit) {
