@@ -86,7 +86,7 @@ test("findPattern__S", () => {
 
 test("findPatternS__", () => {
     const field = fieldObj.field([0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 0, 0, 0, 0]);
-                                 [0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 0, 0, 0, 0 ]
+    // [0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 0, 0, 0, 0 ]
     const arr = bot.findPattern("S   ", 3, field);
     assert.equal(arr.length, 0);
 });
