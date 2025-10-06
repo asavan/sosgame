@@ -1,8 +1,12 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
 import PACKAGE from "../package.json" with { type: "json" };
 import {webpackProd} from "netdeps";
 
 const prodConfig = () => {
-    return webpackProd(PACKAGE.version);
+    const dirname = path.dirname(fileURLToPath(import.meta.url));
+    return webpackProd(PACKAGE.version, dirname);
 };
 
 export default prodConfig;
