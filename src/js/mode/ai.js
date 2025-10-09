@@ -17,7 +17,7 @@ function botTryToMove(presenter, game) {
     return game.onMessage(move);
 }
 
-export default function ai(window, document, settings, gameFunction) {
+export default async function ai(window, document, settings, gameFunction) {
     const presenter = presenterObj.presenterFuncDefault(settings);
     const game = gameFunction(window, document, settings, presenter);
     const userInd = presenter.getClientIndex();
@@ -46,10 +46,10 @@ export default function ai(window, document, settings, gameFunction) {
     game.on("winclosed", () => {
         presenter.nextRound();
         game.redraw();
-        botTryToMove(presenter, game);
+        return botTryToMove(presenter, game);
     });
     presenter.resetRound();
-    botTryToMove(presenter, game);
     game.redraw();
-    return Promise.resolve(game);
+    await botTryToMove(presenter, game);
+    return game;
 }
