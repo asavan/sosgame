@@ -1,2 +1,1 @@
-import {webpackDev} from "netdeps";
-export default webpackDev;
+export { webpackDev as default } from "devdeps";
