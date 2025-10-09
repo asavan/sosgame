@@ -1,6 +1,6 @@
 {
   "name": "sosgame",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Alex Sav",
   "description": "Sos game",
   "private": true,
@@ -25,6 +25,7 @@
     "updates:fix": "npx ncu -u && npm install && npm audit fix"
   },
   "devDependencies": {
+    "devdeps": "github:asavan/dev-deps#846441d58df197301a41203c6cbf68b7cbd2f6bc",
     "netdeps": "github:asavan/net-deps#d0697445f82a02226e53919633dd30494577f79e"
   },
   "dependencies": {
