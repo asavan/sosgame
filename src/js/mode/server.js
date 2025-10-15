@@ -1,6 +1,5 @@
 import netObj from "./net.js";
-import {removeElem} from "../utils/helper.js";
-import {makeQrPlain} from "../views/qr_helper.js";
+import {makeQrPlain, removeElem} from "../views/qr_helper.js";
 import {beginGame} from "./server_helper.js";
 import loggerFunc from "../views/logger.js";
 

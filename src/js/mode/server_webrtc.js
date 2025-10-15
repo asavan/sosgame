@@ -1,13 +1,14 @@
 import netObj from "./net.js";
-import {makeQrPlain} from "../views/qr_helper.js";
-import {removeElem} from "../utils/helper.js";
+import {makeQrPlain, removeElem} from "../views/qr_helper.js";
 import {delayReject} from "../utils/timer.js";
 import scanBarcode from "../views/barcode.js";
 import LZString from "lz-string";
-import loggerFunc from "../views/logger.js";
 import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./server_helper.js";
-import {createSignalingChannel, createDataChannelServer, broadcastConnectionFunc, rtcConnectionFunc} from "netutils";
+import {
+    createSignalingChannel, createDataChannelServer,
+    broadcastConnectionFunc, loggerFunc, rtcConnectionFunc
+} from "netutils";
 
 function showReadBtn(window, document, logger) {
     const barCodeReady = Promise.withResolvers();
