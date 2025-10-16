@@ -21,7 +21,7 @@ function showQr(document, dataToSend, logger) {
 function clientOfferPromise(window, offerPromise) {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const connectionStr = urlParams.get("c");
+    const connectionStr = urlParams.get("z");
     if (!connectionStr) {
         return;
     }

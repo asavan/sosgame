@@ -38,7 +38,7 @@ function showQr(window, document, dataToSend) {
     const baseUrl = urlWithoutParams || "https://asavan.github.io/sosgame/";
     const jsonString = JSON.stringify(dataToSend);
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
-    const url2 = baseUrl + "?c=" + encoded2;
+    const url2 = baseUrl + "?z=" + encoded2;
     const qr = makeQrPlain(url2, document, ".qrcode");
     return qr;
 }
