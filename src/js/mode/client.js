@@ -1,5 +1,5 @@
 import {assert} from "../utils/helper.js";
-import {createSignalingChannel, broadcastConnectionFunc} from "netutils";
+import {createSignalingChannelClient, broadcastConnectionFunc} from "netutils";
 import netObj from "./net.js";
 import {beginGame} from "./client_helper.js";
 import loggerFunc from "../views/logger.js";
@@ -9,7 +9,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const myId = netObj.getMyId(window, settings, Math.random);
     const networkLogger = loggerFunc(document, settings);
     const gamePromise = Promise.withResolvers();
-    const gameChannel = await createSignalingChannel(myId, window.location, settings, networkLogger);
+    const gameChannel = await createSignalingChannelClient(myId, window.location, settings, networkLogger);
     const connection = broadcastConnectionFunc(myId, networkLogger, gameChannel);
 
     const openConPromise = Promise.withResolvers();

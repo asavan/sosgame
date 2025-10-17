@@ -9,7 +9,7 @@ import {beginGame} from "./client_helper.js";
 
 import {assert} from "../utils/helper.js";
 
-import {createSignalingChannel, createDataChannelClient, broadcastConnectionFunc} from "netutils";
+import {createSignalingChannelClient, createDataChannelClient, broadcastConnectionFunc} from "netutils";
 
 function showQr(document, dataToSend, logger) {
     const jsonString = JSON.stringify(dataToSend);
@@ -42,7 +42,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const serverId = await Promise.race([offerPromise.promise, Promise.resolve(null)]).then(data => data?.id);
     mainLogger.log("maybe server " + serverId);
     const signalingLogger = loggerFunc(document, settings, 1);
-    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, signalingLogger, serverId);
+    const gameChannelPromise = createSignalingChannelClient(myId, window.location, settings, signalingLogger, serverId);
     const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
     console.timeLog("loadgame", "c0");
     const dataChanLogger = loggerFunc(document, settings, 1);
