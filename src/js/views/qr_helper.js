@@ -62,16 +62,6 @@ export function removeElem(el) {
     }
 }
 
-export function makeQrString(window, settings) {
-    const staticHost = settings.sh || (window.location.origin + window.location.pathname);
-    const url = new URL(staticHost);
-    if (settings.seed) {
-        url.searchParams.set("seed", settings.seed);
-    }
-    const urlStr = chomp(url.toString(), "/");
-    return urlStr;
-}
-
 export function makeQrPlain(urlStr, document, selector) {
     const el = document.querySelector(selector);
     if (!el) {
@@ -84,14 +74,11 @@ export function makeQrPlain(urlStr, document, selector) {
 }
 
 export function makeQrElement(urlStr, el) {
+    urlStr = chomp(urlStr, "/");
     console.log("enemy url", urlStr, urlStr.length);
     renderQRCodeSVG(urlStr, el);
     // bigPicture(el);
     shareAndCopy(el, urlStr);
     bigPicture(el);
     return el;
-}
-
-export function makeQr(window, document, settings) {
-    return makeQrPlain(makeQrString(window, settings), document, ".qrcode");
 }

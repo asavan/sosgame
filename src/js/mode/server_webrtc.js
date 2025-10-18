@@ -32,10 +32,8 @@ function showReadBtn(window, document, logger) {
     return barCodeReady.promise;
 }
 
-function showQr(window, document, dataToSend) {
-    const currentUrl = new URL(window.location.href);
-    const urlWithoutParams = currentUrl.origin + currentUrl.pathname;
-    const baseUrl = urlWithoutParams || "https://asavan.github.io/sosgame/";
+function showQr(window, document, settings, dataToSend) {
+    const baseUrl = netObj.getHostUrl(settings, window.location);
     const jsonString = JSON.stringify(dataToSend);
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
     const url2 = baseUrl + "?z=" + encoded2;
@@ -57,7 +55,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const connectionLogger = loggerFunc(document, settings, 1);
     const dataChan = createDataChannelServer(myId, dataChanLogger);
     const dataToSend = await dataChan.getDataToSend();
-    const qr = showQr(window, document, dataToSend);
+    const qr = showQr(window, document, settings, dataToSend);
     let connection = null;
     showReadBtn(window, document, mainLogger).then((answerAndCand) => {
         mainLogger.log(answerAndCand);

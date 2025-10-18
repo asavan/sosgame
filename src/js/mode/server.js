@@ -7,7 +7,7 @@ import {createSignalingChannel, broadcastConnectionFunc} from "netutils";
 import addSettingsButton from "../views/settings-form-btn.js";
 
 function makeQr(window, document, settings) {
-    const staticHost = settings.sh || window.location.href;
+    const staticHost = netObj.getHostUrl(settings, window.location);
     const url = new URL(staticHost);
     console.log("enemy url", url.toString());
     return makeQrPlain(url.toString(), document, ".qrcode");
