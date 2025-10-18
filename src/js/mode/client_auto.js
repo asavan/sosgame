@@ -1,4 +1,4 @@
-import loggerFunc from "../views/logger.js";
+import {loggerFunc} from "netutils";
 
 const modes = [import("./client_webrtc.js"), import("./hotseat.js")];
 

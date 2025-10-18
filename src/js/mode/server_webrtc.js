@@ -1,5 +1,3 @@
-import netObj from "./net.js";
-import {removeElem} from "../views/qr_helper.js";
 import LZString from "lz-string";
 import {beginGame} from "./server_helper.js";
 import {
@@ -7,7 +5,7 @@ import {
     createSignalingChannel, createDataChannelServer,
     broadcastConnectionFunc, delayReject,
     loggerFunc, rtcConnectionFunc,
-    makeQrStr, scanBarcode
+    makeQrStr, netObj, removeElem, scanBarcode
 } from "netutils";
 
 function showReadBtn(window, document, logger) {

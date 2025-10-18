@@ -1,5 +1,5 @@
 import lobbyFunc from "../lobby.js";
-import loggerFunc from "../views/logger.js";
+import {loggerFunc} from "netutils";
 import actionsFunc from "../actions.js";
 import {showGameView} from "../views/section_view.js";
 import presenterObj from "../presenter.js";

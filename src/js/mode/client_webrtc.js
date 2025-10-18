@@ -1,5 +1,3 @@
-import netObj from "./net.js";
-
 import LZString from "lz-string";
 import {beginGame} from "./client_helper.js";
 
@@ -7,7 +5,7 @@ import {
     assert,
     addSettingsButton, createSignalingChannel,
     createDataChannelClient, broadcastConnectionFunc,
-    delayReject, loggerFunc, makeQrStr
+    delayReject, loggerFunc, makeQrStr, netObj
 } from "netutils";
 
 function showQr(window, document, settings, dataToSend, logger) {
@@ -39,7 +37,10 @@ export default async function gameMode(window, document, settings, gameFunction)
     const myId = netObj.getMyId(window, settings, Math.random);
     const offerPromise = Promise.withResolvers();
     clientOfferPromise(window, offerPromise);
-    const serverId = await Promise.race([offerPromise.promise, Promise.resolve(null)]).then(data => data?.id);
+    let serverId = await Promise.race([offerPromise.promise, Promise.resolve(null)]).then(data => data?.id);
+    if (!serverId) {
+        serverId = settings.serverId;
+    }
     mainLogger.log("maybe server " + serverId);
     const signalingLogger = loggerFunc(document, settings, 1);
     const gameChannelPromise = createSignalingChannel(myId, serverId, window.location, settings, signalingLogger);

@@ -1,8 +1,5 @@
-import {assert} from "../utils/helper.js";
-import {createSignalingChannel, broadcastConnectionFunc} from "netutils";
-import netObj from "./net.js";
+import {assert, createSignalingChannel, broadcastConnectionFunc, loggerFunc, netObj} from "netutils";
 import {beginGame} from "./client_helper.js";
-import loggerFunc from "../views/logger.js";
 
 export default async function gameMode(window, document, settings, gameFunction) {
 

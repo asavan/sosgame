@@ -5,6 +5,7 @@ export default {
     channelType: "auto",
     wsPort : 8088,
     logger: "",
+    serverId: "",
     networkDebug: false,
     logicDebug: true,
     fastRestart: false,

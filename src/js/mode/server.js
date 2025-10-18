@@ -1,15 +1,17 @@
-import netObj from "./net.js";
-import {removeElem} from "../views/qr_helper.js";
 import {beginGame} from "./server_helper.js";
 
 import {
     addSettingsButton, createSignalingChannel,
-    broadcastConnectionFunc, loggerFunc, makeQrStr
+    broadcastConnectionFunc, loggerFunc, makeQrStr,
+    netObj, removeElem
 } from "netutils";
 
-function makeQr(window, document, settings) {
+function makeQr(window, document, settings, serverId) {
     const staticHost = netObj.getHostUrl(settings, window.location);
     const url = new URL(staticHost);
+    if (serverId) {
+        url.searchParams.set("serverId", serverId);
+    }
     console.log("enemy url", url.toString());
     const image = {
         source: "./images/sos.png",
@@ -24,10 +26,11 @@ function makeQr(window, document, settings) {
 export default async function gameMode(window, document, settings, gameFunction) {
     addSettingsButton(document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
+    settings.serverId = myId;
     const networkLogger = loggerFunc(document, settings);
 
     const gameChannel = await createSignalingChannel(myId, myId, window.location, settings, networkLogger);
-    const code = makeQr(window, document, settings);
+    const code = makeQr(window, document, settings, myId);
 
     const connection = broadcastConnectionFunc(myId, networkLogger, gameChannel);
     const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
