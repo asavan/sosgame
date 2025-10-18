@@ -334,5 +334,24 @@ footer {
 
 .control-panel button:not(:disabled):hover { background-color: #686868; }
 
+/* Стили для формы, созданной функцией createFormBinder */
+
+.formbinder-form {
+    /* Стили для формы в целом */
+}
+
+.formbinder-field-container {
+    margin: 10px 0;
+}
+
+.formbinder-label {
+    display: inline-block;
+    width: 120px;
+}
+
+.formbinder-error {
+    color: red;
+}
+
 .hidden { display: none; }
 

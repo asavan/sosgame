@@ -1,13 +1,13 @@
 import netObj from "./net.js";
-import {makeQrPlain, removeElem} from "../views/qr_helper.js";
-import {delayReject} from "../utils/timer.js";
-import scanBarcode from "../views/barcode.js";
+import {removeElem} from "../views/qr_helper.js";
 import LZString from "lz-string";
-import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./server_helper.js";
 import {
+    addSettingsButton,
     createSignalingChannel, createDataChannelServer,
-    broadcastConnectionFunc, loggerFunc, rtcConnectionFunc
+    broadcastConnectionFunc, delayReject,
+    loggerFunc, rtcConnectionFunc,
+    makeQrStr, scanBarcode
 } from "netutils";
 
 function showReadBtn(window, document, logger) {
@@ -37,8 +37,7 @@ function showQr(window, document, settings, dataToSend) {
     const jsonString = JSON.stringify(dataToSend);
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
     const url2 = baseUrl + "?z=" + encoded2;
-    const qr = makeQrPlain(url2, document, ".qrcode");
-    return qr;
+    return makeQrStr(url2, window, document, settings);
 }
 
 export default async function gameMode(window, document, settings, gameFunction) {

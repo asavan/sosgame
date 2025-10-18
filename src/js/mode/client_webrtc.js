@@ -1,21 +1,21 @@
 import netObj from "./net.js";
-import {makeQrPlain} from "../views/qr_helper.js";
-import {delayReject} from "../utils/timer.js";
 
 import LZString from "lz-string";
-import loggerFunc from "../views/logger.js";
-import addSettingsButton from "../views/settings-form-btn.js";
 import {beginGame} from "./client_helper.js";
 
-import {assert} from "../utils/helper.js";
+import {
+    assert,
+    addSettingsButton, createSignalingChannel,
+    createDataChannelClient, broadcastConnectionFunc,
+    delayReject, loggerFunc, makeQrStr
+} from "netutils";
 
-import {createSignalingChannel, createDataChannelClient, broadcastConnectionFunc} from "netutils";
-
-function showQr(document, dataToSend, logger) {
+function showQr(window, document, settings, dataToSend, logger) {
     const jsonString = JSON.stringify(dataToSend);
     const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
-    const qr = makeQrPlain(encoded2, document, ".qrcode");
+    const qr = makeQrStr(encoded2, window, document, settings);
     logger.log(qr);
+    return qr;
 }
 
 function clientOfferPromise(window, offerPromise) {
@@ -52,7 +52,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     try {
         const dataToSend = await dataChan.connect(offerPromise, sigChan);
         commChan = dataChan;
-        showQr(document, dataToSend, qrLogger);
+        showQr(window, document, settings, dataToSend, qrLogger);
         await dataChan.ready();
         if (sigChan) {
             sigChan.close();

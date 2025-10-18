@@ -1,1 +1,7 @@
-export { webpackDev as default } from "devdeps";
+import { webpackDev } from "devdeps";
+
+const config = () => {
+    return webpackDev();
+};
+
+export default config;

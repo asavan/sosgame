@@ -1,16 +1,24 @@
 import netObj from "./net.js";
-import {makeQrPlain, removeElem} from "../views/qr_helper.js";
+import {removeElem} from "../views/qr_helper.js";
 import {beginGame} from "./server_helper.js";
-import loggerFunc from "../views/logger.js";
 
-import {createSignalingChannel, broadcastConnectionFunc} from "netutils";
-import addSettingsButton from "../views/settings-form-btn.js";
+import {
+    addSettingsButton, createSignalingChannel,
+    broadcastConnectionFunc, loggerFunc, makeQrStr
+} from "netutils";
 
 function makeQr(window, document, settings) {
     const staticHost = netObj.getHostUrl(settings, window.location);
     const url = new URL(staticHost);
     console.log("enemy url", url.toString());
-    return makeQrPlain(url.toString(), document, ".qrcode");
+    const image = {
+        source: "./images/sos.png",
+        width: "10%",
+        height: "20%",
+        x: "center",
+        y: "center"
+    };
+    return makeQrStr(url.toString(), window, document, settings, image);
 }
 
 export default async function gameMode(window, document, settings, gameFunction) {

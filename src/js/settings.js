@@ -9,6 +9,7 @@ export default {
     logicDebug: true,
     fastRestart: false,
     colorOrder: ["blue", "red", "green", "yellow"],
+    colors: ["blue", "red", "green", "yellow"],
     color: "blue",
     gameChanPrefix: "sos_",
     playerLimit: 2,
