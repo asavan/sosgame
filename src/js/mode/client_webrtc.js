@@ -25,6 +25,9 @@ function clientOfferPromise(window, offerPromise) {
     }
     const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);
     const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
+    let url = new URL(window.location.href);
+    url.searchParams.delete("z");
+    history.replaceState({}, document.title, url.href);
     offerPromise.resolve(offerAndCandidates);
 }
 
@@ -72,7 +75,11 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     connection.on("reconnect", (data) => {
         assert(data.data.serverId === data.from, `Different server ${data}`);
-        window.location.reload();
+        let url = new URL(window.location.href);
+        url.searchParams.delete("z");
+        // history.pushState({}, document.title, url.href);
+        // window.location.reload();
+        window.location.replace(url.toString());
     });
 
     const openCon = await connection.connect();

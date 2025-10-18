@@ -58,13 +58,6 @@ footer {
     align-items: stretch;
 }
 
-.qrcode .big {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-}
-
 .buttons {
     display: flex;
     flex: 2;
@@ -77,6 +70,12 @@ footer {
     display: inline-block;
 }
 
+.qrcode.big {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
 
 .install {
     background-color: var(--main-color);
