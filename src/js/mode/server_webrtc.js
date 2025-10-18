@@ -51,7 +51,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     mainSection.classList.add("hidden");
 
     const signalingLogger = loggerFunc(document, settings, 1);
-    const gameChannelPromise = createSignalingChannel(myId, window.location, settings, signalingLogger);
+    const gameChannelPromise = createSignalingChannel(myId, myId, window.location, settings, signalingLogger);
     const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
     const dataChanLogger = loggerFunc(document, settings, 1);
     const connectionLogger = loggerFunc(document, settings, 1);

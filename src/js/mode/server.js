@@ -18,7 +18,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     const myId = netObj.getMyId(window, settings, Math.random);
     const networkLogger = loggerFunc(document, settings);
 
-    const gameChannel = await createSignalingChannel(myId, window.location, settings, networkLogger);
+    const gameChannel = await createSignalingChannel(myId, myId, window.location, settings, networkLogger);
     const code = makeQr(window, document, settings);
 
     const connection = broadcastConnectionFunc(myId, networkLogger, gameChannel);

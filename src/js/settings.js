@@ -1,6 +1,8 @@
 export default {
     modes: ["client", "ai", "server", "hotseat", "test", "swrtc", "cwrtc", "ssupa", "csupa", "cauto"],
     mode: "cauto",
+    channelTypes: ["socket", "supa", "fake", "auto", "none"],
+    channelType: "auto",
     wsPort : 8088,
     logger: "",
     networkDebug: false,
