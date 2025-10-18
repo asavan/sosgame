@@ -1,6 +1,4 @@
-import {assert} from "./utils/helper.js";
-import {delay} from "./utils/timer.js";
-import handlersFunc from "./utils/handlers.js";
+import {assert, delay, handlersFunc} from "netutils";
 import handleClick from "./views/click.js";
 
 

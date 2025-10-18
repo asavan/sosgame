@@ -1,6 +1,5 @@
 import fieldObj from "./field.js";
-import handlersFunc from "./utils/handlers.js";
-import PromiseQueue from "./utils/async-queue.js";
+import {handlersFunc, PromiseQueue} from "netutils";
 
 function cell(isLastMove, isActive, value, colors, playerIdx) {
     const text = value;

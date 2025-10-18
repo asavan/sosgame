@@ -6,7 +6,6 @@ export default {
     wsPort : 8088,
     logger: "",
     serverId: "",
-    networkDebug: false,
     logicDebug: true,
     fastRestart: false,
     colorOrder: ["blue", "red", "green", "yellow"],

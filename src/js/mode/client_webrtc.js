@@ -25,7 +25,7 @@ function clientOfferPromise(window, offerPromise) {
     }
     const offerAndCandidatesStr = LZString.decompressFromEncodedURIComponent(connectionStr);
     const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
-    let url = new URL(window.location.href);
+    const url = new URL(window.location.href);
     url.searchParams.delete("z");
     history.replaceState({}, document.title, url.href);
     offerPromise.resolve(offerAndCandidates);
@@ -75,8 +75,9 @@ export default async function gameMode(window, document, settings, gameFunction)
 
     connection.on("reconnect", (data) => {
         assert(data.data.serverId === data.from, `Different server ${data}`);
-        let url = new URL(window.location.href);
+        const url = new URL(window.location.href);
         url.searchParams.delete("z");
+        url.searchParams.set("serverId", data.data.serverId);
         // history.pushState({}, document.title, url.href);
         // window.location.reload();
         window.location.replace(url.toString());

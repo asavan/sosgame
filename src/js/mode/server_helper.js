@@ -1,9 +1,7 @@
-import lobbyFunc from "../lobby.js";
-import {loggerFunc} from "netutils";
+import {loggerFunc, lobby as lobbyFunc, actionToHandler} from "netutils";
 import actionsFunc from "../actions.js";
 import {showGameView} from "../views/section_view.js";
 import presenterObj from "../presenter.js";
-import actionToHandler from "../utils/action_to_handler.js";
 
 function reconnect(con, serverId) {
     const toSend = {

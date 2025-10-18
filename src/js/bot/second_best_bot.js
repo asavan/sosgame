@@ -1,6 +1,5 @@
-import {assert} from "../utils/helper.js";
+import {assert, random} from "netutils";
 import fieldObj from "../field.js";
-import random from "../utils/random.js";
 import randomBot from "./random_bot.js";
 import simpleBot from "./simple_bot.js";
 

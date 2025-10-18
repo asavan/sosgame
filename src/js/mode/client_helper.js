@@ -1,8 +1,7 @@
 import presenterObj from "../presenter.js";
 import actionsFunc from "../actions.js";
 import {showGameView} from "../views/section_view.js";
-import actionToHandler from "../utils/action_to_handler.js";
-import {wrapClientConnection} from "netutils";
+import {actionToHandler, wrapClientConnection} from "netutils";
 
 function setupGameToConnectionSendClient(game, con, logger, actionKeys) {
     for (const handlerName of actionKeys) {
