@@ -1,5 +1,5 @@
 import LZString from "lz-string";
-import {beginGame} from "./server_helper.js";
+import {beginGame, makeQr} from "./server_helper.js";
 import {
     addSettingsButton,
     createSignalingChannel, createDataChannelServer,
@@ -52,7 +52,8 @@ export default async function gameMode(window, document, settings, gameFunction)
     const connectionLogger = loggerFunc(document, settings, 1);
     const dataChan = createDataChannelServer(myId, dataChanLogger);
     const dataToSend = await dataChan.getDataToSend();
-    const qr = showQr(window, document, settings, dataToSend);
+    const qr1 = showQr(window, document, settings, dataToSend);
+    const qr2 = makeQr(window, document, settings, myId);
     let connection = null;
     showReadBtn(window, document, mainLogger).then((answerAndCand) => {
         mainLogger.log(answerAndCand);
@@ -76,7 +77,8 @@ export default async function gameMode(window, document, settings, gameFunction)
         connection = broadcastConnectionFunc(myId, connectionLogger, sigChan);
     }
 
-    removeElem(qr);
+    removeElem(qr1);
+    removeElem(qr2);
     const game = beginGame(window, document, settings, gameFunction, connection, connection, myId);
     await connection.connect();
     return game;

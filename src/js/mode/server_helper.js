@@ -1,4 +1,4 @@
-import {loggerFunc, lobby as lobbyFunc, actionToHandler} from "netutils";
+import {loggerFunc, lobby as lobbyFunc, actionToHandler, makeQrStr, netObj} from "netutils";
 import actionsFunc from "../actions.js";
 import {showGameView} from "../views/section_view.js";
 import presenterObj from "../presenter.js";
@@ -78,4 +78,21 @@ export function beginGame(window, document, settings, gameFunction, connection, 
     const game = gameFunction(window, document, settings, presenter);
     connectNetworkAndGame(document, game, presenter, myId, settings, openCon, connection);
     return game;
+}
+
+export function makeQr(window, document, settings, serverId) {
+    const staticHost = netObj.getHostUrl(settings, window.location);
+    const url = new URL(staticHost);
+    if (serverId) {
+        url.searchParams.set("serverId", serverId);
+    }
+    console.log("enemy url", url.toString());
+    const image = {
+        source: "./images/sos.png",
+        width: "10%",
+        height: "20%",
+        x: "center",
+        y: "center"
+    };
+    return makeQrStr(url.toString(), window, document, settings, image);
 }

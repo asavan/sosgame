@@ -1,27 +1,10 @@
-import {beginGame} from "./server_helper.js";
+import {beginGame, makeQr} from "./server_helper.js";
 
 import {
     addSettingsButton, createSignalingChannel,
-    broadcastConnectionFunc, loggerFunc, makeQrStr,
+    broadcastConnectionFunc, loggerFunc,
     netObj, removeElem
 } from "netutils";
-
-function makeQr(window, document, settings, serverId) {
-    const staticHost = netObj.getHostUrl(settings, window.location);
-    const url = new URL(staticHost);
-    if (serverId) {
-        url.searchParams.set("serverId", serverId);
-    }
-    console.log("enemy url", url.toString());
-    const image = {
-        source: "./images/sos.png",
-        width: "10%",
-        height: "20%",
-        x: "center",
-        y: "center"
-    };
-    return makeQrStr(url.toString(), window, document, settings, image);
-}
 
 export default async function gameMode(window, document, settings, gameFunction) {
     addSettingsButton(document, settings);

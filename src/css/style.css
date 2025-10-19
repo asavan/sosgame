@@ -352,5 +352,37 @@ footer {
     color: red;
 }
 
+
+dialog {
+    border: none;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.circled {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+}
+
+.circled::before {
+    content: "";
+    grid-area: 1 / 1;
+    width: 35px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.circled::after {
+    content: "?";
+    grid-area: 1 / 1;
+}
+
 .hidden { display: none; }
 
