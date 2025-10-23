@@ -1,4 +1,5 @@
-import LZString from "lz-string";
+import JSONCrush from "jsoncrush";
+
 import {beginGame, makeQr} from "./server_helper.js";
 import {
     addSettingsButton,
@@ -23,7 +24,7 @@ function showReadBtn(window, document, logger) {
             }
             codes = sign;
         }
-        const decode = LZString.decompressFromEncodedURIComponent(codes);
+        const decode = JSONCrush.uncrush(codes);
         barCodeReady.resolve(JSON.parse(decode));
     });
 
@@ -33,9 +34,10 @@ function showReadBtn(window, document, logger) {
 function showQr(window, document, settings, dataToSend) {
     const baseUrl = netObj.getHostUrl(settings, window.location);
     const jsonString = JSON.stringify(dataToSend);
-    const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
-    const url2 = baseUrl + "?z=" + encoded2;
-    return makeQrStr(url2, window, document, settings);
+    const encoded3 = JSONCrush.crush(jsonString);
+    const encoded4 = window.encodeURIComponent(encoded3);
+    const url4 = baseUrl + "?z=" + encoded4;
+    return makeQrStr(url4, window, document, settings);
 }
 
 export default async function gameMode(window, document, settings, gameFunction) {

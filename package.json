@@ -33,6 +33,7 @@
     "netdeps": "github:asavan/net-deps#v0.0.3"
   },
   "dependencies": {
+    "jsoncrush": "^1.1.8",
     "netutils": "github:asavan/netutils#da341d50b182a31fae9212f5f1147fccbc2920d3"
   }
 }
