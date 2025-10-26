@@ -1,37 +1,11 @@
-import JSONCrush from "jsoncrush";
 import {beginGame} from "./client_helper.js";
 
 import {
     assert,
-    addSettingsButton, createSignalingChannel,
-    createDataChannelClient, broadcastConnectionFunc,
-    delayReject, loggerFunc, makeQrStr, netObj
+    addSettingsButton, client_chan,
+    broadcastConnectionFunc,
+    delayReject, loggerFunc, netObj
 } from "netutils";
-
-function showQr(window, document, settings, dataToSend, logger) {
-    const jsonString = JSON.stringify(dataToSend);
-    // const encoded2 = LZString.compressToEncodedURIComponent(jsonString);
-    const encoded3 = JSONCrush.crush(jsonString);
-    // const encoded4 = window.encodeURIComponent(encoded3);
-    const qr = makeQrStr(encoded3, window, document, settings);
-    logger.log(qr);
-    return qr;
-}
-
-function clientOfferPromise(window, offerPromise) {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const connectionStr = urlParams.get("z");
-    if (!connectionStr) {
-        return;
-    }
-    const offerAndCandidatesStr = JSONCrush.uncrush(connectionStr);
-    const offerAndCandidates = JSON.parse(offerAndCandidatesStr);
-    const url = new URL(window.location.href);
-    url.searchParams.delete("z");
-    history.replaceState({}, document.title, url.href);
-    offerPromise.resolve(offerAndCandidates);
-}
 
 export default async function gameMode(window, document, settings, gameFunction) {
     console.time("loadgame");
@@ -40,33 +14,7 @@ export default async function gameMode(window, document, settings, gameFunction)
     mainSection.classList.add("hidden");
     const mainLogger = loggerFunc(document, settings, 2, null, "mainLog");
     const myId = netObj.getMyId(window, settings, Math.random);
-    const offerPromise = Promise.withResolvers();
-    clientOfferPromise(window, offerPromise);
-    let serverId = await Promise.race([offerPromise.promise, Promise.resolve(null)]).then(data => data?.id);
-    if (!serverId) {
-        serverId = settings.serverId;
-    }
-    mainLogger.log("maybe server " + serverId);
-    const signalingLogger = loggerFunc(document, settings, 1);
-    const gameChannelPromise = createSignalingChannel(myId, serverId, window.location, settings, signalingLogger);
-    const sigChan = await Promise.race([gameChannelPromise, delayReject(5000)]).catch(() => null);
-    console.timeLog("loadgame", "c0");
-    const dataChanLogger = loggerFunc(document, settings, 1);
-    const dataChan = createDataChannelClient(myId, dataChanLogger);
-    let commChan = null;
-    const qrLogger = loggerFunc(document, settings, 1);
-    try {
-        const dataToSend = await dataChan.connect(offerPromise, sigChan);
-        commChan = dataChan;
-        showQr(window, document, settings, dataToSend, qrLogger);
-        await dataChan.ready();
-        if (sigChan) {
-            sigChan.close();
-        }
-    } catch (err) {
-        mainLogger.error(err);
-        commChan = sigChan;
-    }
+    let commChan = await client_chan(myId, window, document, settings);
 
     const connectionLogger = loggerFunc(document, settings, 1, null, "clientRtcBroadConn1");
     const connection = broadcastConnectionFunc(myId, connectionLogger, commChan);
