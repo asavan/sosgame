@@ -30,7 +30,7 @@
   },
   "homepage": "https://asavan.github.io/sosgame/",
   "devDependencies": {
-    "netdeps": "github:asavan/net-deps#v0.0.3"
+    "netdeps": "github:asavan/net-deps#v0.0.4"
   },
   "dependencies": {
     "netutils": "github:asavan/netutils#v0.1.1"
