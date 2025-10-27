@@ -33,6 +33,6 @@
     "netdeps": "github:asavan/net-deps#v0.0.3"
   },
   "dependencies": {
-    "netutils": "github:asavan/netutils#d7ca8438d0c018ac06f1c73d4b5242b0aac0998c"
+    "netutils": "github:asavan/netutils#6e05d2ce042f3acb1a395ca1042965fefa8c9c13"
   }
 }
