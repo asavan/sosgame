@@ -12,6 +12,10 @@ import {
 const filter = (n) => !(!n || (n.playerId !== null && n.playerId !== n.clientId));
 
 export async function gameInitClient(document, settings, myId, commChan, window, mainLogger) {
+    if (!commChan) {
+        mainLogger.log("No chan client");
+        throw new Error("No chan client");
+    }
     const connectionLogger = loggerFunc(document, settings, 1, null, "clientRtcBroadConn1");
     const connection = broadcastConnectionFunc(myId, connectionLogger, commChan);
     const gameInitPromise = Promise.withResolvers();
