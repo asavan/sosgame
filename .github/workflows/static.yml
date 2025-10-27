@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: build
+name: GH Deploy
 
 on:
   # Runs on pushes targeting the default branch
@@ -18,44 +18,9 @@ permissions:
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: "sosgame"
   cancel-in-progress: false
 
 jobs:
-  test:
-    uses: asavan/netutils/.github/workflows/static.yml@master
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Use Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: 'npm'
-          cache-dependency-path: ./package.json
-      - run: npm i
-      - run: npm run build
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # Upload docs folder
-          path: './docs'
-
-
-  # Single deploy job since we're just deploying
   deploy:
-    needs: [test, build]
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    uses: asavan/dev-deps/.github/workflows/deploy.yml@master
