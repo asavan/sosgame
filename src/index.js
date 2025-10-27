@@ -14,4 +14,4 @@ window.addEventListener("unhandledrejection", (event) => {
     // event.preventDefault();
 });
 
-starter(window, document)
+starter(window, document);
