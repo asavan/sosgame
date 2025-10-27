@@ -23,21 +23,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Use Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: 'npm'
-          cache-dependency-path: ./package.json
-      - run: npm i
-      - run: npm run style
-      - run: npm run style2
-      - run: npm run test
+    uses: asavan/netutils/.github/workflows/static.yml@master
 
   build:
     needs: test
