@@ -10,14 +10,14 @@ java {
 
 android {
     namespace = "ru.asavan.sosgame"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "ru.asavan.sosgame"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 22
-        versionName = "1.1.2"
+        versionName = "1.1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,8 +44,6 @@ dependencies {
     implementation("org.nanohttpd:nanohttpd-websocket:2.3.1")
     implementation("com.google.androidbrowserhelper:androidbrowserhelper:2.6.2")
 
-//    implementation("androidx.appcompat:appcompat:1.6.1")
-//    implementation("com.google.android.material:material:1.9.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
