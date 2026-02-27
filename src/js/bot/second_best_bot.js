@@ -69,7 +69,6 @@ function longestEmptyMids(field) {
     let curLen = 0;
     let maxLen = 0;
     let curBegin = -1;
-    let curEnd = -1;
     for (let i = 0; i < arr.length; i++) {
         const c = arr[i];
         if (c === 0) {
@@ -77,7 +76,7 @@ function longestEmptyMids(field) {
                 curBegin = i;
             }
             ++curLen;
-            curEnd = i + 1;
+            const curEnd = i + 1;
             if (curLen > maxLen) {
                 maxLen = curLen;
 
@@ -98,7 +97,6 @@ function longestEmptyMids(field) {
             }
         } else {
             curLen = 0;
-            curEnd = -1;
             curBegin = -1;
         }
     }
