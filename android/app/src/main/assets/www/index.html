@@ -7,36 +7,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="theme-color" content="#ffffff">
     <link id="favicon" rel="icon" href="./images/sos.svg" sizes="any" type="image/svg+xml">
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="./app.webmanifest">
 
-<script defer src="main.6a0476df227e5bbe072f.js"></script><style type="text/css">*{box-sizing:border-box;margin:0;padding:0}:root{--main-color:#f0f8ff;--player-color:#7fff00;--field-size:4;--card-width:50px;--color-green:#5a5;--color-red:#f55;--color-yellow:#fa0;--color-blue:#55f;--color-black:#000;--current-color:#f0f8ff;--inverted-color:#fff;--border-color:gray}body,html{height:100%}body{display:flex;flex-direction:column}.content{flex:1 0 auto;padding:10px}footer{flex:0 0 auto}.field{flex-wrap:wrap;justify-content:space-between}.box,.field{display:flex;gap:5px}.box{align-items:stretch;flex:var(--field-size)}.qrcode.big{left:0;position:absolute;top:0;width:calc(var(--field-size)*100px + 50px)}.buttons{display:flex;flex:2;gap:5px;justify-content:center}.qrcode{display:inline-block;width:300px}.install{background-color:var(--main-color);border:0;cursor:pointer;font:700 24px/100px Tahoma,sans-serif;height:100px;padding:0;text-align:center;width:100%}.hidden{display:none}.cell{aspect-ratio:1/1;background-color:var(--main-color);border:2px solid;border-color:var(--border-color);border-radius:10px;cursor:pointer;display:grid;flex-grow:1;font:700 24px Tahoma,sans-serif;max-width:100px;min-width:50px;place-items:center;touch-action:none;user-select:none}@media (max-width:750px){.cell{max-height:calc((100vh - 30px)/var(--field-size) - 2px);max-width:calc((100vh - 30px)/var(--field-size) - 2px);min-width:48px}.box{gap:2px}.box,.buttons{flex:1;flex-direction:column}.buttons{align-self:center}.hidden2{display:none}}.red{--border-color:var(--color-red);color:var(--color-red)}.blue{--border-color:var(--color-blue);color:var(--color-blue)}.green{--border-color:var(--color-green);color:var(--color-green)}.yellow{--border-color:var(--color-yellow);color:var(--color-yellow)}.black{--border-color:var(--color-black);color:var(--color-black)}.cell.last{box-shadow:inset 0 0 0 5px var(--border-color)}.active{background-color:var(--border-color);color:#fff}.overlay{background:rgba(0,0,0,.7);inset:0;opacity:0;position:fixed;transition:opacity .7s;visibility:hidden}.overlay.show{opacity:1;visibility:visible}.popup{background:#fff;border-radius:5px;margin:70px auto;padding:20px;position:relative;transition:all 5s ease-in-out;width:80%}.popup h2{color:#333;font-family:Tahoma,Arial,sans-serif;margin-top:0}.popup .close{color:#333;font-size:30px;font-weight:700;position:absolute;right:30px;text-decoration:none;top:20px;transition:all .4s}.popup .close:hover{color:var(--player-color)}.popup .content{max-height:30%;overflow:auto}.disabled,.disabled *{cursor:not-allowed}</style></head>
+<script type="module" src="main.b206deb21c7ae60c942f.js"></script><style type="text/css">*{box-sizing:border-box;margin:0;padding:0}:root{--main-color:#f0f8ff;--player-color:#7fff00;--field-size:4;--card-width:50px;--color-green:#5a5;--color-red:#f55;--color-yellow:#fa0;--color-blue:#55f;--color-black:#000;--current-color:#f0f8ff;--inverted-color:#fff;--border-color:gray}body,html{height:100%}body{display:flex;flex-direction:column}body::backdrop{background-color:#fff}.game{flex:1 0 auto}footer{flex:0 0 auto}.field{flex-wrap:wrap;justify-content:space-between}.box,.field{display:flex;gap:5px}.box{align-items:stretch;flex:var(--field-size)}.buttons{display:flex;flex:2;gap:5px;justify-content:center}.qrcode{display:inline-block;width:300px}.qrcode.big{left:0;position:absolute;top:0;width:100%}.install{border:0;cursor:pointer;font:700 24px/100px Tahoma,sans-serif;height:100px;padding:0;text-align:center;width:100%}.cell,.install{background-color:var(--main-color)}.cell{aspect-ratio:1/1;border:2px solid;border-color:var(--border-color);border-radius:10px;cursor:pointer;display:grid;flex-grow:1;font:700 24px Tahoma,sans-serif;max-width:100px;min-width:50px;place-items:center;touch-action:none;user-select:none}@media (max-width:750px){.cell{max-height:calc((100vh - 30px)/var(--field-size) - 2px);max-width:calc((100vh - 30px)/var(--field-size) - 2px);min-width:48px}.box{gap:2px}.box,.buttons{flex:1;flex-direction:column}.buttons{align-self:center}.absolute{position:absolute}.hidden2{display:none}}@media (min-width:750px){.game{padding:5px}}.red{--border-color:var(--color-red);color:var(--color-red)}.blue{--border-color:var(--color-blue);color:var(--color-blue)}.green{--border-color:var(--color-green);color:var(--color-green)}.yellow{--border-color:var(--color-yellow);color:var(--color-yellow)}.black{--border-color:var(--color-black);color:var(--color-black)}.cell.last{box-shadow:inset 0 0 0 5px var(--border-color)}.active{background-color:var(--border-color);color:#fff}.overlay{background:rgba(0,0,0,.7);inset:0;opacity:0;position:fixed;transition:opacity .7s;visibility:hidden}.overlay.show{opacity:1;visibility:visible}.popup{background:#fff;border-radius:5px;margin:70px auto;padding:20px;position:relative;transition:all 5s ease-in-out;width:80%}.popup h2{color:#333;font-family:Tahoma,Arial,sans-serif;margin-top:0}.popup .close{color:#333;font-size:30px;font-weight:700;position:absolute;right:30px;text-decoration:none;top:20px;transition:all .4s}.popup .close:hover{color:var(--player-color)}.popup .content{max-height:30%;overflow:auto}.disabled,.disabled *{cursor:not-allowed}.form-container{border:1px solid #ddd;border-radius:8px;font-family:Arial,sans-serif;max-width:400px;padding:20px}.form-field{align-items:center;display:flex;margin-bottom:15px;transition:background-color .2s ease}.form-field:hover{background-color:#f8f9fa;color:#000}.form-input{cursor:pointer;margin-right:10px;transform:scale(1.2)}.form-label{cursor:pointer;flex:1;user-select:none}.form-field.changed{background-color:#e8f5e8;border-left:3px solid #28a745;padding-left:10px}.panel-header{align-items:center;display:flex;flex-direction:row;gap:3px;justify-content:flex-end}.relative{position:relative}.control-panel{background-color:#323232;border-radius:5px;color:#fff;display:flex;flex-direction:column;font-family:sans-serif;gap:5px;min-width:320px;padding:10px;right:10px;top:10px;transition:min-height .3s ease,padding .3s ease,min-width .3s ease;z-index:2}.control-panel.minimized{border-radius:3px;display:block!important;gap:0;margin-left:0;min-height:auto;min-width:auto;outline:none;outline-offset:2px;padding:5px}.contrl-btn{background:none;border:none;color:#fff;cursor:pointer;display:grid;font-family:Cambria,Georgia,serif;font-size:2rem;height:50px;overflow:hidden;padding:0 3px;place-items:center;width:50px}.control-panel button:not(:disabled):active{background-color:#7a7a7a;transform:translateY(1px)}.control-panel button:not(:disabled):hover{background-color:#686868}.formbinder-field-container{margin:10px 0}.formbinder-label{display:inline-block;width:120px}.formbinder-error{color:red}dialog{border:none;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.2);padding:20px}dialog::backdrop{background-color:rgba(0,0,0,.5)}.circled{align-items:center;display:grid;justify-content:center}.circled:before{aspect-ratio:1/1;border:2px solid #fff;border-radius:50%;content:"";grid-area:1/1;width:35px}.circled:after{content:"?";grid-area:1/1}.hidden{display:none}</style></head>
 
 <body>
-
-<div class="container content">
+<section class="menu">
+    <div id="control-panel" class="control-panel minimized">
+        <div class="panel-header">
+            <!--⛶ ⤭ ◱ 🗖 🗖 -->
+            <button id="butInstall" title="install" class="hidden contrl-btn butInstall">↓</button>
+            <button id="resize-btn" title="fullscreen" class="contrl-btn resize-btn">⤱</button>
+            <button id="maximize-btn" class="hidden contrl-btn maximize-btn" title="Maximize Panel">⚙</button>
+            <button class="help-btn contrl-btn circled" title="Rules" popovertarget="myModal"></button>
+            <button class="qr-btn contrl-btn" title="QR">▣</button>
+        </div>
+        <div class="panel-content"></div>
+    </div>
+    <div class="video-barcode"></div>
+</section>
+<section class="lobby">
+    <div class="qrcontainer"></div>
+    <div class="qrcode"></div>
+</section>
+<section class="container content game hidden">
     <div class="field">
         <div class="box"></div>
-        <div class="buttons"><div class="cell">S</div><div class="cell">O</div></div>
+        <div class="buttons"><div class="cell" data-num="1">S</div><div class="cell" data-num="2">O</div></div>
     </div>
     <div class="score">
         
     </div>
-</div>
+</section>
 
 <div class="log"></div>
-<div class="qrcode"></div>
 <div class="qrcontainerserver"></div>
-<div id="popup1" class="overlay">
-    <div class="popup">
-        <h2>You win</h2>
-        <a class="close" href="#">&times;</a>
-        <div class="content">
-            Result 0
+<section class="popups">
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <h2>You win</h2>
+            <a class="close" href="#">&times;</a>
+            <div class="content">
+                Result 0
+            </div>
         </div>
     </div>
-</div>
+</section>
+<dialog popover id="myModal" >
+    <p id="modalContent">
+        Two players play a game on a line of N squares. <br>
+        Each player in turn puts either S or O into an empty square.<br>
+        The game stops when three adjacent squares contain S, O, S in that order and the last player wins.<br>
+        If all the squares are filled without getting S, O, S, then the game is drawn.<br>
+    </p>
+</dialog>
 <footer>
-    <button id="butInstall" class="butInstall install hidden hidden2">Install as app</button>
 </footer>
 
 </body>

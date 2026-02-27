@@ -54,10 +54,16 @@ public class AndroidWebServerActivity extends Activity {
             b.put("wh", hostUtils.getSocketHost(IpUtils.LOCALHOST));
             b.put("sh", host);
             b.put("mode", "server");
-            btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCAL_IP), b, R.id.twa_127);
             btnUtils.addButtonWebView(WEB_VIEW_URL, b, R.id.webview_localhost);
             btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), b, R.id.twa_real_ip, host);
             btnUtils.addButtonTwa(WEB_GAME_URL, b, R.id.newest);
+        }
+        {
+            Map<String, String> b = new LinkedHashMap<>();
+            b.put("wh", hostUtils.getSocketHost(IpUtils.LOCALHOST));
+            b.put("sh", host);
+            b.put("mode", "swrtc");
+            btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), b, R.id.twa_127);
         }
     }
 
