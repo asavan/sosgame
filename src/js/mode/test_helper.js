@@ -1,4 +1,5 @@
 import {handlersFunc, negotiator} from "netutils";
+import {createDataChannel} from "./rtcConn.js";
 
 export function jsonSocketChan(socketUrl, logger) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
@@ -88,7 +89,7 @@ export function wrapJsonNetworkToNegotiator(net1, logger, id) {
     return neg1;
 }
 
-function newNetworkHandler(id, netNeg, logger, parentSender) {
+function newNetworkHandler(id, netNeg, logger, parentSender, initiator) {
     const tSender = {
         send(data) {
             const toSend = {};
@@ -98,12 +99,30 @@ function newNetworkHandler(id, netNeg, logger, parentSender) {
             return toSend;
         }
     };
+
+    const rtcC = createDataChannel(logger, initiator);
     const addRemote = (data) => {
         logger.log("addRemote", data);
+        return rtcC.processAnswer(data);
     };
-    tSender.send({"remote": {"offer": 1}});
+    const addRemoteFirst = (data) => {
+        logger.log("addRemote first", data);
+        return rtcC.processOffer(data);
+    };
+    const createOffer = (data) => {
+        rtcC.createOffer(data);
+    };
+    rtcC.on("remote", (r) => {
+        logger.log("RTC Remote received", r);
+        tSender.send({"remote": r});
+    });
+
+    const send = (data) => tSender.send(data);
     return {
-        addRemote
+        addRemote,
+        addRemoteFirst,
+        createOffer,
+        send
     };
 }
 
@@ -112,12 +131,17 @@ export function netHandler(logger, parentSender) {
     const clients = {};
     const actions = {
         "join": (data) => {
-            clients[data] = newNetworkHandler(data, netNeg, logger, parentSender);
+            const client = newNetworkHandler(data, netNeg, logger, parentSender, true);
+            clients[data] = client;
+            client.createOffer(data);
         },
         "remote": (data, context) => {
             const client = clients[context.from];
             if (!client) {
-                logger.error("No client");
+                logger.log("No client");
+                const client = newNetworkHandler(context.from, netNeg, logger, parentSender, false);
+                clients[context.from] = client;
+                client.addRemoteFirst(data);
                 return;
             }
             client.addRemote(data);
