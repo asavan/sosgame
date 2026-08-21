@@ -19,7 +19,7 @@ export default function showRules(window, document) {
         }
     });
 
-    closeModalBtn.addEventListener("click", () => {
+    closeModalBtn?.addEventListener("click", () => {
         myModal.close(); // Close the modal
     });
 }

@@ -1,7 +1,6 @@
 import { webpackDev } from "devdeps";
+import settings from "../src/js/settings.js";
 
-const config = () => {
-    return webpackDev();
-};
+const devConfig = () => webpackDev([], settings);
 
-export default config;
+export default devConfig;

@@ -69,9 +69,9 @@ public class AndroidWebServerActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (btnUtils != null) {
             btnUtils.onDestroy();
         }
+        super.onDestroy();
     }
 }
