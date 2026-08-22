@@ -36,7 +36,7 @@ export function createDataChannel(logger, initiator) {
     peerConnection = SetupFreshConnection(logger);
 
     peerConnection.ondatachannel = (ev) => {
-        // TODO close old channel if exists
+        dataChannel?.close();
         dataChannel = ev.channel;
         if (initiator) {
             logger.error("ERROR Received datachannel");
@@ -180,8 +180,9 @@ export function createDataChannel(logger, initiator) {
             await handlers.call("beforeclose", {});
             dataChannel?.close();
         }
+        peerConnection.close();
     };
 
     const ready = () => connectionPromise.promise;
-    return {...handlers, send, close, ready, resetPromises, createOffer, processOffer, processAnswer};
+    return {...handlers, send, close, ready, createOffer, processOffer, processAnswer};
 }
