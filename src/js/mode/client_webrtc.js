@@ -6,7 +6,6 @@ import {
 } from "netutils";
 
 export default async function gameMode(window, document, settings, gameFunction) {
-    console.time("loadgame");
     addSettingsButton(document, settings);
     const mainSection = document.querySelector(".game");
     mainSection.classList.add("hidden");

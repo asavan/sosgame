@@ -109,9 +109,7 @@ function newNetworkHandler(id, netNeg, logger, parentSender, initiator) {
         logger.log("addRemote first", data);
         return rtcC.processOffer(data);
     };
-    const createOffer = (data) => {
-        rtcC.createOffer(data);
-    };
+    const {createOffer} = rtcC;
     rtcC.on("remote", (r) => {
         logger.log("RTC Remote received", r);
         tSender.send({"remote": r});
@@ -131,8 +129,11 @@ export function netHandler(logger, parentSender) {
     const clients = {};
     const actions = {
         "join": (data) => {
-            const client = newNetworkHandler(data, netNeg, logger, parentSender, true);
-            clients[data] = client;
+            let client = clients[data];
+            if (!client) {
+                client = newNetworkHandler(data, netNeg, logger, parentSender, true);
+                clients[data] = client;
+            }
             client.createOffer(data);
         },
         "remote": (data, context) => {
