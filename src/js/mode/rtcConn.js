@@ -1,28 +1,14 @@
 import {handlersFunc, delay} from "netutils";
 
 
-export function SetupFreshConnection(logger) {
-    const peerConnection = new RTCPeerConnection();
+function SetupFreshConnection(logger) {
+    const pc = new RTCPeerConnection();
 
-    // peerConnection.onicecandidate = e => {
-    //     if (!e) {
-    //         logger.error("No ice");
-    //         return;
-    //     }
-    //     if (!e.candidate) {
-    //         logger.log("Last cand");
-    //     } else {
-    //         logger.log("Received icecandidate", e);
-    //     }
-    // };
-
-
-
-    peerConnection.onsignalingstatechange = (ev) => {
-        logger.log("signaling state change " + peerConnection.signalingState, ev);
+    pc.onsignalingstatechange = (ev) => {
+        logger.log("signaling state change " + pc.signalingState, ev);
     };
 
-    peerConnection.onicecandidateerror = (ev) => {
+    pc.onicecandidateerror = (ev) => {
         if (ev.errorCode === 701) {
             logger.log("ONICECANDIDATEERROR " + ev.url + " " + ev.errorText);
         } else {
@@ -30,7 +16,7 @@ export function SetupFreshConnection(logger) {
         }
     };
 
-    return peerConnection;
+    return pc;
 }
 
 export function createDataChannel(logger, initiator) {
@@ -50,17 +36,17 @@ export function createDataChannel(logger, initiator) {
     peerConnection = SetupFreshConnection(logger);
 
     peerConnection.ondatachannel = (ev) => {
+        dataChannel = ev.channel;
         if (initiator) {
             logger.error("ERROR Received datachannel");
         } else {
-            logger.log("Received datachannel");
+            logger.log("Received datachannel " + dataChannel.id);
         }
-        dataChannel = ev.channel;
         setupDataChannel(ev.channel);
     };
 
     peerConnection.oniceconnectionstatechange = (e) => {
-        logger.log("connection state change " + peerConnection.iceConnectionState);
+        logger.log("connection state change " + peerConnection.iceConnectionState + " " + dataChannel?.id);
         if (peerConnection.iceConnectionState === "failed" || peerConnection.iceConnectionState === "disconnected") {
             logger.error("failed iceConnectionState " + peerConnection.iceConnectionState, e);
             resetPromises();
@@ -132,7 +118,7 @@ export function createDataChannel(logger, initiator) {
         await delay(500);
         logger.log("After set offer and delay");
         await peerConnection.setLocalDescription();
-        logger.log("AFTER set answer", JSON.stringify(peerConnection.localDescription));
+        logger.log("AFTER create local answer " + dataChannel?.id);
     }
 
     async function processAnswer(answer) {
@@ -144,6 +130,7 @@ export function createDataChannel(logger, initiator) {
     }
 
     function setupDataChannel(dataChannel) {
+        console.time("setupDataChannel");
         // resetPromises();
         dataChannel.onmessage = function (e) {
             logger.log("data get " + e.data);
@@ -152,6 +139,7 @@ export function createDataChannel(logger, initiator) {
         };
 
         dataChannel.onopen = function () {
+            console.timeEnd("setupDataChannel");
             isConnected = true;
             logger.log("------ DATACHANNEL OPENED ------");
             const sctp = peerConnection.sctp;
@@ -186,17 +174,13 @@ export function createDataChannel(logger, initiator) {
     const close = async () => {
         connectionPromise.reject("close");
         // iphone fires "onerror" on close socket
-        await handlers.call("beforeclose", {});
         if (isConnected) {
             isConnected = false;
-            if (dataChannel) {
-                dataChannel.close();
-            }
+            await handlers.call("beforeclose", {});
+            dataChannel?.close();
         }
     };
 
-
     const ready = () => connectionPromise.promise;
-
     return {...handlers, send, close, ready, resetPromises, createOffer, processOffer, processAnswer};
 }
