@@ -118,11 +118,9 @@ export default function game(_window, document, settings, presenter) {
             promises.push(handlers.call("started", obj));
         }
         promises.push(redraw());
+        // not wait this
+        handlers.call("message", obj);
         await Promise.allSettled(promises);
-        const promises2 = [];
-        promises2.push(delay(200));
-        promises2.push(handlers.call("message", obj));
-        await Promise.allSettled(promises2);
     });
 
     presenter.on("nextPlayer", () => {
