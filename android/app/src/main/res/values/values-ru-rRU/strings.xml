@@ -12,5 +12,6 @@
     <string name="webview">Webview</string>
     <string name="launch_localhost">Запустить на localhost</string>
     <string name="webview_localhost">Webview localhost</string>
+    <string name="network_info">Сетевая информация</string>
     <string name="errors">Вывод ошибок</string>
 </resources>

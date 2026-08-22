@@ -7,26 +7,28 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.Button;
 
+import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
+
 import com.google.androidbrowserhelper.trusted.QualityEnforcer;
 import com.google.androidbrowserhelper.trusted.TwaLauncher;
+import com.luigivampa92.ndefemulation.NdefEmulation;
+import com.luigivampa92.ndefemulation.ndef.UriNdefData;
 
 import java.util.Map;
 
-import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
+import fi.iki.elonen.NanoHTTPD;
 
 public class BtnUtils {
     private final int staticContentPort;
-    private final int webSocketPort;
-    private final boolean secure;
     private final Activity activity;
-    private AndroidStaticAssetsServer server = null;
-    private WebSocketBroadcastServer webSocketServer = null;
+    private WebServer server = null;
 
-    public BtnUtils(Activity activity, int staticContentPort, int webSocketPort, boolean secure) {
+
+    private NdefEmulation ndefEmulation;
+
+    public BtnUtils(Activity activity, int staticContentPort) {
         this.staticContentPort = staticContentPort;
-        this.webSocketPort = webSocketPort;
         this.activity = activity;
-        this.secure = secure;
     }
 
     public void launchWebView(String host, Map<String, String> parameters) {
@@ -37,14 +39,29 @@ public class BtnUtils {
         activity.startActivity(intent);
     }
 
-    public void addButtonBrowser(final String host, Map<String, String> parameters, int btnId) {
-        Button btn = activity.findViewById(btnId);
-        btn.setOnClickListener(v -> launchBrowser(host, parameters));
+    private void launchWebViewAndServer(String host, Map<String, String> parameters) {
+        startServerAndSocket();
+        launchWebView(host, parameters);
     }
 
     public void addButtonWebView(final String host, Map<String, String> parameters, int btnId) {
         Button btn = activity.findViewById(btnId);
-        btn.setOnClickListener(v -> launchWebViewAndServer(host, parameters));
+        btn.setOnClickListener(v -> {
+            launchWebView(host, parameters);
+        });
+    }
+
+    public void addButtonBrowser(final String host, Map<String, String> parameters, int btnId) {
+        addButtonBrowser(host, parameters, btnId, null);
+    }
+
+    public void addButtonBrowser(final String host, Map<String, String> parameters, int btnId, String text) {
+        Button btn = activity.findViewById(btnId);
+        if (text != null && !text.isEmpty()) {
+            String newText = btn.getText() + " " + text;
+            btn.setText(newText);
+        }
+        btn.setOnClickListener(v -> launchBrowser(host, parameters));
     }
 
     public void addButtonTwa(String host, Map<String, String> parameters, int id) {
@@ -54,29 +71,38 @@ public class BtnUtils {
     public void addButtonTwa(String host, Map<String, String> parameters, int id, String text) {
         Button btn = activity.findViewById(id);
         if (text != null) {
-            btn.setText(text);
+            String newText = btn.getText() + " " + text;
+            btn.setText(newText);
         }
         btn.setOnClickListener(v -> launchTwa(host, parameters));
     }
 
     private void launchBrowser(String host, Map<String, String> parameters) {
         startServerAndSocket();
+        launchNFC(host, parameters);
         Uri launchUri = Uri.parse(UrlUtils.getLaunchUrl(host, parameters));
         activity.startActivity(new Intent(Intent.ACTION_VIEW, launchUri));
     }
 
-
-    private void launchWebViewAndServer(String host, Map<String, String> parameters) {
+    public void launchTwa(String host, Map<String, String> parameters) {
         startServerAndSocket();
-        launchWebView(host, parameters);
-    }
-
-
-    private void launchTwa(String host, Map<String, String> parameters) {
-        startServerAndSocket();
+        launchNFC(host, parameters);
         Uri launchUri = Uri.parse(UrlUtils.getLaunchUrl(host, parameters));
         TwaLauncher launcher = new TwaLauncher(activity);
         launcher.launch(new TrustedWebActivityIntentBuilder(launchUri), new QualityEnforcer(), null, null);
+    }
+
+    private void launchNFC(String host, Map<String, String> parameters) {
+        try {
+            var sh = parameters.get("sh");
+            if (sh != null) {
+                ndefEmulation.setCurrentEmulatedNdefData(new UriNdefData(sh));
+            } else {
+                ndefEmulation.setCurrentEmulatedNdefData(new UriNdefData(host));
+            }
+        } catch (Exception ex) {
+            // ignore
+        }
     }
 
     private void startServerAndSocket() {
@@ -85,22 +111,19 @@ public class BtnUtils {
         }
         try {
             Context applicationContext = activity.getApplicationContext();
-            server = new AndroidStaticAssetsServer(applicationContext, staticContentPort, secure);
-            if (webSocketServer == null) {
-                webSocketServer = new WebSocketBroadcastServer(applicationContext, webSocketPort, secure);
-                webSocketServer.start(0);
-            }
+            ndefEmulation = new NdefEmulation(applicationContext);
+            server = new WebServer(applicationContext, staticContentPort);
+            server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         } catch (Exception e) {
             Log.e("BTN_UTILS", "main", e);
         }
     }
 
     protected void onDestroy() {
+        ndefEmulation.setCurrentEmulatedNdefData(null);
         if (server != null) {
             server.stop();
         }
-        if (webSocketServer != null) {
-            webSocketServer.stop();
-        }
+        server = null;
     }
 }

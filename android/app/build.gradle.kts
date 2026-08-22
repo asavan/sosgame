@@ -2,12 +2,6 @@ plugins {
     id("com.android.application")
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
-    }
-}
-
 android {
     namespace = "ru.asavan.sosgame"
     compileSdk = 37
@@ -16,8 +10,8 @@ android {
         applicationId = "ru.asavan.sosgame"
         minSdk = 24
         targetSdk = 37
-        versionCode = 23
-        versionName = "1.2.0"
+        versionCode = 24
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -33,17 +27,23 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            optimization {
+                enable  = true
+            }
         }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
     implementation("org.nanohttpd:nanohttpd:2.3.1")
     implementation("org.nanohttpd:nanohttpd-websocket:2.3.1")
-    implementation("com.google.androidbrowserhelper:androidbrowserhelper:2.7.2")
+    implementation("com.google.androidbrowserhelper:androidbrowserhelper:2.7.3")
+    implementation("com.luigivampa92:ndefemulation-android:1.0.0")
+    implementation("androidx.webkit:webkit:1.17.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")

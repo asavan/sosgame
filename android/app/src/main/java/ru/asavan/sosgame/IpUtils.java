@@ -2,10 +2,9 @@ package ru.asavan.sosgame;
 
 import android.util.Log;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.Collections;
-import java.util.List;
 
 public class IpUtils {
 
@@ -15,23 +14,17 @@ public class IpUtils {
 
     public static String getIPAddress() {
         try {
-            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-
-            for (NetworkInterface interface_ : interfaces) {
-                for (InetAddress inetAddress : Collections.list(interface_.getInetAddresses())) {
+            for (var interfaces = NetworkInterface.getNetworkInterfaces();
+                 interfaces.hasMoreElements(); ) {
+                NetworkInterface interface_ = interfaces.nextElement();
+                for (var addrs = interface_.getInetAddresses(); addrs.hasMoreElements(); ) {
+                    InetAddress inetAddress = addrs.nextElement();
                     if (inetAddress.isLoopbackAddress()) {
                         continue;
                     }
-
-                    String ipAddr = inetAddress.getHostAddress();
-                    if (ipAddr == null) {
-                        continue;
+                    if (inetAddress instanceof Inet4Address ip4Addr) {
+                        return ip4Addr.getHostAddress();
                     }
-                    boolean isIPv4 = ipAddr.indexOf(':') < 0;
-                    if (!isIPv4) {
-                        continue;
-                    }
-                    return ipAddr;
                 }
             }
         } catch (Exception e) {

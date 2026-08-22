@@ -9,9 +9,9 @@ import fi.iki.elonen.NanoWSD.WebSocketFrame;
 
 class DumbWebSocket extends WebSocket {
 
-    private final WebSocketBroadcastServer server;
+    private final IWebSocketServer server;
 
-    public DumbWebSocket(IHTTPSession handshakeRequest, WebSocketBroadcastServer server) {
+    public DumbWebSocket(IHTTPSession handshakeRequest, IWebSocketServer server) {
         super(handshakeRequest);
         this.server = server;
     }

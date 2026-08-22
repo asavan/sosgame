@@ -10,9 +10,11 @@ import java.util.Map;
 
 public class AndroidWebServerActivity extends Activity {
     private static final int STATIC_CONTENT_PORT = 8080;
-    private static final int WEB_SOCKET_PORT = 8088;
+    private static final int WEB_SOCKET_PORT = 8080;
     private static final String WEB_GAME_URL = "https://asavan.github.io/sosgame/";
-    public static final String WEB_VIEW_URL = "file:///android_asset/www/index.html";
+    // public static final String WEB_VIEW_URL = "file:///android_asset/www/index.html";
+    public static final String WEB_VIEW_URL = "https://appassets.androidplatform.net/assets/www/index.html";
+
     public static final String MAIN_LOG_TAG = "SOS_TAG";
     private static final boolean secure = false;
 
@@ -22,11 +24,10 @@ public class AndroidWebServerActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        btnUtils = new BtnUtils(this, STATIC_CONTENT_PORT, WEB_SOCKET_PORT, secure);
+        btnUtils = new BtnUtils(this, STATIC_CONTENT_PORT);
         try {
             addButtons(IpUtils.getIPAddressSafe());
-            Map<String, String> mainParams = new LinkedHashMap<>();
-            btnUtils.launchWebView(WEB_VIEW_URL, mainParams);
+            btnUtils.launchWebView(WEB_VIEW_URL, null);
         } catch (Exception e) {
             Log.e(MAIN_LOG_TAG, "main", e);
         }
@@ -36,18 +37,18 @@ public class AndroidWebServerActivity extends Activity {
         HostUtils hostUtils = new HostUtils(STATIC_CONTENT_PORT, WEB_SOCKET_PORT, secure);
         final String host = hostUtils.getStaticHost(formattedIpAddress);
         {
-            Map<String, String> mainParams = new LinkedHashMap<>();
-            mainParams.put("mode", "ai");
-            btnUtils.addButtonTwa(WEB_GAME_URL, mainParams, R.id.twa_ai);
-            btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), mainParams, R.id.twa_ai_localhost);
-            btnUtils.addButtonWebView(WEB_VIEW_URL, mainParams, R.id.ai);
+            Map<String, String> aiParams = new LinkedHashMap<>();
+            aiParams.put("mode", "ai");
+            btnUtils.addButtonTwa(WEB_GAME_URL, aiParams, R.id.twa_ai);
+            btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), aiParams, R.id.twa_ai_localhost);
+            btnUtils.addButtonWebView(WEB_VIEW_URL, aiParams, R.id.ai);
         }
         {
             Map<String, String> b = new LinkedHashMap<>();
-            b.put("wh", hostUtils.getSocketHost(formattedIpAddress));
             b.put("sh", host);
             b.put("mode", "server");
             btnUtils.addButtonBrowser(host, b, R.id.launch_browser);
+            btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), b, R.id.twa_real_ip, host);
         }
         {
             Map<String, String> b = new LinkedHashMap<>();
@@ -55,15 +56,19 @@ public class AndroidWebServerActivity extends Activity {
             b.put("sh", host);
             b.put("mode", "server");
             btnUtils.addButtonWebView(WEB_VIEW_URL, b, R.id.webview_localhost);
-            btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), b, R.id.twa_real_ip, host);
             btnUtils.addButtonTwa(WEB_GAME_URL, b, R.id.newest);
         }
         {
             Map<String, String> b = new LinkedHashMap<>();
-            b.put("wh", hostUtils.getSocketHost(IpUtils.LOCALHOST));
             b.put("sh", host);
             b.put("mode", "swrtc");
             btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), b, R.id.twa_127);
+        }
+        {
+            Map<String, String> b = new LinkedHashMap<>();
+            b.put("sh", host);
+            b.put("mode", "test");
+            btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), b, R.id.network_info);
         }
     }
 
