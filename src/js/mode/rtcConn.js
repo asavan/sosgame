@@ -36,6 +36,7 @@ export function createDataChannel(logger, initiator) {
     peerConnection = SetupFreshConnection(logger);
 
     peerConnection.ondatachannel = (ev) => {
+        // TODO close old channel if exists
         dataChannel = ev.channel;
         if (initiator) {
             logger.error("ERROR Received datachannel");
@@ -97,11 +98,11 @@ export function createDataChannel(logger, initiator) {
 
     const send = (data) => {
         if (!isConnected) {
-            console.error("Not connected");
+            logger.error("Not connected");
             return false;
         }
         if (!dataChannel) {
-            console.error("Not data channel");
+            logger.error("Not data channel");
             return false;
         }
         const str = JSON.stringify(data);
@@ -114,11 +115,9 @@ export function createDataChannel(logger, initiator) {
         }
         logger.log("Before set offer");
         await peerConnection.setRemoteDescription(offer);
-        logger.log("After set offer", offer);
-        await delay(500);
-        logger.log("After set offer and delay");
+        logger.log("After set offer");
         await peerConnection.setLocalDescription();
-        logger.log("AFTER create local answer " + dataChannel?.id);
+        logger.log("AFTER create local answer ");
     }
 
     async function processAnswer(answer) {
@@ -141,11 +140,12 @@ export function createDataChannel(logger, initiator) {
         dataChannel.onopen = function () {
             console.timeEnd("setupDataChannel");
             isConnected = true;
-            logger.log("------ DATACHANNEL OPENED ------");
+            logger.log("------ DATACHANNEL OPENED ------" + dataChannel.label);
             const sctp = peerConnection.sctp;
             const maxMessageSize = sctp.maxMessageSize;
-            logger.log("datachanid " + dataChannel.id + " " + dataChannel.label + " " + JSON.stringify(sctp.transport.iceTransport.getSelectedCandidatePair()));
-            logger.log("chan " + dataChannel.protocol + " " + dataChannel.reliable + " " + dataChannel.priority);
+            const candsStr = JSON.stringify(sctp.transport.iceTransport.getSelectedCandidatePair());
+            logger.log("datachanid " + dataChannel.id + " " + candsStr);
+            logger.log("chan " + dataChannel.protocol + " " + dataChannel.reliable + " " + maxMessageSize);
             logger.log("chan2 " + dataChannel.ordered + " " + dataChannel.binaryType + " ");
 
             connectionPromise.resolve(dataChannel.label);
@@ -155,14 +155,15 @@ export function createDataChannel(logger, initiator) {
         dataChannel.onclosing = (event) => {
             logger.log("------ DC closing! ------", event);
             isConnected = false;
+            resetPromises();
+            ++reconnectCount;
+            peerConnection.restartIce();
             return handlers.call("beforeclose", {});
         };
 
         dataChannel.onclose = function () {
             logger.log("------ DC closed! ------");
             isConnected = false;
-            ++reconnectCount;
-            peerConnection.restartIce();
             return handlers.call("close", {});
         };
 
