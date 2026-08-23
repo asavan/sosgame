@@ -11,6 +11,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 
 
 public class WebViewActivity extends Activity {
@@ -28,7 +29,7 @@ public class WebViewActivity extends Activity {
 
 
 
-        webView.setWebViewClient(new WebViewClient() {
+        webView.setWebViewClient(new WebViewClientCompat() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
@@ -38,7 +39,7 @@ public class WebViewActivity extends Activity {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        webView.setBackgroundColor(Color.TRANSPARENT);
+        // webView.setBackgroundColor(Color.TRANSPARENT);
         String url = getIntent().getStringExtra("url");
         webView.loadUrl(url);
     }

@@ -31,6 +31,6 @@
     "devdeps": "github:asavan/dev-deps#v0.1.2"
   },
   "dependencies": {
-    "netutils": "github:asavan/netutils#155ffb71b6ce357a549ae9a493e48ca6ea82f2a3"
+    "netutils": "github:asavan/netutils#v0.2.0"
   }
 }

@@ -10,5 +10,6 @@
         <!-- Primary brand color. -->
         <item name="android:textAllCaps">false</item>
         <item name="android:buttonStyle">@style/ButtonColorDark</item>
+        <item name="android:windowBackground">@color/white</item>
     </style>
 </resources>

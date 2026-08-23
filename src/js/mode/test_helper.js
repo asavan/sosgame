@@ -1,5 +1,4 @@
-import {handlersFunc, negotiator} from "netutils";
-import {createDataChannel} from "./rtcConn.js";
+import {handlersFunc, negotiator, createDataChannelV2} from "netutils";
 
 export function jsonSocketChan(socketUrl, logger) {
     const handlers = handlersFunc(["error", "open", "message", "beforeclose", "close"]);
@@ -100,7 +99,7 @@ function newNetworkHandler(id, netNeg, logger, parentSender, initiator) {
         }
     };
 
-    const rtcC = createDataChannel(logger, initiator);
+    const rtcC = createDataChannelV2(logger, initiator);
     const addRemote = (data) => {
         logger.log("addRemote", data);
         return rtcC.processAnswer(data);
