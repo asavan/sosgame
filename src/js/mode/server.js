@@ -1,13 +1,13 @@
 import {beginGame, makeQr} from "./server_helper.js";
 
 import {
-    addSettingsButton, createSignalingChannel,
+    addServerBtns, createSignalingChannel,
     broadcastConnectionFunc, loggerFunc,
     netObj, removeElem
 } from "netutils";
 
 export default async function gameMode(window, document, settings, gameFunction) {
-    addSettingsButton(document, settings);
+    addServerBtns(window, document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     settings.serverId = myId;
     const networkLogger = loggerFunc(document, settings);

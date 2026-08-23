@@ -81,10 +81,7 @@ export function wrapJsonNetworkToNegotiator(net1, logger, id) {
         neg1.parseData(data);
     });
     const fSender = fromSender(id, net1);
-    const sender = (data) => {
-        fSender.send(data);
-    };
-    neg1.setParentSender(sender);
+    neg1.setParentSender(fSender);
     return neg1;
 }
 

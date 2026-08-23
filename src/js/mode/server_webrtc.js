@@ -1,6 +1,6 @@
 import {beginGame, makeQr} from "./server_helper.js";
 import {
-    addSettingsButton,
+    addServerBtns,
     broadcastConnectionFunc,
     loggerFunc, server_chan,
     netObj, removeElem
@@ -8,7 +8,7 @@ import {
 
 export default async function gameMode(window, document, settings, gameFunction) {
     const connectionLogger = loggerFunc(document, settings, 1);
-    addSettingsButton(document, settings);
+    addServerBtns(window, document, settings);
     const myId = netObj.getMyId(window, settings, Math.random);
     const mainSection = document.querySelector(".game");
     mainSection.classList.add("hidden");

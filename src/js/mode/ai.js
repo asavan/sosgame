@@ -1,8 +1,7 @@
-import {assert, delay, lobby as lobbyFunc, loggerFunc, addSettingsButton} from "netutils";
+import {assert, delay, lobby as lobbyFunc, loggerFunc, showGameView, addLoggerBtn, addFullScreenBtn} from "netutils";
 import bot from "../bot/second_best_bot.js";
 import fieldObj from "../field.js";
 import presenterObj from "../presenter.js";
-import {showGameView} from "../views/section_view.js";
 
 
 function botTryToMove(presenter, game, logger) {
@@ -20,7 +19,8 @@ function botTryToMove(presenter, game, logger) {
 }
 
 export default async function ai(window, document, settings, gameFunction) {
-    addSettingsButton(document, settings);
+    addFullScreenBtn(window, document);
+    addLoggerBtn(window, document);
     showGameView(document);
     const logger = loggerFunc(document, settings, 1, null, "aiLog");
     const presenter = presenterObj.presenterFuncDefault(settings);

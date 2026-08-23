@@ -1,12 +1,12 @@
 import {beginGame, gameInitClient} from "./client_helper.js";
 
 import {
-    addSettingsButton, client_chan,
+    addFullScreenBtn, client_chan,
     loggerFunc, netObj
 } from "netutils";
 
 export default async function gameMode(window, document, settings, gameFunction) {
-    addSettingsButton(document, settings);
+    addFullScreenBtn(window, document);
     const mainSection = document.querySelector(".game");
     mainSection.classList.add("hidden");
     const mainLogger = loggerFunc(document, settings, 2, null, "mainLog");

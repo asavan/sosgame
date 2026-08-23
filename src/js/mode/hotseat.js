@@ -1,5 +1,5 @@
 import presenterObj from "../presenter.js";
-import {showGameView} from "../views/section_view.js";
+import {showGameView} from "netutils";
 
 export default function gameMode(window, document, settings, gameFunction) {
     showGameView(document);

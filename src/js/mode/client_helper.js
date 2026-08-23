@@ -1,11 +1,11 @@
 import presenterObj from "../presenter.js";
 import actionsFunc from "../actions.js";
-import {showGameView} from "../views/section_view.js";
 import {
     subscribe_both_ways, assert,
     loggerFunc,
     broadcastConnectionFunc,
-    delayReject
+    delayReject,
+    showGameView
 } from "netutils";
 
 

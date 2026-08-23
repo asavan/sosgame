@@ -1,6 +1,5 @@
-import {loggerFunc, lobby as lobbyFunc, actionToHandler, makeQrStr, netObj} from "netutils";
+import {loggerFunc, lobby as lobbyFunc, actionToHandler, makeQrStr, netObj, showGameView} from "netutils";
 import actionsFunc from "../actions.js";
-import {showGameView} from "../views/section_view.js";
 import presenterObj from "../presenter.js";
 
 function reconnect(con, serverId) {

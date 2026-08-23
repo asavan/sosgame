@@ -17,10 +17,7 @@
         <div class="panel-header">
             <!--⛶ ⤭ ◱ 🗖 🗖 -->
             <button id="butInstall" title="install" class="hidden contrl-btn butInstall">↓</button>
-            <button id="resize-btn" title="fullscreen" class="contrl-btn resize-btn">⤱</button>
-            <button id="maximize-btn" class="hidden contrl-btn maximize-btn" title="Maximize Panel">⚙</button>
             <button class="help-btn contrl-btn circled" title="Rules" popovertarget="myModal"></button>
-            <button class="qr-btn contrl-btn" title="QR">▣</button>
         </div>
         <div class="panel-content"></div>
     </div>
@@ -40,7 +37,6 @@
     </div>
 </section>
 
-<div class="log"></div>
 <div class="qrcontainerserver"></div>
 <section class="popups">
     <div id="popup1" class="overlay">
@@ -52,17 +48,17 @@
             </div>
         </div>
     </div>
+    <dialog popover id="myModal" >
+        <p id="modalContent">
+            Two players play a game on a line of N squares. <br>
+            Each player in turn puts either S or O into an empty square.<br>
+            The game stops when three adjacent squares contain S, O, S in that order and the last player wins.<br>
+            If all the squares are filled without getting S, O, S, then the game is drawn.<br>
+        </p>
+    </dialog>
 </section>
-<dialog popover id="myModal" >
-    <p id="modalContent">
-        Two players play a game on a line of N squares. <br>
-        Each player in turn puts either S or O into an empty square.<br>
-        The game stops when three adjacent squares contain S, O, S in that order and the last player wins.<br>
-        If all the squares are filled without getting S, O, S, then the game is drawn.<br>
-    </p>
-</dialog>
 <footer>
+    <div class="log"></div>
 </footer>
-
 </body>
 </html>
