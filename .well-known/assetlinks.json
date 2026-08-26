@@ -1,6 +1,8 @@
 [
 {
-  "relation": ["delegate_permission/common.handle_all_urls"],
+  "relation": [
+    "delegate_permission/common.use_as_origin",
+    "delegate_permission/common.handle_all_urls"],
   "target": {"namespace": "android_app", "package_name": "ru.asavan.sosgame",
     "sha256_cert_fingerprints": [
       "EC:38:84:9A:D2:76:FA:A8:CB:7C:25:0A:AD:C4:EF:1C:C6:33:5B:18:DF:3C:BF:E5:3A:39:12:83:3C:BB:B1:FA",

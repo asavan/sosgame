@@ -23,6 +23,7 @@
             android:name="asset_statements"
             android:resource="@string/asset_statements" />
 
+
         <activity
             android:name=".AndroidWebServerActivity"
             android:exported="true">
@@ -36,6 +37,16 @@
             android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"
             />
 
+        <service
+            android:name="androidx.browser.customtabs.PostMessageService"
+            android:exported="true" />
+
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+    </queries>
 
 </manifest>

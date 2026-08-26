@@ -1,6 +1,7 @@
 import {assert, loggerFunc, parseSettings} from "netutils";
 import gameFunction from "./game.js";
 import settings from "./settings.js";
+import {appConnector} from "./app_connector.js";
 
 function adjustSettings(settings) {
     if (settings.colorOrder.length > settings.playerLimit) {
@@ -22,6 +23,7 @@ function adjustMode(changed, settings, queryString) {
 }
 
 export default async function starter(window, document) {
+    const appC = appConnector(window);
     const changed = parseSettings(window.location.search, settings);
     adjustSettings(settings);
     adjustMode(changed, settings, window.location.search);
@@ -47,7 +49,7 @@ export default async function starter(window, document) {
     } else {
         assert(false, "Unsupported mode");
     }
-    mode.default(window, document, settings, gameFunction).
+    mode.default(window, document, settings, gameFunction, appC).
         catch((error) => {
             mainLogger.error(error);
         });
