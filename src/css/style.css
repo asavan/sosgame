@@ -36,8 +36,7 @@ body::backdrop {
 
 .game {
     flex: 1 0 auto;
-
-    /* padding: 10px; */
+    padding: 5px;
 }
 
 footer {
@@ -48,11 +47,11 @@ footer {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    align-items: center;
     gap: 5px;
 }
 
 .box {
-    flex: var(--field-size);
     display: flex;
     gap: 5px;
     align-items: stretch;
@@ -60,7 +59,6 @@ footer {
 
 .buttons {
     display: flex;
-    flex: 2;
     gap: 5px;
     justify-content: center;
 }
@@ -93,8 +91,7 @@ footer {
     aspect-ratio: 1 / 1;
     display: grid;
     place-items: center;
-    min-width: 50px;
-    max-width: 100px;
+    width: clamp(48px, calc(((100vw - 20px)/(var(--field-size) + 2)) - 5px ), 100px);
     border: solid 2px;
     border-color: var(--border-color);
     font: bold 24px Tahoma, sans-serif;
@@ -107,20 +104,20 @@ footer {
 
 @media (max-width: 750px) {
     .cell {
-        min-width: 48px;
-        max-width: calc((100vh - 30px)/var(--field-size) - 2px);
-        max-height: calc((100vh - 30px)/var(--field-size) - 2px);
+        width: clamp(48px, calc((100vh - 30px)/var(--field-size) - 2px), 60px);
     }
 
     .box {
         flex-direction: column;
-        flex: 1;
         gap: 2px;
+    }
+
+    .field {
+        justify-content: space-around;
     }
 
     .buttons {
         flex-direction: column;
-        flex: 1;
         align-self: center;
     }
 
@@ -130,12 +127,6 @@ footer {
 
     .hidden2 {
         display: none;
-    }
-}
-
-@media (min-width: 750px) {
-    .game {
-        padding: 5px;
     }
 }
 
@@ -385,4 +376,3 @@ dialog::backdrop {
 }
 
 .hidden { display: none; }
-
