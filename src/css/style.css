@@ -104,7 +104,7 @@ footer {
 
 @media (max-width: 750px) {
     .cell {
-        width: clamp(48px, calc((100vh - 30px)/var(--field-size) - 2px), 60px);
+        width: clamp(40px, calc((100vh - 10px)/var(--field-size) - 2px), 60px);
     }
 
     .box {
