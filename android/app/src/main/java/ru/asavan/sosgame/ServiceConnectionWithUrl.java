@@ -42,6 +42,7 @@ public class ServiceConnectionWithUrl extends CustomTabsServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
+        Log.i(MAIN_LOG_TAG, "onServiceDisconnected " + connectionCounter);
         customTabsCallbackWithSession.setSession(null);
     }
 
