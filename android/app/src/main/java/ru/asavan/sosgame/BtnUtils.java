@@ -3,7 +3,6 @@ package ru.asavan.sosgame;
 import static ru.asavan.sosgame.AndroidWebServerActivity.MAIN_LOG_TAG;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,12 +10,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
-import androidx.browser.customtabs.CustomTabsCallback;
+import androidx.annotation.NonNull;
 import androidx.browser.customtabs.CustomTabsClient;
-import androidx.browser.customtabs.CustomTabsServiceConnection;
-import androidx.browser.customtabs.CustomTabsSession;
-import androidx.browser.trusted.TrustedWebActivityIntent;
-import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 
 import com.luigivampa92.ndefemulation.NdefEmulation;
 import com.luigivampa92.ndefemulation.ndef.UriNdefData;
@@ -34,7 +29,9 @@ public class BtnUtils {
     private final Activity activity;
     private WebServer server = null;
 
-    private CustomTabsSession mSession;
+    // private CustomTabsSession mSession;
+
+    private ServiceConnectionWithUrl mConnection;
 
 
     private NdefEmulation ndefEmulation;
@@ -101,12 +98,35 @@ public class BtnUtils {
         startServerAndSocket();
         launchNFC(host, parameters);
         Uri launchUri = Uri.parse(UrlUtils.getLaunchUrl(host, parameters));
-        TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(launchUri);
-        CustomTabsCallback callback = new CustomTabsCallback() {
+        if (mConnection != null) {
+            mConnection.tryLaunch(launchUri);
+            return;
+        }
+        mConnection = getTabsServiceConnection(launchUri);
+
+        // Bind Custom Tabs Service targeting the user's preferred modern browser (e.g. Chrome)
+        String packageName = CustomTabsClient.getPackageName(activity, Collections.singletonList("com.android.chrome"));
+        // String packageName = CustomTabsClient.getPackageName(activity, null);
+        Log.i(MAIN_LOG_TAG, "PackageName " + packageName);
+        if (packageName != null) {
+            CustomTabsClient.bindCustomTabsServicePreservePriority(activity, packageName, mConnection);
+        }
+    }
+
+    @NonNull
+    private ServiceConnectionWithUrl getTabsServiceConnection(Uri launchUri) {
+        CustomTabsCallbackWithSession callback = getCustomTabsCallback();
+        ServiceConnectionWithUrl mConnection = new ServiceConnectionWithUrl(launchUri, callback, activity);
+        return mConnection;
+    }
+
+    @NonNull
+    private CustomTabsCallbackWithSession getCustomTabsCallback() {
+        CustomTabsCallbackWithSession callback = new CustomTabsCallbackWithSession() {
             @Override
             public void onPostMessage(String message, Bundle extras) {
                 super.onPostMessage(message, extras);
-                Log.i(MAIN_LOG_TAG, "Message from Web: " + message);
+                Log.d(MAIN_LOG_TAG, "Message from Web: " + message);
 
                 try {
                     // 1. Initialize JSONObject with the string
@@ -124,54 +144,8 @@ public class BtnUtils {
                     Log.i(MAIN_LOG_TAG, "Not json");
                 }
             }
-
-            @Override
-            public void onMessageChannelReady(Bundle extras) {
-                Log.i(MAIN_LOG_TAG, "onMessageChannelReady");
-                int result = mSession.postMessage("First message", null);
-                Log.d(MAIN_LOG_TAG, "postMessage returned: " + result);
-            }
         };
-
-        // Safely create the session with your message callback attached!
-        // Request channel link
-        // Launch the TWA Activity using standard intent building blocks
-        // Corrected: Launch via the TWA intent method directly
-        CustomTabsServiceConnection mConnection = new CustomTabsServiceConnection() {
-            @Override
-            public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient client) {
-                client.warmup(0L);
-                // Safely create the session with your message callback attached!
-                mSession = client.newSession(callback);
-
-                if (mSession != null) {
-                    Log.i(MAIN_LOG_TAG, "Launch " + launchUri);
-
-                    // Request channel link
-                    var result = mSession.requestPostMessageChannel(launchUri);
-                    Log.i(MAIN_LOG_TAG, "Started2 " + result);
-
-                    // Launch the TWA Activity using standard intent building blocks
-                    TrustedWebActivityIntent twaIntent = builder.build(mSession);
-                    // Corrected: Launch via the TWA intent method directly
-                    twaIntent.launchTrustedWebActivity(activity);
-                }
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                Log.i(MAIN_LOG_TAG, "onServiceDisconnected");
-                mSession = null;
-            }
-        };
-
-        // Bind Custom Tabs Service targeting the user's preferred modern browser (e.g. Chrome)
-        String packageName = CustomTabsClient.getPackageName(activity, Collections.singletonList("com.android.chrome"));
-        // String packageName = CustomTabsClient.getPackageName(activity, null);
-        Log.i(MAIN_LOG_TAG, "PackageName " + packageName);
-        if (packageName != null) {
-            CustomTabsClient.bindCustomTabsServicePreservePriority(activity, packageName, mConnection);
-        }
+        return callback;
     }
 
     private void launchNFC(String host, Map<String, String> parameters) {
