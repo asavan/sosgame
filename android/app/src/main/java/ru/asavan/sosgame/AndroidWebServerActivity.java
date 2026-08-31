@@ -27,8 +27,9 @@ public class AndroidWebServerActivity extends Activity {
         btnUtils = new BtnUtils(this, STATIC_CONTENT_PORT);
         try {
             addButtons(IpUtils.getIPAddressSafe());
+            btnUtils.startServerAndSocket();
             //  btnUtils.launchTwa(WEB_GAME_URL, null);
-            btnUtils.launchWebView(WEB_VIEW_URL, null);
+            // btnUtils.launchWebView(WEB_VIEW_URL, null);
         } catch (Exception e) {
             Log.e(MAIN_LOG_TAG, "main", e);
         }

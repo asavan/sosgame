@@ -47,6 +47,7 @@ dependencies {
     implementation("com.luigivampa92:ndefemulation-android:1.0.0")
     implementation("androidx.webkit:webkit:1.17.0")
     implementation("androidx.browser:browser:1.10.0")
+    implementation("org.jmdns:jmdns:3.6.3")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")

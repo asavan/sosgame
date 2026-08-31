@@ -2,16 +2,19 @@ package ru.asavan.sosgame;
 
 import static ru.asavan.sosgame.AndroidWebServerActivity.MAIN_LOG_TAG;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.browser.customtabs.CustomTabsClient;
+import androidx.core.app.ActivityCompat;
 
 import com.luigivampa92.ndefemulation.NdefEmulation;
 import com.luigivampa92.ndefemulation.ndef.UriNdefData;
@@ -29,6 +32,10 @@ public class BtnUtils {
     private final Activity activity;
     private WebServer server = null;
 
+    private MdnsUtils mdnsUtils;
+
+    // MvMdnsManager mdnsManager = new MvMdnsManager();
+
     // private CustomTabsSession mSession;
 
     private ServiceConnectionWithUrl mConnection;
@@ -39,6 +46,7 @@ public class BtnUtils {
     public BtnUtils(Activity activity, int staticContentPort) {
         this.staticContentPort = staticContentPort;
         this.activity = activity;
+        // this.mdnsUtils = new MdnsUtils(activity, MAIN_LOG_TAG);
     }
 
     public void launchWebView(String host, Map<String, String> parameters) {
@@ -172,6 +180,22 @@ public class BtnUtils {
             ndefEmulation = new NdefEmulation(applicationContext);
             server = new WebServer(applicationContext, staticContentPort);
             server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+            // mdnsUtils.registerMdnsService("coolgames");
+            // mdnsUtils.setPort(staticContentPort);
+            // mdnsUtils.registerMdnsService("sosgame");
+//            mdnsManager.registerService(applicationContext, "sosgame",    // Имя вашего домена
+//                    "_http._tcp",      // Тип службы (протокол)
+//                    8080);
+
+            Intent serviceIntent = new Intent(activity, MdnsForegroundService.class);
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(
+                        activity,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        0
+                );
+            }
+            activity.startForegroundService(serviceIntent);
         } catch (Exception e) {
             Log.e("BTN_UTILS", "main", e);
         }
@@ -179,6 +203,9 @@ public class BtnUtils {
 
     protected void onDestroy() {
         ndefEmulation.setCurrentEmulatedNdefData(null);
+        activity.stopService(new Intent(activity, MdnsForegroundService.class));
+        // mdnsManager.unregisterService();
+        // mdnsUtils.onDestroy();
         if (server != null) {
             server.stop();
         }
