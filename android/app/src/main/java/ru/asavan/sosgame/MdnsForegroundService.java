@@ -13,80 +13,49 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.wifi.WifiManager;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 
-import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.util.HashMap;
-
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceInfo;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MdnsForegroundService extends Service {
     private static final String TAG = MAIN_LOG_TAG;
     private static final String CHANNEL_ID = "mdns_channel";
     private static final int NOTIFICATION_ID = 100;
 
-    private JmDNS jmdns;
-    private WifiManager.MulticastLock multicastLock;
-    private ServiceInfo serviceInfo;
+    private PureHostClaimer pureHostClaimer;
+    private ExecutorService networkExecutor;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        pureHostClaimer = new PureHostClaimer();
+        networkExecutor = Executors.newSingleThreadExecutor();
         // Отключаем внутренние размашистые логи JmDNS, чтобы не спамить в Logcat
 
         Log.d(TAG, "startMdnsAdvertising ");
         // 1. Активируем MulticastLock (в Foreground Service это сработает на 100%)
-        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if (wifi != null) {
-            multicastLock = wifi.createMulticastLock("mdns_fg_lock");
-            multicastLock.setReferenceCounted(false); // Жесткий захват без подсчета ссылок
-            multicastLock.acquire();
-        }
 
-        try {
-            Log.d(TAG, "startMdnsAdvertising2 ");
-            InetAddress ip = getWifiIpAddress(this);
-            if (ip == null) {
-                Log.e(TAG, "Ошибка: Устройство не подключено к Wi-Fi подсети.");
-                return;
-            }
 
-            Log.d(TAG, "Биндинг JmDNS на IP-адрес: " + ip.getHostAddress());
-            jmdns = JmDNS.create(ip, ip.getHostAddress());
-
-            // Обязательные метаданные (TXT Record) для стабильного распознавания сканерами
-            HashMap<String, String> properties = new HashMap<>();
-            properties.put("status", "active");
-
-            // Создаем структуру сервиса (тип строго должен заканчиваться на .local.)
-            serviceInfo = ServiceInfo.create(
-                    "_http._tcp.local",
-                    "MyCoolDevice",
-                    8080,
-                    0, 0,
-                    properties
-            );
-
-            // Публикуем в сеть
-            jmdns.registerService(serviceInfo);
-            Log.d(TAG, "Домен успешно опубликован в сети!");
-
-        } catch (IOException e) {
-            Log.e(TAG, "Критическая ошибка JmDNS при регистрации", e);
-        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(MAIN_LOG_TAG, "onStartCommand 1");
+
+        InetAddress ip = getWifiIpAddress(this);
+        if (ip == null) {
+            Log.e(TAG, "Ошибка: Устройство не подключено к Wi-Fi подсети.");
+            super.onStartCommand(intent, flags, startId);
+        }
+
+
         try {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "ChannelN", NotificationManager.IMPORTANCE_LOW);
             channel.setDescription("channel for foreground service notification");
@@ -112,6 +81,24 @@ public class MdnsForegroundService extends Service {
                 Log.e(TAG, "WTF");
                 startForeground(NOTIFICATION_ID, notification);
             }
+
+            var self = this;
+
+            // 2. Отправляем сетевую задачу в фоновый поток
+            networkExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Получаем локальный IP-адрес Wi-Fi
+                        Log.d(TAG, "Биндинг JmDNS на IP-адрес: " + ip.getHostAddress());
+                        pureHostClaimer.claimHostOnly(getApplicationContext(), ip, "pretty");
+                        Log.d(TAG, "Домен успешно опубликован в сети!");
+
+                    } catch (Exception e) {
+                        Log.e(TAG, "Ошибка инициализации mDNS в фоновом потоке", e);
+                    }
+                }
+            });
         } catch (Exception ex) {
             Log.e(TAG, "onStartCommand fail", ex);
         }
@@ -144,54 +131,26 @@ public class MdnsForegroundService extends Service {
         return null;
     }
 
-    private void createNotificationChannel() {
-        NotificationChannel channel = new NotificationChannel(
-                CHANNEL_ID, "mDNS Service Channel", NotificationManager.IMPORTANCE_HIGH);
-        NotificationManager manager = getSystemService(NotificationManager.class);
-        if (manager != null) {
-            manager.createNotificationChannel(channel);
-        } else {
-            Log.d(TAG, "No NotificationManager");
-        }
-    }
 
     @Override
     public void onDestroy() {
         Log.i(MAIN_LOG_TAG, "Destroy service");
-        try {
-            if (jmdns != null) {
-                // JmDNS рассылает Goodbye-пакеты, чтобы ПК мгновенно забыл это устройство
-                jmdns.unregisterAllServices();
-                jmdns.close();
-                jmdns = null;
-                Log.d(TAG, "Ресурсы JmDNS успешно очищены.");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Ошибка при закрытии сокетов JmDNS", e);
-        } finally {
-            // Всегда гарантированно отпускаем блокировку мультикаста
-            if (multicastLock != null && multicastLock.isHeld()) {
-                multicastLock.release();
-                multicastLock = null;
-            }
-        }
+        if (networkExecutor != null) {
+            networkExecutor.execute(() -> {
+                if (pureHostClaimer != null) {
+                    pureHostClaimer.releaseHost();
+                }
+            });
+            // Закрываем сам исполнитель потоков после завершения задачи
 
-        // Вызываем родительский метод только после того, как все Goodbye-пакеты ушли в сеть
+            // Вызываем родительский метод только после того, как все Goodbye-пакеты ушли в сеть
+            networkExecutor.shutdown();
+        }
         super.onDestroy();
-    }
-
-    public class LocalBinder extends Binder {
-        MdnsForegroundService getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return MdnsForegroundService.this;
-        }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
+        return null;
     }
-
-    private final IBinder mBinder = new LocalBinder();
 }
-
