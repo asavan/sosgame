@@ -28,6 +28,12 @@ android {
         }
     }
 
+    androidResources {
+        ignoreAssetsPatterns.clear()
+        // Передаем список, содержащий только одну пустую строку
+        ignoreAssetsPatterns.addAll(listOf(""))
+    }
+
     buildTypes {
         release {
             optimization {

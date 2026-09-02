@@ -18,6 +18,8 @@ abstract public class WebServer extends NanoWSD implements IStartStopServer {
     private final String folderToServe;
     private static final String DEFAULT_STATIC_FOLDER = "www";
 
+    private boolean allowDots = true;
+
     public WebServer(Context context, int port, String folderToServe) {
         super(port);
         this.context = context;
@@ -48,7 +50,7 @@ abstract public class WebServer extends NanoWSD implements IStartStopServer {
         if (file.startsWith("/")) {
             file = file.substring(1);
         }
-        if (file.startsWith(".")) {
+        if (!allowDots && file.startsWith(".")) {
             file = file.substring(1);
         }
 
