@@ -108,6 +108,30 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="@string/network_info" />
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+    </Space>
+
+    <Button
+        android:id="@+id/other_game"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="@string/other_game" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+    </Space>
+
+    <Button
+        android:id="@+id/clear"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="@string/clear" />
+
 
     <Space
         android:layout_width="0dp"

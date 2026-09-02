@@ -48,6 +48,7 @@ dependencies {
     implementation("androidx.webkit:webkit:1.17.0")
     implementation("androidx.browser:browser:1.10.0")
     implementation("org.jmdns:jmdns:3.6.3")
+    implementation("androidx.activity:activity:1.13.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")

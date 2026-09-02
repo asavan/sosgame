@@ -1,14 +1,17 @@
 package ru.asavan.sosgame;
 
-import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+
+
+import androidx.activity.ComponentActivity;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-public class AndroidWebServerActivity extends Activity {
+public class AndroidWebServerActivity extends ComponentActivity implements ISetTree {
     private static final int STATIC_CONTENT_PORT = 8080;
     private static final int WEB_SOCKET_PORT = 8080;
     private static final String WEB_GAME_URL = "https://asavan.github.io/sosgame/";
@@ -21,7 +24,7 @@ public class AndroidWebServerActivity extends Activity {
     private BtnUtils btnUtils;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         btnUtils = new BtnUtils(this, STATIC_CONTENT_PORT);
@@ -79,6 +82,20 @@ public class AndroidWebServerActivity extends Activity {
         if (btnUtils != null) {
             btnUtils.onDestroy();
         }
+        btnUtils = null;
         super.onDestroy();
+    }
+
+    @Override
+    public void setBaseTreeUri(Uri baseTreeUri) {
+        Log.i(MAIN_LOG_TAG, "setBaseTreeUri1");
+        if (btnUtils != null) {
+            if (baseTreeUri == null) {
+                Log.i(MAIN_LOG_TAG, "setBaseTreeUri2");
+            } else {
+                Log.i(MAIN_LOG_TAG, "setBaseTreeUri3 " + baseTreeUri);
+            }
+            btnUtils.setBaseTreeUri(baseTreeUri);
+        }
     }
 }

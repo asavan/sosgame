@@ -49,6 +49,8 @@
     <string name="launch_twa_local">Launch in app local</string>
     <string name="webview">Webview</string>
     <string name="network_info">Network info</string>
+    <string name="other_game">Other game</string>
+    <string name="clear">Clear folder</string>
     <string name="webview_localhost">Webview localhost</string>
     <string name="errors">Error messages</string>
 
