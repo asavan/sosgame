@@ -19,6 +19,7 @@ import com.luigivampa92.ndefemulation.ndef.UriNdefData;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -48,6 +49,10 @@ public class BtnUtils implements ISetTree {
     private void launchWebViewAndServer(String host, Map<String, String> parameters) {
         startServerAndSocket();
         launchWebView(host, parameters);
+    }
+
+    public int getPort() {
+        return staticContentPort;
     }
 
     public void addButtonWebView(final String host, Map<String, String> parameters, int btnId) {
@@ -91,6 +96,7 @@ public class BtnUtils implements ISetTree {
     }
 
     public void launchTwa(String host, Map<String, String> parameters) {
+        Log.i(MAIN_LOG_TAG, "launchTwa " + host);
         startServerAndSocket();
         launchNFC(host, parameters);
         Uri launchUri = Uri.parse(UrlUtils.getLaunchUrl(host, parameters));
@@ -153,6 +159,10 @@ public class BtnUtils implements ISetTree {
                     url = sh;
                 }
             }
+            if (url == null) {
+                Log.e(MAIN_LOG_TAG, "launchNFC fail null url");
+                return;
+            }
             ndefEmulation.setCurrentEmulatedNdefData(new UriNdefData(url));
         } catch (Exception ex) {
             Log.e(MAIN_LOG_TAG, "launchNFC fail", ex);
@@ -160,17 +170,23 @@ public class BtnUtils implements ISetTree {
     }
 
     public void startServerAndSocket() {
+        Log.i(MAIN_LOG_TAG, "startServerAndSocket");
         if (server != null) {
             return;
         }
         try {
             Context applicationContext = activity.getApplicationContext();
-            ndefEmulation = new NdefEmulation(applicationContext);
-            server = new WebServerWithSocket(applicationContext, staticContentPort);
-            server.start();
+            startServerInner(applicationContext);
         } catch (Exception e) {
             Log.e("BTN_UTILS", "main", e);
         }
+    }
+
+    protected void startServerInner(Context applicationContext) throws IOException {
+        Log.i(MAIN_LOG_TAG, "BtnUtilsStarted");
+        ndefEmulation = new NdefEmulation(applicationContext);
+        server = new WebServerWithSocket(applicationContext, staticContentPort);
+        server.start();
     }
 
     protected void onDestroy() {
@@ -184,7 +200,6 @@ public class BtnUtils implements ISetTree {
     @Override
     public void setBaseTreeUri(Uri baseTreeUri) {
         if (server != null) {
-
             server.setBaseTreeUri(baseTreeUri);
         }
     }

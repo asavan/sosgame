@@ -24,9 +24,8 @@ public class MvMdnsManager {
 
     private JmDNS jmdns;
     private WifiManager.MulticastLock multicastLock;
-    private ServiceInfo serviceInfo;
 
-    public void registerService(Context context, String name, String type, int port) {
+    public void registerService(Context context, String name, int port) {
 
         // 1. Включаем MulticastLock
         WifiManager wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -50,24 +49,10 @@ public class MvMdnsManager {
                 Log.d(TAG, "Binding JmDNS to IP: " + bindingAddress.getHostAddress());
 
                 // Создаем JmDNS на базе актуального IP
-                jmdns = JmDNS.create(bindingAddress, bindingAddress.getHostAddress());
-
-                String fullType = type.endsWith(".local") ? type : type + ".local";
-
-                java.util.HashMap<String, String> properties = new java.util.HashMap<>();
-                properties.clear();
-                properties.put("path", "/"); // Любое дефолтное свойство
-
-                // String fullType = type.endsWith(".local") ? type : type + ".local";
-
-// Используем перегруженный метод с properties
-                serviceInfo = ServiceInfo.create(fullType, name, port, 0, 0, properties);
-                // serviceInfo = ServiceInfo.create(fullType, name, port, name);
-
+                jmdns = JmDNS.create(bindingAddress, name);
+                ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", name, port, "path=index.html");
                 jmdns.registerService(serviceInfo);
                 Log.d(TAG, "Служба успешно зарегистрирована через JmDNS: " + name);
-                jmdns.list(fullType);
-
             } catch (IOException e) {
                 Log.e(TAG, "Ошибка регистрации JmDNS", e);
             }

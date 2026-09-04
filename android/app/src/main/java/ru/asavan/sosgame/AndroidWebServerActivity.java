@@ -27,7 +27,7 @@ public class AndroidWebServerActivity extends ComponentActivity implements ISetT
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        btnUtils = new BtnUtils(this, STATIC_CONTENT_PORT);
+        btnUtils = new BtnUtilsWithMdns(this, STATIC_CONTENT_PORT);
         try {
             addButtons(IpUtils.getIPAddressSafe());
             btnUtils.startServerAndSocket();

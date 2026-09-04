@@ -28,9 +28,10 @@
   },
   "homepage": "https://asavan.github.io/sosgame/",
   "devDependencies": {
+    "bonjour-service": "^1.4.4",
     "devdeps": "github:asavan/dev-deps#v0.2.0",
-    "node-dns-sd": "^1.0.1",
-    "mdns-local": "^0.1.0"
+    "mdns-local": "^0.1.0",
+    "node-dns-sd": "^1.0.1"
   },
   "dependencies": {
     "netutils": "github:asavan/netutils#v0.2.1"
