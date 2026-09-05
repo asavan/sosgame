@@ -1,7 +1,8 @@
 import presenterObj from "../presenter.js";
 import {loggerFunc, netObj, addLoggerBtn, addFullScreenBtn} from "netutils";
-import {fromSender, jsonSocketChan, netHandler, wrapJsonNetworkToNegotiator} from "./test_helper.js";
+import {fromSender, netHandler, wrapJsonNetworkToNegotiator} from "./test_helper.js";
 import {qrHandler} from "../views/manual-qr.js";
+import {piSocket} from "../conection/pisocket.js";
 
 export default async function test(window, document, settings, gameFunction) {
     addFullScreenBtn(window, document);
@@ -15,7 +16,7 @@ export default async function test(window, document, settings, gameFunction) {
     const socketUrl = netObj.getWebSocketUrl(settings, location);
     mainLogger.log("Started " + myId);
     mainLogger.log("Socket " + socketUrl);
-    const jsonChan = jsonSocketChan(socketUrl, logger);
+    const jsonChan = piSocket(logger);
     const idChan = fromSender(myId, jsonChan);
     const neg1 = wrapJsonNetworkToNegotiator(idChan, logger, myId);
     const negNet = netHandler(logger, neg1);
