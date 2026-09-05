@@ -1,10 +1,12 @@
 import presenterObj from "../presenter.js";
 import {loggerFunc, netObj, addLoggerBtn, addFullScreenBtn} from "netutils";
 import {fromSender, jsonSocketChan, netHandler, wrapJsonNetworkToNegotiator} from "./test_helper.js";
+import {qrHandler} from "../views/manual-qr.js";
 
 export default async function test(window, document, settings, gameFunction) {
     addFullScreenBtn(window, document);
     addLoggerBtn(window, document);
+    qrHandler(window, document);
     const presenter = presenterObj.presenterFuncDefault(settings);
     const game = gameFunction(window, document, settings, presenter);
     const mainLogger = loggerFunc(document, settings, 2, null, "mainLog");

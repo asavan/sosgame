@@ -375,4 +375,10 @@ dialog::backdrop {
     grid-area: 1 / 1;
 }
 
+.qr-input {
+    width: clamp(200px, 100%, 800px);
+    padding: 5px;
+    display: block;
+}
+
 .hidden { display: none; }

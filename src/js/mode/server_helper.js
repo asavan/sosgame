@@ -79,6 +79,17 @@ export function beginGame(window, document, settings, gameFunction, connection, 
     return game;
 }
 
+export function makeQrAny(str, document) {
+    const image = {
+        source: "./images/sos64.png",
+        width: "15%",
+        height: "15%",
+        x: "center",
+        y: "center"
+    };
+    return makeQrStr(str, null, document, {}, image);
+}
+
 export function makeQr(window, document, settings, serverId) {
     const staticHost = netObj.getHostUrl(settings, window.location);
     const url = new URL(staticHost);
@@ -86,12 +97,6 @@ export function makeQr(window, document, settings, serverId) {
         url.searchParams.set("serverId", serverId);
     }
     console.log("enemy url", url.toString());
-    const image = {
-        source: "./images/sos.png",
-        width: "10%",
-        height: "20%",
-        x: "center",
-        y: "center"
-    };
-    return makeQrStr(url.toString(), window, document, settings, image);
+    return makeQrAny(url.toString(), document);
+    // return makeQrStr(url.toString(), window, document, settings, image);
 }
