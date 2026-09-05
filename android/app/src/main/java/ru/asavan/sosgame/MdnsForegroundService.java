@@ -49,7 +49,7 @@ public class MdnsForegroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(MAIN_LOG_TAG, "onStartCommand 1");
 
-        InetAddress ip = getWifiIpAddress(this);
+        InetAddress ip = NetUtils.getWifiIpAddress(this);
         if (ip == null) {
             Log.e(TAG, "Ошибка: Устройство не подключено к Wi-Fi подсети.");
             super.onStartCommand(intent, flags, startId);
@@ -109,27 +109,7 @@ public class MdnsForegroundService extends Service {
     /**
      * Современный (Non-deprecated) метод получения IPv4 адреса Wi-Fi интерфейса
      */
-    private InetAddress getWifiIpAddress(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm == null) return null;
 
-        Network activeNetwork = cm.getActiveNetwork();
-        if (activeNetwork == null) return null;
-
-        NetworkCapabilities caps = cm.getNetworkCapabilities(activeNetwork);
-        if (caps == null || !caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) return null;
-
-        LinkProperties linkProperties = cm.getLinkProperties(activeNetwork);
-        if (linkProperties == null) return null;
-
-        for (LinkAddress linkAddress : linkProperties.getLinkAddresses()) {
-            InetAddress address = linkAddress.getAddress();
-            if (address instanceof Inet4Address && !address.isLoopbackAddress()) {
-                return address;
-            }
-        }
-        return null;
-    }
 
 
     @Override

@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.activity.ComponentActivity;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -17,17 +18,19 @@ public class AndroidWebServerActivity extends ComponentActivity implements ISetT
     private static final String WEB_GAME_URL = "https://asavan.github.io/sosgame/";
     // public static final String WEB_VIEW_URL = "file:///android_asset/www/index.html";
     public static final String WEB_VIEW_URL = "https://appassets.androidplatform.net/assets/www/index.html";
+    private static final List<String> DNS_NAMES = List.of("sosgame", "game", "coolgames");
 
     public static final String MAIN_LOG_TAG = "SOS_TAG";
     private static final boolean secure = false;
 
     private BtnUtils btnUtils;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        btnUtils = new BtnUtilsWithMdns(this, STATIC_CONTENT_PORT);
+        btnUtils = new BtnUtilsWithMdns(this, STATIC_CONTENT_PORT, DNS_NAMES);
         try {
             addButtons(IpUtils.getIPAddressSafe());
             btnUtils.startServerAndSocket();

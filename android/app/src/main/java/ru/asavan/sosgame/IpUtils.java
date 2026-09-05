@@ -12,6 +12,14 @@ public class IpUtils {
     public static final String LOCALHOST = "localhost";
 
     public static String getIPAddress() {
+        var addr = getMainAddress();
+        if (addr == null) {
+            return null;
+        }
+        return addr.getHostAddress();
+    }
+
+    public static Inet4Address getMainAddress() {
         try {
             for (var interfaces = NetworkInterface.getNetworkInterfaces();
                  interfaces.hasMoreElements(); ) {
@@ -22,7 +30,7 @@ public class IpUtils {
                         continue;
                     }
                     if (inetAddress instanceof Inet4Address ip4Addr) {
-                        return ip4Addr.getHostAddress();
+                        return ip4Addr;
                     }
                 }
             }

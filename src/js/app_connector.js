@@ -11,12 +11,12 @@ export function appConnector(window) {
     let portSender = null;
 
     const runWithDelay = async () => {
-        initLogger.log("before start");
         await delay(2000);
         const payload = JSON.stringify({ action: "DATA1", value: "123" });
-        initLogger.log("try send message " + payload);
-        portSender?.postMessage(payload);
-        initLogger.log("after message");
+        if (portSender) {
+            initLogger.log("try send message " + payload);
+            portSender.postMessage(payload);
+        }
     };
 
     window.addEventListener("unhandledrejection", (event) => {
@@ -71,4 +71,3 @@ export function appConnector(window) {
     };
     return {send};
 }
-
