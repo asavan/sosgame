@@ -1,6 +1,6 @@
 {
   "name": "sosgame",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "author": "Alex Sav",
   "description": "Sos game",
   "private": true,
@@ -11,6 +11,7 @@
     "start": "webpack serve --config webpack_configs/webpack.config.js --mode development",
     "android": "webpack --config webpack_configs/android.webpack.config.js --mode production",
     "build": "webpack --config webpack_configs/production.webpack.config.js --mode production",
+    "mdns": "node devtools/bonjur.js",
     "style": "npx eslint . -c linters/eslint.config.js",
     "style:fix": "npx eslint . -c linters/eslint.config.js --fix",
     "style2": "npx stylelint --config linters/stylelint.config.js \"src/**/*.css\"",
@@ -29,9 +30,9 @@
   "homepage": "https://asavan.github.io/sosgame/",
   "devDependencies": {
     "bonjour-service": "^1.4.4",
-    "devdeps": "github:asavan/dev-deps#v0.2.0"
+    "devdeps": "github:asavan/dev-deps#v0.3.1"
   },
   "dependencies": {
-    "netutils": "github:asavan/netutils#v0.2.1"
+    "netutils": "github:asavan/netutils#v0.2.2"
   }
 }

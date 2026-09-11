@@ -9,7 +9,7 @@
 ![Original](/assets/screenshots/5.png)
 
 ### Rules
-Two players play a game on a line of N squares.  
+Two players play a game on a line of N squares.     
 Each player in turn puts either S or O into an empty square.  
 The game stops when three adjacent squares contain S, O, S in that order and the last player wins.  
 If all the squares are filled without getting S, O, S, then the game is drawn.
