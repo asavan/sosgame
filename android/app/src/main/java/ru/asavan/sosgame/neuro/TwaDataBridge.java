@@ -1,7 +1,6 @@
 package ru.asavan.sosgame.neuro;
 
 import android.util.Base64;
-import androidx.browser.customtabs.CustomTabsSession;
 import org.json.JSONObject;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -10,9 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TwaDataBridge {
 
-    private final CustomTabsSession customTabsSession;
+    private final TwaMessageBridgeCallback messageCallback;
     private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
-    private final boolean isChannelReady;
 
     private static class CacheEntry {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -21,36 +19,37 @@ public class TwaDataBridge {
     }
 
     /**
-     * Конструктор принимает сессию и текущий статус готовности канала портов.
+     * Конструктор принимает только единственный мост-коллбек.
      */
-    public TwaDataBridge(CustomTabsSession session, boolean isChannelReady) {
-        this.customTabsSession = session;
-        this.isChannelReady = isChannelReady;
+    public TwaDataBridge(TwaMessageBridgeCallback messageCallback) {
+        this.messageCallback = messageCallback;
     }
 
     /**
      * Синхронный метод получения данных по ключу.
-     * Не вызывайте в главном (UI) потоке приложения.
      */
     public byte[] getData(String key) {
-        if (customTabsSession == null || !isChannelReady) {
+        // Проверяем готовность канала через инкапсулированный метод коллбека
+        if (messageCallback == null || !messageCallback.isChannelReady()) {
             return null;
         }
 
-        // Атомарно получаем или создаем запись для ключа
         CacheEntry entry = cache.computeIfAbsent(key, k -> new CacheEntry());
-
-        // Первый зашедший поток отправляет запрос на веб-страницу
         boolean isFirstRequest = entry.isRequestSent.compareAndSet(false, true);
 
         try {
             if (isFirstRequest) {
                 JSONObject message = new JSONObject();
                 message.put("file", key);
-                customTabsSession.postMessage(message.toString(), null);
+
+                // Отправляем сообщение через messageCallback. Метод сам проверит сессию.
+                boolean sent = messageCallback.postMessage(message.toString());
+                if (!sent) {
+                    return null; // Если отправка не удалась на системном уровне
+                }
             }
 
-            // Блокируем поток на время ожидания ответа (таймаут 15 секунд)
+            // Блокируем поток на время ожидания ответа
             boolean success = entry.latch.await(15, TimeUnit.SECONDS);
             if (success && entry.data != null) {
                 return entry.data;
@@ -59,9 +58,6 @@ public class TwaDataBridge {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            // Если мы были инициатором запроса, но данные по какой-то причине не пришли
-            // (ошибка JSON, таймаут, InterruptedException), очищаем запись из кэша,
-            // чтобы дать возможность повторить запрос при следующем вызове.
             if (isFirstRequest && entry.data == null) {
                 cache.remove(key);
             }
@@ -69,10 +65,6 @@ public class TwaDataBridge {
         return null;
     }
 
-    /**
-     * Публичный метод для обработки входящих JSON-сообщений.
-     * Вызывается внешним посредником (например, из Activity через Callback).
-     */
     public void processIncomingMessage(String messageString) {
         try {
             JSONObject response = new JSONObject(messageString);
@@ -81,12 +73,10 @@ public class TwaDataBridge {
 
             CacheEntry entry = cache.get(key);
             if (entry != null && response.has("data")) {
-                // Записываем данные только один раз
                 if (entry.data == null) {
                     String base64Data = response.getString("data");
                     entry.data = Base64.decode(base64Data, Base64.DEFAULT);
                 }
-                // Разблокируем все ожидающие этот ключ потоки
                 entry.latch.countDown();
             }
         } catch (Exception e) {
@@ -94,9 +84,6 @@ public class TwaDataBridge {
         }
     }
 
-    /**
-     * Полная очистка внутреннего кэша.
-     */
     public void clearCache() {
         cache.clear();
     }

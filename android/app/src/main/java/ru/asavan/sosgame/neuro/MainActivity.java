@@ -62,24 +62,17 @@ public class MainActivity extends ComponentActivity {
             return;
         }
 
-        // 1. Вся работа по освобождению старого слушателя теперь выполняется СНАРУЖИ
-        if (currentListener != null) {
-            messageCallback.unregisterListener(currentListener);
-        }
         if (currentDataBridge != null) {
             currentDataBridge.clearCache();
         }
 
-        messageCallback.setTargetUrl(url);
+        // Создаем мост, передавая ТОЛЬКО messageCallback
+        currentDataBridge = new TwaDataBridge(messageCallback);
 
-        // 2. Создаем чистый dataBridge, передавая только состояние флага из callback
-        currentDataBridge = new TwaDataBridge(session, messageCallback.isChannelReady());
+        // Выполняем атомарный своп
+        messageCallback.swapTargetAndListener(url, message -> currentDataBridge.processIncomingMessage(message));
 
-        // 3. Напрямую связываем callback и новый dataBridge через внешнюю подписку
-        currentListener = message -> currentDataBridge.processIncomingMessage(message);
-        messageCallback.registerListener(currentListener);
-
-        // 4. Запуск TWA
+        // Запускаем TWA
         Uri launchUri = Uri.parse(url);
         TrustedWebActivityIntentBuilder builder = new TrustedWebActivityIntentBuilder(launchUri);
         TrustedWebActivityIntent twaIntent = builder.build(session);
@@ -89,9 +82,8 @@ public class MainActivity extends ComponentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (currentListener != null) {
-            messageCallback.unregisterListener(currentListener);
-        }
+        // Полная очистка ресурсов при выходе из приложения
+        messageCallback.clear();
         twaConnection.unbind(this);
     }
 }

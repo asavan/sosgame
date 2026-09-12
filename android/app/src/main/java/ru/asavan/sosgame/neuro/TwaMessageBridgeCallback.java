@@ -19,14 +19,7 @@ public class TwaMessageBridgeCallback extends CustomTabsCallback {
     private CustomTabsSession currentSession;
     private Uri targetOriginUri;
     private volatile boolean isChannelReady = false;
-
-    public void registerListener(PostMessageListener listener) {
-        listeners.add(listener);
-    }
-
-    public void unregisterListener(PostMessageListener listener) {
-        listeners.remove(listener);
-    }
+    private PostMessageListener activeListener;
 
     public boolean isChannelReady() {
         return isChannelReady;
@@ -36,8 +29,39 @@ public class TwaMessageBridgeCallback extends CustomTabsCallback {
         this.currentSession = session;
     }
 
-    public void setTargetUrl(String targetUrl) {
-        this.targetOriginUri = targetUrl != null ? Uri.parse(targetUrl) : null;
+    /**
+     * Отправляет сообщение на веб-страницу, если сессия и порты готовы.
+     * @return true, если сообщение успешно отправлено
+     */
+    public boolean postMessage(@NonNull String message) {
+        if (currentSession != null && isChannelReady) {
+            // Отправляем сообщение через инкапсулированную сессию
+            return currentSession.postMessage(message, null) == 0;
+        }
+        return false;
+    }
+
+    /**
+     * Атомарный своп целевого URL и слушателя данных.
+     */
+    public synchronized void swapTargetAndListener(@NonNull String newUrl, @NonNull PostMessageListener newListener) {
+        if (this.activeListener != null) {
+            listeners.remove(this.activeListener);
+        }
+
+        this.targetOriginUri = Uri.parse(newUrl);
+        this.isChannelReady = false;
+
+        this.activeListener = newListener;
+        listeners.add(newListener);
+    }
+
+    public synchronized void clear() {
+        if (this.activeListener != null) {
+            listeners.remove(this.activeListener);
+            this.activeListener = null;
+        }
+        this.targetOriginUri = null;
         this.isChannelReady = false;
     }
 
