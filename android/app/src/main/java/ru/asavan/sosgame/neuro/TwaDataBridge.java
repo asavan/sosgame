@@ -1,15 +1,19 @@
 package ru.asavan.sosgame.neuro;
 
 import android.util.Base64;
+import android.util.Log;
 import org.json.JSONObject;
-
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TwaDataBridge {
+import ru.asavan.sosgame.IDataGetter;
+
+public class TwaDataBridge implements IDataGetter {
+
+    private static final String MAIN_LOG_TAG = "TwaDataBridge";
 
     private final TwaMessageBridgeCallback messageCallback;
     private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
@@ -39,26 +43,20 @@ public class TwaDataBridge {
 
                 boolean sent = messageCallback.postMessage(message.toString());
                 if (!sent) {
-                    // АТОМАРНЫЙ СБРОС И РАЗБЛОКИРОВКА:
-                    // Возвращаем флаг в false, чтобы следующий вызов мог повторить попытку
                     entry.isRequestSent.set(false);
-                    // Будим параллельные потоки, если они успели «подсесть» на этот latch
                     entry.latch.countDown();
                     return null;
                 }
             }
 
-            // Блокируем поток на время ожидания ответа
             boolean success = entry.latch.await(15, TimeUnit.SECONDS);
             if (success && entry.data != null) {
                 return entry.data;
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(MAIN_LOG_TAG, "Error while waiting for data for key: " + key, e);
         } finally {
-            // Если отправка не удалась или произошел таймаут/ошибка у ПЕРВОГО потока,
-            // удаляем запись из мапы кэша для возможности повторного запроса.
             if (isFirstRequest && entry.data == null) {
                 cache.remove(key);
             }
@@ -66,6 +64,9 @@ public class TwaDataBridge {
         return null;
     }
 
+    /**
+     * Публичный метод для обработки входящих JSON-сообщений от веб-страницы.
+     */
     public void processIncomingMessage(String messageString) {
         try {
             JSONObject response = new JSONObject(messageString);
@@ -76,34 +77,31 @@ public class TwaDataBridge {
 
             if (entry != null && entry.data == null) {
                 String rawData = response.getString("data");
-                // Если "encoding" не передан, по умолчанию считаем его "base64" для обратной совместимости
                 String encoding = response.optString("encoding", "base64");
 
-                // Декодируем данные в зависимости от указанного типа кодирования
                 entry.data = decodePayload(rawData, encoding);
-
-                // Разблокируем все ожидающие потоки (даже если декодирование вернуло null при ошибке форматирования)
                 entry.latch.countDown();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(MAIN_LOG_TAG, "Error while processing incoming message string", e);
         }
     }
 
+    /**
+     * Вспомогательный метод для декодирования входящей строки в массив байт.
+     */
     private byte[] decodePayload(String rawData, String encoding) {
         try {
             switch (encoding) {
                 case "plain_text":
-                    // Превращаем обычную строку в байты напрямую (UTF-8)
                     return rawData.getBytes(StandardCharsets.UTF_8);
 
                 case "base64":
                 default:
-                    // Декодируем из Base64, как и раньше
                     return Base64.decode(rawData, Base64.DEFAULT);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(MAIN_LOG_TAG, "Failed to decode payload with encoding: " + encoding, e);
             return null;
         }
     }
