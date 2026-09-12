@@ -6,22 +6,13 @@ import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsSession;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 
-/**
- * Системный коннекшен. Только биндит сервис и сообщает о создании сессии.
- */
 public class TwaServiceConnection extends CustomTabsServiceConnection {
 
-    public interface OnSessionReadyListener {
-        void onSessionCreated(CustomTabsSession session);
-    }
-
     private final TwaMessageBridgeCallback callback;
-    private final OnSessionReadyListener sessionReadyListener;
     private CustomTabsSession currentSession;
 
-    public TwaServiceConnection(TwaMessageBridgeCallback callback, OnSessionReadyListener listener) {
+    public TwaServiceConnection(TwaMessageBridgeCallback callback) {
         this.callback = callback;
-        this.sessionReadyListener = listener;
     }
 
     @Override
@@ -29,10 +20,9 @@ public class TwaServiceConnection extends CustomTabsServiceConnection {
         client.warmup(0L);
         currentSession = client.newSession(callback);
 
-        callback.setSession(currentSession);
-
-        if (currentSession != null && sessionReadyListener != null) {
-            sessionReadyListener.onSessionCreated(currentSession);
+        if (currentSession != null) {
+            // Передаем созданную сессию в коллбек
+            callback.setSession(currentSession);
         }
     }
 
