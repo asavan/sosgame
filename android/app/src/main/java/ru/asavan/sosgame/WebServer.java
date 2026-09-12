@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
@@ -15,19 +14,22 @@ import androidx.annotation.NonNull;
 
 abstract public class WebServer extends NanoWSD implements IStartStopServer {
     private final Context context;
-    private final String folderToServe;
     private static final String DEFAULT_STATIC_FOLDER = "www";
+
+    private IResourceProvider resourceProvider;
+    private IResourceProvider prevResourceProvider;
 
     private boolean allowDots = true;
 
     public WebServer(Context context, int port, String folderToServe) {
         super(port);
         this.context = context;
-        this.folderToServe = folderToServe;
+        this.resourceProvider = new StaticResourceProvider(context, folderToServe);
 
         var testEx = getMimeTypeForFile("index.html");
         Log.i(MAIN_LOG_TAG, "mime after init " + testEx);
     }
+
 
     public WebServer(Context context, int port) {
         this(context, port, DEFAULT_STATIC_FOLDER);
@@ -59,13 +61,19 @@ abstract public class WebServer extends NanoWSD implements IStartStopServer {
 
     @NonNull
     protected Response getResponse(String file) {
-        String fileWithFolder = folderToServe + "/" + file;
         try {
-            InputStream is = context.getResources().getAssets().open(fileWithFolder);
+            IResourceProvider localProvider = getResourceProvider();
+            var res = localProvider.getResource(file);
             var mimeType = getMimeTypeForFile(file);
-            var result = newChunkedResponse(Response.Status.OK, mimeType, is);
-            Log.i(MAIN_LOG_TAG, "served");
-            return result;
+            if (res.hasSize()) {
+                var result = newFixedLengthResponse(Response.Status.OK, mimeType, res.stream(), res.size());
+                Log.i(MAIN_LOG_TAG, "served fixed");
+                return result;
+            } else {
+                var result = newChunkedResponse(Response.Status.OK, mimeType, res.stream());
+                Log.i(MAIN_LOG_TAG, "served stream");
+                return result;
+            }
         } catch (IOException e) {
             Log.e(MAIN_LOG_TAG, "AndroidStaticAssetsServer", e);
         }
@@ -79,5 +87,25 @@ abstract public class WebServer extends NanoWSD implements IStartStopServer {
 
     protected static Response notFound() {
         return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found");
+    }
+
+    public synchronized IResourceProvider getResourceProvider() {
+        return resourceProvider;
+    }
+
+    public synchronized void setResourceProvider(IResourceProvider resourceProvider) {
+        if (this.resourceProvider == resourceProvider) {
+            return;
+        }
+        if (resourceProvider == null) {
+            if (prevResourceProvider == null) {
+                return;
+            }
+            this.resourceProvider = prevResourceProvider;
+            prevResourceProvider = null;
+            return;
+        }
+        prevResourceProvider = this.resourceProvider;
+        this.resourceProvider = resourceProvider;
     }
 }

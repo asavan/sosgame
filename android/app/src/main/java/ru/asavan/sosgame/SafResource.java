@@ -4,7 +4,7 @@ import android.net.Uri;
 import java.io.InputStream;
 import java.util.Objects;
 
-final class SafResource {
+public final class SafResource implements IStreaming {
     private final InputStream inputStream;
     private final long size;
     private final Uri uriInStorage;
@@ -15,7 +15,7 @@ final class SafResource {
         this.uriInStorage = uriInStorage;
     }
 
-    public InputStream inputStream() {
+    public InputStream stream() {
         return inputStream;
     }
 
