@@ -2,6 +2,8 @@ package ru.asavan.sosgame.neuro;
 
 import android.util.Base64;
 import org.json.JSONObject;
+
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -18,22 +20,15 @@ public class TwaDataBridge {
         volatile byte[] data = null;
     }
 
-    /**
-     * Конструктор принимает только единственный мост-коллбек.
-     */
     public TwaDataBridge(TwaMessageBridgeCallback messageCallback) {
         this.messageCallback = messageCallback;
     }
 
     /**
      * Синхронный метод получения данных по ключу.
+     * Не вызывайте в UI-потоке.
      */
     public byte[] getData(String key) {
-        // Проверяем готовность канала через инкапсулированный метод коллбека
-        if (messageCallback == null || !messageCallback.isChannelReady()) {
-            return null;
-        }
-
         CacheEntry entry = cache.computeIfAbsent(key, k -> new CacheEntry());
         boolean isFirstRequest = entry.isRequestSent.compareAndSet(false, true);
 
@@ -42,10 +37,14 @@ public class TwaDataBridge {
                 JSONObject message = new JSONObject();
                 message.put("file", key);
 
-                // Отправляем сообщение через messageCallback. Метод сам проверит сессию.
                 boolean sent = messageCallback.postMessage(message.toString());
                 if (!sent) {
-                    return null; // Если отправка не удалась на системном уровне
+                    // АТОМАРНЫЙ СБРОС И РАЗБЛОКИРОВКА:
+                    // Возвращаем флаг в false, чтобы следующий вызов мог повторить попытку
+                    entry.isRequestSent.set(false);
+                    // Будим параллельные потоки, если они успели «подсесть» на этот latch
+                    entry.latch.countDown();
+                    return null;
                 }
             }
 
@@ -58,6 +57,8 @@ public class TwaDataBridge {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            // Если отправка не удалась или произошел таймаут/ошибка у ПЕРВОГО потока,
+            // удаляем запись из мапы кэша для возможности повторного запроса.
             if (isFirstRequest && entry.data == null) {
                 cache.remove(key);
             }
@@ -68,19 +69,42 @@ public class TwaDataBridge {
     public void processIncomingMessage(String messageString) {
         try {
             JSONObject response = new JSONObject(messageString);
-            if (!response.has("file")) return;
-            String key = response.getString("file");
+            if (!response.has("file") || !response.has("data")) return;
 
+            String key = response.getString("file");
             CacheEntry entry = cache.get(key);
-            if (entry != null && response.has("data")) {
-                if (entry.data == null) {
-                    String base64Data = response.getString("data");
-                    entry.data = Base64.decode(base64Data, Base64.DEFAULT);
-                }
+
+            if (entry != null && entry.data == null) {
+                String rawData = response.getString("data");
+                // Если "encoding" не передан, по умолчанию считаем его "base64" для обратной совместимости
+                String encoding = response.optString("encoding", "base64");
+
+                // Декодируем данные в зависимости от указанного типа кодирования
+                entry.data = decodePayload(rawData, encoding);
+
+                // Разблокируем все ожидающие потоки (даже если декодирование вернуло null при ошибке форматирования)
                 entry.latch.countDown();
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private byte[] decodePayload(String rawData, String encoding) {
+        try {
+            switch (encoding) {
+                case "plain_text":
+                    // Превращаем обычную строку в байты напрямую (UTF-8)
+                    return rawData.getBytes(StandardCharsets.UTF_8);
+
+                case "base64":
+                default:
+                    // Декодируем из Base64, как и раньше
+                    return Base64.decode(rawData, Base64.DEFAULT);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
