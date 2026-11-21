@@ -69,7 +69,7 @@ abstract public class WebServer extends NanoWSD implements ISetTreeServer {
         try {
             var res = localProvider.getResource(file);
             final String mimeType;
-            if ("/".equals(file)) {
+            if ("/".equals(file) || "".equals(file)) {
                 mimeType = getMimeTypeForFile("index.html");
             } else {
                 mimeType = getMimeTypeForFile(file);

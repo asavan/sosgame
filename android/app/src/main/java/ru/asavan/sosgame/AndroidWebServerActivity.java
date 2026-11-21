@@ -15,7 +15,7 @@ import java.util.Map;
 public class AndroidWebServerActivity extends ComponentActivity implements ISetTree {
     private static final int STATIC_CONTENT_PORT = 8080;
     private static final int WEB_SOCKET_PORT = 8080;
-    private static final String WEB_GAME_URL = "https://asavan.github.io/";
+    private static final String WEB_GAME_URL = "https://asavan.github.io/sosgame/";
     // public static final String WEB_VIEW_URL = "file:///android_asset/www/index.html";
     public static final String WEB_VIEW_URL = "https://appassets.androidplatform.net/assets/www/index.html";
     private static final List<String> DNS_NAMES = List.of("sosgame", "game", "coolgames");
@@ -78,6 +78,9 @@ public class AndroidWebServerActivity extends ComponentActivity implements ISetT
             b.put("mode", "test");
             btnUtils.addButtonTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), b, R.id.network_info);
         }
+        Map<String, String> aiParams = new LinkedHashMap<>();
+        aiParams.put("mode", "ai");
+        btnUtils.launchTwa(hostUtils.getStaticHost(IpUtils.LOCALHOST), aiParams, null);
     }
 
     @Override
