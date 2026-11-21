@@ -1,11 +1,11 @@
 package ru.asavan.sosgame.neuro;
 
-import android.util.Base64;
+import static androidx.browser.customtabs.CustomTabsService.RESULT_SUCCESS;
+
 import android.util.Log;
 
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -46,8 +46,8 @@ public class TwaDataBridge implements IDataGetter, IDataSetter {
                 message.put("name", key);
                 message.put("type", "request");
 
-                boolean sent = messageSender.postMessage(message.toString());
-                if (!sent) {
+                var sent = messageSender.postMessage(message.toString());
+                if (sent != RESULT_SUCCESS) {
                     entry.isRequestSent.set(false);
                     entry.latch.countDown();
                     return null;
@@ -69,34 +69,6 @@ public class TwaDataBridge implements IDataGetter, IDataSetter {
         return null;
     }
 
-    /**
-     * Публичный метод для обработки входящих JSON-сообщений от веб-страницы.
-     */
-    public void processIncomingMessage(String messageString) {
-        try {
-            JSONObject response = new JSONObject(messageString);
-            if (!response.has("name") || !response.has("data")) return;
-
-            String key = response.getString("name");
-            CacheEntry entry = cache.get(key);
-            if (entry == null) {
-                Log.e(MAIN_LOG_TAG, "No such key in cache " + key);
-                return;
-            }
-            if (entry.data != null) {
-                Log.e(MAIN_LOG_TAG, "Already filled " + key);
-                return;
-            }
-
-            String rawData = response.getString("data");
-            String encoding = response.optString("type", "base64");
-            byte[] payload = decodePayload(rawData, encoding);
-            putData(key, payload);
-        } catch (Exception e) {
-            Log.e(MAIN_LOG_TAG, "Error while processing incoming message string", e);
-        }
-    }
-
     @Override
     public void putData(String key, byte[] data) {
         CacheEntry entry = cache.get(key);
@@ -106,28 +78,5 @@ public class TwaDataBridge implements IDataGetter, IDataSetter {
         }
         entry.data = data;
         entry.latch.countDown();
-    }
-
-    /**
-     * Вспомогательный метод для декодирования входящей строки в массив байт.
-     */
-    private byte[] decodePayload(String rawData, String encoding) {
-        try {
-            switch (encoding) {
-                case "plaintext":
-                    return rawData.getBytes(StandardCharsets.UTF_8);
-
-                case "base64":
-                default:
-                    return Base64.decode(rawData, Base64.DEFAULT);
-            }
-        } catch (Exception e) {
-            Log.e(MAIN_LOG_TAG, "Failed to decode payload with encoding: " + encoding, e);
-            return null;
-        }
-    }
-
-    public void clearCache() {
-        cache.clear();
     }
 }

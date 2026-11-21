@@ -28,4 +28,3 @@ public class PlainTextHandler implements JsonMessageHandler {
         dataSetter.putData(name, data);
     }
 }
-

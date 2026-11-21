@@ -1,8 +1,10 @@
-package ru.asavan.sosgame;
+package ru.asavan.sosgame.providers;
 import android.net.Uri;
 
 import java.io.InputStream;
 import java.util.Objects;
+
+import ru.asavan.sosgame.IStreaming;
 
 public final class SafResource implements IStreaming {
     private final InputStream inputStream;

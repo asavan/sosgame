@@ -44,8 +44,8 @@ export function appConnector(window) {
     let portSender = null;
 
     const runWithDelay = async () => {
-        await delay(2000);
-        const payload = JSON.stringify({ action: "DATA1", value: "123" });
+        await delay(200);
+        const payload = JSON.stringify({ type: "browserserver" });
         if (portSender) {
             initLogger.log("try send message " + payload);
             portSender.postMessage(payload);

@@ -4,4 +4,8 @@ import java.io.IOException;
 
 public interface IResourceProvider {
     IStreaming getResource(String file) throws IOException;
+
+    boolean needExpandIndex();
+
+    String name();
 }

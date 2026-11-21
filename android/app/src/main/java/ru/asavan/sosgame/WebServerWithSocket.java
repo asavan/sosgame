@@ -57,8 +57,8 @@ public class WebServerWithSocket extends WebServer implements IWebSocketServer {
     @Override
     public void stop() {
         try {
+            executor.execute(this::disconectAll);
             executor.shutdown();
-            disconectAll();
             var terminated = executor.awaitTermination(5, TimeUnit.SECONDS);
             Log.i(MAIN_LOG_TAG, "termination status " + terminated);
         } catch (Exception ex) {

@@ -22,14 +22,15 @@ import java.util.Map;
 import ru.asavan.sosgame.neuro.MessageDispatcher;
 import ru.asavan.sosgame.neuro.NfcHandler;
 import ru.asavan.sosgame.neuro.TwaMessageBridgeCallback;
+import ru.asavan.sosgame.providers.StaticResourceProvider;
+import ru.asavan.sosgame.providers.UserFolderResourceProvider;
 
 public class BtnUtils implements ISetTree {
     private final int staticContentPort;
     private final Activity activity;
     private ISetTreeServer server = null;
     private ServiceConnectionWithUrl mConnection;
-
-    private MessageDispatcher messageDispatcher;
+    private final MessageDispatcher messageDispatcher;
 
 
     private NdefEmulation ndefEmulation;
@@ -88,7 +89,16 @@ public class BtnUtils implements ISetTree {
             String newText = btn.getText() + " " + text;
             btn.setText(newText);
         }
-        btn.setOnClickListener(v -> launchTwa(host, parameters));
+        btn.setOnClickListener(v -> launchTwa(host, parameters, null));
+    }
+
+    public void addButtonTwaBrowserServer(String host, Map<String, String> parameters, int id, String text) {
+        Button btn = activity.findViewById(id);
+        if (text != null) {
+            String newText = btn.getText() + " " + text;
+            btn.setText(newText);
+        }
+        btn.setOnClickListener(v -> launchTwa(host, parameters, server));
     }
 
     private void launchBrowser(String host, Map<String, String> parameters) {
@@ -98,7 +108,7 @@ public class BtnUtils implements ISetTree {
         activity.startActivity(new Intent(Intent.ACTION_VIEW, launchUri));
     }
 
-    public void launchTwa(String host, Map<String, String> parameters) {
+    public void launchTwa(String host, Map<String, String> parameters, IProviderSetter providerSetter) {
         Log.i(MAIN_LOG_TAG, "launchTwa " + host);
         startServerAndSocket();
         launchNFC(host, parameters);
@@ -107,7 +117,10 @@ public class BtnUtils implements ISetTree {
             mConnection.tryLaunch(launchUri);
             return;
         }
-        mConnection = getTabsServiceConnection(launchUri);
+        if (providerSetter != null) {
+            providerSetter.setResourceProvider(null);
+        }
+        mConnection = getTabsServiceConnection(launchUri, providerSetter);
 
         // Bind Custom Tabs Service targeting the user's preferred modern browser (e.g. Chrome)
         String packageName = CustomTabsClient.getPackageName(activity, Collections.singletonList("com.android.chrome"));
@@ -119,15 +132,15 @@ public class BtnUtils implements ISetTree {
     }
 
     @NonNull
-    private ServiceConnectionWithUrl getTabsServiceConnection(Uri launchUri) {
-        var callback = getCustomTabsCallback();
+    private ServiceConnectionWithUrl getTabsServiceConnection(Uri launchUri, IProviderSetter providerSetter) {
+        var callback = getCustomTabsCallback(providerSetter);
         ServiceConnectionWithUrl mConnection = new ServiceConnectionWithUrl(launchUri, callback, activity);
         return mConnection;
     }
 
     @NonNull
-    private TwaMessageBridgeCallback getCustomTabsCallback() {
-        return new TwaMessageBridgeCallback(messageDispatcher, server);
+    private TwaMessageBridgeCallback getCustomTabsCallback(IProviderSetter providerSetter) {
+        return new TwaMessageBridgeCallback(messageDispatcher, providerSetter);
     }
 
     private void launchNFC(String host, Map<String, String> parameters) {

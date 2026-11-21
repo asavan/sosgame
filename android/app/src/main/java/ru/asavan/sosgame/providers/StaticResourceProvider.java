@@ -1,9 +1,13 @@
-package ru.asavan.sosgame;
+package ru.asavan.sosgame.providers;
 
 import android.content.Context;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import ru.asavan.sosgame.FileStream;
+import ru.asavan.sosgame.IResourceProvider;
+import ru.asavan.sosgame.IStreaming;
 
 public class StaticResourceProvider implements IResourceProvider {
     private final Context context;
@@ -23,5 +27,15 @@ public class StaticResourceProvider implements IResourceProvider {
         String fileWithFolder = folderToServe + "/" + file;
         InputStream is = context.getResources().getAssets().open(fileWithFolder);
         return new FileStream(is);
+    }
+
+    @Override
+    public boolean needExpandIndex() {
+        return true;
+    }
+
+    @Override
+    public String name() {
+        return "static";
     }
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
+import ru.asavan.sosgame.providers.StaticResourceProvider;
 
 import static ru.asavan.sosgame.AndroidWebServerActivity.MAIN_LOG_TAG;
 
@@ -17,7 +18,6 @@ abstract public class WebServer extends NanoWSD implements ISetTreeServer {
     private static final String DEFAULT_STATIC_FOLDER = "www";
 
     private IResourceProvider resourceProvider;
-    private IResourceProvider prevResourceProvider;
 
     private boolean allowDots = true;
 
@@ -43,9 +43,14 @@ abstract public class WebServer extends NanoWSD implements ISetTreeServer {
             Log.i(MAIN_LOG_TAG, "not found");
             return notFound();
         }
-        Log.i(MAIN_LOG_TAG, "try serve2");
+        IResourceProvider localProvider = getResourceProvider();
+        if (localProvider == null) {
+            Log.i(MAIN_LOG_TAG, "no provider yet");
+            return inTransition();
+        }
+        Log.i(MAIN_LOG_TAG, "try serve2 " + localProvider.name());
         String file = session.getUri();
-        if ("/".equals(file)) {
+        if ("/".equals(file) && localProvider.needExpandIndex()) {
             file = "index.html";
         }
 
@@ -56,18 +61,19 @@ abstract public class WebServer extends NanoWSD implements ISetTreeServer {
             file = file.substring(1);
         }
 
-        return getResponse(file);
+        return getResponse(file, localProvider);
     }
 
     @NonNull
-    protected Response getResponse(String file) {
+    protected Response getResponse(String file, IResourceProvider localProvider) {
         try {
-            IResourceProvider localProvider = getResourceProvider();
-            if (localProvider == null) {
-                return inTransition();
-            }
             var res = localProvider.getResource(file);
-            var mimeType = getMimeTypeForFile(file);
+            final String mimeType;
+            if ("/".equals(file)) {
+                mimeType = getMimeTypeForFile("index.html");
+            } else {
+                mimeType = getMimeTypeForFile(file);
+            }
             if (res.hasSize()) {
                 var result = newFixedLengthResponse(Response.Status.OK, mimeType, res.stream(), res.size());
                 Log.i(MAIN_LOG_TAG, "served fixed");
@@ -106,14 +112,10 @@ abstract public class WebServer extends NanoWSD implements ISetTreeServer {
             return;
         }
         if (resourceProvider == null) {
-            if (prevResourceProvider == null) {
-                return;
-            }
-            this.resourceProvider = prevResourceProvider;
-            prevResourceProvider = null;
-            return;
+            Log.i(MAIN_LOG_TAG, "Set null as resourceProvider");
+        } else {
+            Log.i(MAIN_LOG_TAG, "Set resourceProvider " + resourceProvider.name());
         }
-        prevResourceProvider = this.resourceProvider;
         this.resourceProvider = resourceProvider;
     }
 }

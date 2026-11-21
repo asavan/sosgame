@@ -51,9 +51,9 @@ dependencies {
     implementation("org.nanohttpd:nanohttpd:2.3.1")
     implementation("org.nanohttpd:nanohttpd-websocket:2.3.1")
     implementation("com.luigivampa92:ndefemulation-android:1.0.0")
-    implementation("androidx.webkit:webkit:1.17.0")
+    implementation("androidx.webkit:webkit:1.18.0")
     implementation("androidx.browser:browser:1.10.0")
-    implementation("org.jmdns:jmdns:3.6.3")
+    implementation("org.jmdns:jmdns:3.6.5")
     implementation("androidx.activity:activity:1.13.0")
 
     testImplementation("junit:junit:4.13.2")

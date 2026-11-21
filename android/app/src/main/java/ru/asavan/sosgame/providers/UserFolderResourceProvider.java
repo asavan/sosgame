@@ -1,4 +1,4 @@
-package ru.asavan.sosgame;
+package ru.asavan.sosgame.providers;
 
 import static ru.asavan.sosgame.AndroidWebServerActivity.MAIN_LOG_TAG;
 
@@ -13,6 +13,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import ru.asavan.sosgame.IResourceProvider;
+import ru.asavan.sosgame.IStreaming;
+
 public class UserFolderResourceProvider implements IResourceProvider {
 
     private final Uri baseTreeUri;
@@ -21,8 +24,6 @@ public class UserFolderResourceProvider implements IResourceProvider {
         this.baseTreeUri = baseTreeUri;
         this.context = context;
     }
-
-
 
     public SafResource getSafResource(Uri treeUri, String relativePath) throws FileNotFoundException {
         if (relativePath.startsWith("/")) {
@@ -113,5 +114,15 @@ public class UserFolderResourceProvider implements IResourceProvider {
     @Override
     public IStreaming getResource(String file) throws IOException {
         return getSafResource(baseTreeUri, file);
+    }
+
+    @Override
+    public boolean needExpandIndex() {
+        return true;
+    }
+
+    @Override
+    public String name() {
+        return "folder";
     }
 }

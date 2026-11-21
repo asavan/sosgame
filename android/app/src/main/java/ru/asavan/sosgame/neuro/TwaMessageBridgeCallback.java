@@ -1,6 +1,6 @@
 package ru.asavan.sosgame.neuro;
 
-import static androidx.browser.customtabs.CustomTabsService.RESULT_SUCCESS;
+import static androidx.browser.customtabs.CustomTabsService.RESULT_FAILURE_REMOTE_ERROR;
 
 import static ru.asavan.sosgame.AndroidWebServerActivity.MAIN_LOG_TAG;
 
@@ -15,7 +15,6 @@ import androidx.browser.customtabs.CustomTabsSession;
 
 import ru.asavan.sosgame.IMessageSender;
 import ru.asavan.sosgame.IProviderSetter;
-import ru.asavan.sosgame.TWAResourceProvider;
 
 public class TwaMessageBridgeCallback extends CustomTabsCallback {
     private final MessageDispatcher messageDispatcher;
@@ -61,15 +60,13 @@ public class TwaMessageBridgeCallback extends CustomTabsCallback {
 
         IMessageSender messageSender = message -> {
             if (currentSession != null) {
-                return currentSession.postMessage(message, null) == RESULT_SUCCESS;
+                return currentSession.postMessage(message, null);
             }
-            return false;
+            return RESULT_FAILURE_REMOTE_ERROR;
         };
-        TwaDataBridge twaDataBridge = new TwaDataBridge(messageSender);
-        messageDispatcher.registerHandler(new PlainTextHandler(twaDataBridge));
-        messageDispatcher.registerHandler(new Base64Handler(twaDataBridge));
-        var resourceProvider = new TWAResourceProvider(twaDataBridge);
-        providerSetter.setResourceProvider(resourceProvider);
+        var result = messageSender.postMessage("First message");
+        Log.d(MAIN_LOG_TAG, "postMessage returned: " + result);
+        messageDispatcher.registerHandler(new BrowserServerHandler(messageDispatcher, providerSetter, messageSender));
     }
 
     @Override
