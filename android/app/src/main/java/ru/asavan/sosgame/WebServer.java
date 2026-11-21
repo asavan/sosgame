@@ -12,7 +12,7 @@ import static ru.asavan.sosgame.AndroidWebServerActivity.MAIN_LOG_TAG;
 
 import androidx.annotation.NonNull;
 
-abstract public class WebServer extends NanoWSD implements IStartStopServer {
+abstract public class WebServer extends NanoWSD implements ISetTreeServer {
     private final Context context;
     private static final String DEFAULT_STATIC_FOLDER = "www";
 
@@ -63,6 +63,9 @@ abstract public class WebServer extends NanoWSD implements IStartStopServer {
     protected Response getResponse(String file) {
         try {
             IResourceProvider localProvider = getResourceProvider();
+            if (localProvider == null) {
+                return inTransition();
+            }
             var res = localProvider.getResource(file);
             var mimeType = getMimeTypeForFile(file);
             if (res.hasSize()) {
@@ -89,10 +92,15 @@ abstract public class WebServer extends NanoWSD implements IStartStopServer {
         return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found");
     }
 
+    protected static Response inTransition() {
+        return newFixedLengthResponse(Response.Status.CONFLICT, NanoHTTPD.MIME_PLAINTEXT, "In transition");
+    }
+
     public synchronized IResourceProvider getResourceProvider() {
         return resourceProvider;
     }
 
+    @Override
     public synchronized void setResourceProvider(IResourceProvider resourceProvider) {
         if (this.resourceProvider == resourceProvider) {
             return;

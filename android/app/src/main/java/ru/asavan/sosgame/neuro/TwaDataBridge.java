@@ -2,7 +2,9 @@ package ru.asavan.sosgame.neuro;
 
 import android.util.Base64;
 import android.util.Log;
+
 import org.json.JSONObject;
+
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -10,12 +12,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import ru.asavan.sosgame.IDataGetter;
+import ru.asavan.sosgame.IDataSetter;
+import ru.asavan.sosgame.IMessageSender;
 
-public class TwaDataBridge implements IDataGetter {
+public class TwaDataBridge implements IDataGetter, IDataSetter {
 
     private static final String MAIN_LOG_TAG = "TwaDataBridge";
 
-    private final TwaMessageBridgeCallback messageCallback;
+    private final IMessageSender messageSender;
     private final ConcurrentHashMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
 
     private static class CacheEntry {
@@ -24,8 +28,8 @@ public class TwaDataBridge implements IDataGetter {
         volatile byte[] data = null;
     }
 
-    public TwaDataBridge(TwaMessageBridgeCallback messageCallback) {
-        this.messageCallback = messageCallback;
+    public TwaDataBridge(IMessageSender messageCallback) {
+        this.messageSender = messageCallback;
     }
 
     /**
@@ -39,9 +43,10 @@ public class TwaDataBridge implements IDataGetter {
         try {
             if (isFirstRequest) {
                 JSONObject message = new JSONObject();
-                message.put("file", key);
+                message.put("name", key);
+                message.put("type", "request");
 
-                boolean sent = messageCallback.postMessage(message.toString());
+                boolean sent = messageSender.postMessage(message.toString());
                 if (!sent) {
                     entry.isRequestSent.set(false);
                     entry.latch.countDown();
@@ -70,21 +75,37 @@ public class TwaDataBridge implements IDataGetter {
     public void processIncomingMessage(String messageString) {
         try {
             JSONObject response = new JSONObject(messageString);
-            if (!response.has("file") || !response.has("data")) return;
+            if (!response.has("name") || !response.has("data")) return;
 
-            String key = response.getString("file");
+            String key = response.getString("name");
             CacheEntry entry = cache.get(key);
-
-            if (entry != null && entry.data == null) {
-                String rawData = response.getString("data");
-                String encoding = response.optString("encoding", "base64");
-
-                entry.data = decodePayload(rawData, encoding);
-                entry.latch.countDown();
+            if (entry == null) {
+                Log.e(MAIN_LOG_TAG, "No such key in cache " + key);
+                return;
             }
+            if (entry.data != null) {
+                Log.e(MAIN_LOG_TAG, "Already filled " + key);
+                return;
+            }
+
+            String rawData = response.getString("data");
+            String encoding = response.optString("type", "base64");
+            byte[] payload = decodePayload(rawData, encoding);
+            putData(key, payload);
         } catch (Exception e) {
             Log.e(MAIN_LOG_TAG, "Error while processing incoming message string", e);
         }
+    }
+
+    @Override
+    public void putData(String key, byte[] data) {
+        CacheEntry entry = cache.get(key);
+        if (entry == null) {
+            Log.e(MAIN_LOG_TAG, "No such key in cache " + key);
+            return;
+        }
+        entry.data = data;
+        entry.latch.countDown();
     }
 
     /**
@@ -93,7 +114,7 @@ public class TwaDataBridge implements IDataGetter {
     private byte[] decodePayload(String rawData, String encoding) {
         try {
             switch (encoding) {
-                case "plain_text":
+                case "plaintext":
                     return rawData.getBytes(StandardCharsets.UTF_8);
 
                 case "base64":

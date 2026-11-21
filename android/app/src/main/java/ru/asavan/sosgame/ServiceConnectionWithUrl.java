@@ -15,14 +15,16 @@ import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 
 import org.jspecify.annotations.NonNull;
 
+import ru.asavan.sosgame.neuro.TwaMessageBridgeCallback;
+
 public class ServiceConnectionWithUrl extends CustomTabsServiceConnection {
     private Uri mLaunchUri;
-    private final CustomTabsCallbackWithSession customTabsCallbackWithSession;
+    private final TwaMessageBridgeCallback customTabsCallbackWithSession;
 
     private final Context context;
 
     private int connectionCounter = 0;
-    public ServiceConnectionWithUrl(Uri launchUri, CustomTabsCallbackWithSession customTabsCallbackWithSession, Context context) {
+    public ServiceConnectionWithUrl(Uri launchUri, TwaMessageBridgeCallback customTabsCallbackWithSession, Context context) {
         mLaunchUri = launchUri;
         this.customTabsCallbackWithSession = customTabsCallbackWithSession;
         this.context = context;

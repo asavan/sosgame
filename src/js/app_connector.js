@@ -1,4 +1,37 @@
 import { delay, loggerFunc } from "netutils";
+import {fetchFileContent3} from "./downloader.js";
+
+async function handleMessage(jsonString, port) {
+    let data;
+
+    // 1. Пытаемся распарсить строку в JSON
+    try {
+        data = JSON.parse(jsonString);
+    } catch (ignored) {
+        // Если строка не валидный JSON, просто выходим из функции
+        return ignored;
+    }
+
+    // 2. Проверяем, что результат парсинга — это именно объект (не null и не массив)
+    // и проверяем поле type === "request"
+    if (
+        typeof data === "object" &&
+        data !== null &&
+        !Array.isArray(data) &&
+        data.type === "request"
+    ) {
+        try {
+            // 3. Вызываем асинхронную функцию с полем name
+            const result = await fetchFileContent3(data.name);
+
+            // 4. Преобразуем полученный JSON в строку и отправляем в port
+            port.postMessage(JSON.stringify(result));
+        } catch (error) {
+            console.error("Ошибка при получении или отправке файла:", error);
+        }
+    }
+}
+
 
 export function appConnector(window) {
     const c1 = {
@@ -55,9 +88,11 @@ export function appConnector(window) {
         port.postMessage("Web ready");
 
         // Receive upcoming messages on this port.
-        port.onmessage = function(event) {
+        port.onmessage = async function(event) {
             initLogger.log("got message2 " + event.data);
             initLogger.log("got message3 " + event.origin);
+
+            await handleMessage(event.data, port);
             // console.log("[PostMessage1] Got message" + event.data);
         };
 

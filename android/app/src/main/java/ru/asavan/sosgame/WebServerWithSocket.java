@@ -14,7 +14,7 @@ import static ru.asavan.sosgame.AndroidWebServerActivity.MAIN_LOG_TAG;
 
 import fi.iki.elonen.NanoHTTPD;
 
-public class WebServerWithSocket extends WebServerWithUserFolder implements IWebSocketServer {
+public class WebServerWithSocket extends WebServer implements IWebSocketServer {
     private final List<WebSocket> list;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 

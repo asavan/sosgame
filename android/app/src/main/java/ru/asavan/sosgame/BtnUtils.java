@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
@@ -16,12 +15,13 @@ import androidx.browser.customtabs.CustomTabsClient;
 import com.luigivampa92.ndefemulation.NdefEmulation;
 import com.luigivampa92.ndefemulation.ndef.UriNdefData;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+
+import ru.asavan.sosgame.neuro.MessageDispatcher;
+import ru.asavan.sosgame.neuro.NfcHandler;
+import ru.asavan.sosgame.neuro.TwaMessageBridgeCallback;
 
 public class BtnUtils implements ISetTree {
     private final int staticContentPort;
@@ -29,12 +29,15 @@ public class BtnUtils implements ISetTree {
     private ISetTreeServer server = null;
     private ServiceConnectionWithUrl mConnection;
 
+    private MessageDispatcher messageDispatcher;
+
 
     private NdefEmulation ndefEmulation;
 
     public BtnUtils(Activity activity, int staticContentPort) {
         this.staticContentPort = staticContentPort;
         this.activity = activity;
+        messageDispatcher = new MessageDispatcher();
         // this.mdnsUtils = new MdnsUtils(activity, MAIN_LOG_TAG);
     }
 
@@ -117,37 +120,14 @@ public class BtnUtils implements ISetTree {
 
     @NonNull
     private ServiceConnectionWithUrl getTabsServiceConnection(Uri launchUri) {
-        CustomTabsCallbackWithSession callback = getCustomTabsCallback();
+        var callback = getCustomTabsCallback();
         ServiceConnectionWithUrl mConnection = new ServiceConnectionWithUrl(launchUri, callback, activity);
         return mConnection;
     }
 
     @NonNull
-    private CustomTabsCallbackWithSession getCustomTabsCallback() {
-        CustomTabsCallbackWithSession callback = new CustomTabsCallbackWithSession() {
-            @Override
-            public void onPostMessage(String message, Bundle extras) {
-                super.onPostMessage(message, extras);
-                Log.d(MAIN_LOG_TAG, "Message from Web: " + message);
-
-                try {
-                    // 1. Initialize JSONObject with the string
-                    JSONObject jsonObject = new JSONObject(message);
-
-                    // 2. Extract values using specific types
-                    boolean hasSh = jsonObject.has("sh");
-                    if (hasSh) {
-                        String sh = jsonObject.getString("sh");
-                        Log.i(MAIN_LOG_TAG, "Message from Web sh: " + sh);
-                        launchNFC(sh, null);
-                    }
-
-                } catch (JSONException e) {
-                    Log.i(MAIN_LOG_TAG, "Not json");
-                }
-            }
-        };
-        return callback;
+    private TwaMessageBridgeCallback getCustomTabsCallback() {
+        return new TwaMessageBridgeCallback(messageDispatcher, server);
     }
 
     private void launchNFC(String host, Map<String, String> parameters) {
@@ -185,7 +165,9 @@ public class BtnUtils implements ISetTree {
     protected void startServerInner(Context applicationContext) throws IOException {
         Log.i(MAIN_LOG_TAG, "BtnUtilsStarted");
         ndefEmulation = new NdefEmulation(applicationContext);
+        NfcHandler nfcHandler = new NfcHandler(ndefEmulation);
         server = new WebServerWithSocket(applicationContext, staticContentPort);
+        messageDispatcher.registerHandler(nfcHandler);
         server.start();
     }
 
@@ -200,7 +182,14 @@ public class BtnUtils implements ISetTree {
     @Override
     public void setBaseTreeUri(Uri baseTreeUri) {
         if (server != null) {
-            server.setBaseTreeUri(baseTreeUri);
+            Context applicationContext = activity.getApplicationContext();
+            final IResourceProvider userProvider;
+            if (baseTreeUri == null) {
+                userProvider = new StaticResourceProvider(applicationContext);
+            } else {
+                userProvider = new UserFolderResourceProvider(applicationContext, baseTreeUri);
+            }
+            server.setResourceProvider(userProvider);
         }
     }
 }

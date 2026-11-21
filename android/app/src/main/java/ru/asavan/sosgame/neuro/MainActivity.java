@@ -10,15 +10,12 @@ import androidx.browser.trusted.TrustedWebActivityIntent;
 import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 
 import ru.asavan.sosgame.R;
+import ru.asavan.sosgame.WebServerWithSocket;
 
 public class MainActivity extends ComponentActivity {
 
     private TwaMessageBridgeCallback messageCallback;
     private TwaServiceConnection twaConnection;
-    private TwaDataBridge currentDataBridge;
-
-    // Ссылка на слушателя, чтобы иметь возможность отписать его при смене урла
-    private TwaMessageBridgeCallback.PostMessageListener currentListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,30 +26,13 @@ public class MainActivity extends ComponentActivity {
         Button btnSiteB = findViewById(R.id.twa_127);
         Button btnGetData = findViewById(R.id.network_info);
 
-        messageCallback = new TwaMessageBridgeCallback();
+        messageCallback = new TwaMessageBridgeCallback(new MessageDispatcher(), new WebServerWithSocket(this, 8080));
         twaConnection = new TwaServiceConnection(messageCallback);
         twaConnection.bind(this);
 
         btnSiteA.setOnClickListener(v -> launchTwa("https://site-a.com"));
         btnSiteB.setOnClickListener(v -> launchTwa("https://site-b.com"));
 
-        btnGetData.setOnClickListener(v -> {
-            if (currentDataBridge == null) {
-                Toast.makeText(this, "Сначала откройте один из сайтов", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            new Thread(() -> {
-                byte[] data = currentDataBridge.getData("config.json");
-                runOnUiThread(() -> {
-                    if (data != null) {
-                        Toast.makeText(MainActivity.this, "Данные получены! Размер: " + data.length, Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "Ошибка или таймаут портов связи", Toast.LENGTH_LONG).show();
-                    }
-                });
-            }).start();
-        });
     }
 
     private void launchTwa(String url) {
@@ -61,16 +41,6 @@ public class MainActivity extends ComponentActivity {
             Toast.makeText(this, "TWA сервис еще загружается, подождите...", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        if (currentDataBridge != null) {
-            currentDataBridge.clearCache();
-        }
-
-        // Создаем мост, передавая ТОЛЬКО messageCallback
-        currentDataBridge = new TwaDataBridge(messageCallback);
-
-        // Выполняем атомарный своп
-        messageCallback.swapTargetAndListener(url, message -> currentDataBridge.processIncomingMessage(message));
 
         // Запускаем TWA
         Uri launchUri = Uri.parse(url);
@@ -81,9 +51,9 @@ public class MainActivity extends ComponentActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         // Полная очистка ресурсов при выходе из приложения
         messageCallback.clear();
         twaConnection.unbind(this);
+        super.onDestroy();
     }
 }
