@@ -15,9 +15,9 @@ function locationMode(window) {
     return HTTP;
 }
 
-export function modeDetector(window, document)  {
-    const BROWSER = 0;
-    const TWA = 1;
+export function modeDetector(window, document) {
+    // const BROWSER = 0;
+    // const TWA = 1;
     const modes = [
         ["server", "client", "ai"],
         ["server", "server", "server"],
