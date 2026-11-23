@@ -96,7 +96,7 @@ export default function game(_window, document, settings, presenter) {
     const field = document.querySelector(".field");
     const box = document.querySelector(".box");
     const digits = document.querySelector(".buttons");
-    const btnInstall = document.querySelector(".install");
+    const btnInstall = document.querySelector(".butInstall");
     const root = document.documentElement;
     root.style.setProperty("--field-size", presenter.size());
     // field.classList.remove("disabled");

@@ -24,11 +24,6 @@ export default async function test(window, document, settings, gameFunction) {
     negNet.send({"join": myId});
     logger.log("send join " + myId);
 
-    game.on("gameover", () => {
-        const btnAdd = document.querySelector(".butInstall");
-        btnAdd.classList.remove("hidden2");
-    });
-
     presenter.resetRound();
     game.redraw();
     return Promise.resolve(game);

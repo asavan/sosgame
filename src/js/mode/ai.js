@@ -36,11 +36,6 @@ export default async function ai(window, document, settings, gameFunction) {
         lobby.addClient(name, name);
     }
 
-    game.on("gameover", () => {
-        const btnAdd = document.querySelector(".butInstall");
-        btnAdd.classList.remove("hidden2");
-    });
-
     game.on("message", async (data) => {
         logger.log("get msg " + JSON.stringify(data));
         if (data.playerId !== userInd) {

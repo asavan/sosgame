@@ -119,7 +119,7 @@ export async function fetchFileContent2(fileName) {
 
 export async function fetchFileContent3(fileName = "") {
     const TEXT_EXTENSIONS = new Set([
-        "txt", "md", "csv", "tsv", "log",
+        "txt", "md", "csv", "tsv", "log", "webmanifest",
         "json", "xml", "yaml", "yml", "toml", "ini", "env",
         "html", "htm", "css", "scss", "less", "svg",
         "js", "mjs", "cjs", "ts", "jsx", "tsx",
