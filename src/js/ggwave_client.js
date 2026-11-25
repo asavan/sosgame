@@ -60,5 +60,5 @@ export function packSDP(sdp, logger) {
 export async function sendSound(data) {
     const audio = new GGWaveAudio();
     await audio.init();
-    await audio.send(data, { protocol: 2, volume: 25 });
+    await audio.send(data, { protocol: 5, volume: 25 });
 }
