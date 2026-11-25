@@ -54,19 +54,13 @@ export async function waitForSound(logger) {
 
     const promise = Promise.withResolvers();
 
-    logger.log("waitForSound");
+    logger.log("waitForSound1");
 
-    // Send data as sound
-    // await audio.send('Hello!', { protocol: 1, volume: 25 });
-
-    // Listen for incoming data
-    audio.startListening((data, text) => {
+    await audio.startListening((data, text) => {
         logger.log("Received: " + text);
         audio.stopListening();
         promise.resolve(text);
     });
+    logger.log("waitForSound2");
     return promise.promise;
 }
-
-// Stop listening
-

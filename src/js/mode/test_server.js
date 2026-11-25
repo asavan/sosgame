@@ -1,4 +1,3 @@
-import presenterObj from "../presenter.js";
 import {loggerFunc, netObj, addLoggerBtn, addFullScreenBtn, createDataChannelV2} from "netutils";
 import {qrHandler} from "../views/manual-qr.js";
 import JSONCrush from "jsoncrush";
@@ -24,21 +23,19 @@ function showQr(window, document, settings, dataToSend, logger) {
     return url4;
 }
 
-export default async function test(window, document, settings, gameFunction) {
+export default async function test(window, document, settings) {
     addFullScreenBtn(window, document);
     addLoggerBtn(window, document);
     const handle = qrHandler(window, document);
-    const presenter = presenterObj.presenterFuncDefault(settings);
-    const game = gameFunction(window, document, settings, presenter);
     const mainLogger = loggerFunc(document, settings, 3, null, "mainLog");
     const logger = loggerFunc(document, settings, 2, null, "socketLogger");
     const myId = netObj.getMyId(window, settings, Math.random);
     mainLogger.log("Started " + myId);
     // await unlockLocalNetworkIP(mainLogger);
     const rtcC = createDataChannelV2(logger, true);
-    const dataTosend = await rtcC.createOffer("test1");
-    mainLogger.log("data " + JSON.stringify(dataTosend));
-    const strUrl = showQr(window, document, settings, dataTosend, logger);
+    const dataToSend = await rtcC.createOffer("test1");
+    mainLogger.log("data " + JSON.stringify(dataToSend));
+    const strUrl = showQr(window, document, settings, dataToSend, logger);
     mainLogger.log("dataUrl " + strUrl);
     handle.set(strUrl);
     const packedSdp = await waitForSound(mainLogger);
@@ -51,7 +48,4 @@ export default async function test(window, document, settings, gameFunction) {
     await rtcC.processAnswer(answer);
     await rtcC.ready();
     logger.log("send join " + myId);
-    presenter.resetRound();
-    game.redraw();
-    return Promise.resolve(game);
 }
