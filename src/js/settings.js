@@ -6,6 +6,7 @@ export default {
     wsPort : 8080,
     wsPath : "/signaling",
     logger: ".log",
+    sh: "http://192.168.110.48:8080/",
     logLevel: 2,
     serverId: "",
     logicDebug: true,

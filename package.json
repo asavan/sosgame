@@ -8,7 +8,7 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "start": "webpack serve --config webpack_configs/webpack.config.js --mode development",
+    "start": "webpack serve --config webpack_configs/webpack.config.js --host 0.0.0.0 --mode development",
     "android": "webpack --config webpack_configs/android.webpack.config.js --mode production",
     "build": "webpack --config webpack_configs/production.webpack.config.js --mode production",
     "mdns": "node devtools/bonjur.js",
@@ -30,9 +30,11 @@
   "homepage": "https://asavan.github.io/sosgame/",
   "devDependencies": {
     "bonjour-service": "^1.4.4",
-    "devdeps": "github:asavan/dev-deps#v0.3.1"
+    "devdeps": "github:asavan/dev-deps#v0.3.3"
   },
   "dependencies": {
-    "netutils": "github:asavan/netutils#v0.2.2"
+    "ggwave": "^0.4.0",
+    "ggwave-js": "^0.4.3",
+    "netutils": "github:asavan/netutils#v0.2.4"
   }
 }

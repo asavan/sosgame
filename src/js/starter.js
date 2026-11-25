@@ -1,4 +1,4 @@
-import {assert, loggerFunc, parseSettings} from "netutils";
+import {assert, loggerFunc, parseZipSettings} from "netutils";
 import gameFunction from "./game.js";
 import settings from "./settings.js";
 import {appConnector} from "./app_connector.js";
@@ -23,11 +23,11 @@ function adjustMode(changed, settings, queryString) {
 }
 
 export default async function starter(window, document) {
-    const appC = appConnector(window);
-    const changed = parseSettings(window.location.search, settings);
+    const changed = await parseZipSettings(window.location.search, settings);
     adjustSettings(settings);
     adjustMode(changed, settings, window.location.search);
     const mainLogger = loggerFunc(document, settings);
+    const appC = appConnector(window, settings, mainLogger);
     mainLogger.log("Choosen mode " + settings.mode);
     let mode;
     if (settings.mode === "client") {
@@ -38,8 +38,10 @@ export default async function starter(window, document) {
         mode = await import("./mode/ai.js");
     } else if (settings.mode === "hotseat") {
         mode = await import("./mode/hotseat.js");
-    } else if (settings.mode === "test") {
-        mode = await import("./mode/test.js");
+    } else if (settings.mode === "test_server") {
+        mode = await import("./mode/test_server.js");
+    } else if (settings.mode === "test_client") {
+        mode = await import("./mode/test_client.js");
     } else if (settings.mode === "swrtc") {
         mode = await import("./mode/server_webrtc.js");
     } else if (settings.mode === "cwrtc") {

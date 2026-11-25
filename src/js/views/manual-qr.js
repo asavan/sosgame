@@ -16,4 +16,10 @@ export function qrHandler(window, document) {
         code = makeQrAny(inputVal, document);
     };
     inEl.oninput = showQr;
+
+    const set = (value) => {
+        inEl.value = value;
+        showQr();
+    };
+    return {set};
 }

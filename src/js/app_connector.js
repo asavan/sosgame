@@ -1,4 +1,4 @@
-import { delay, loggerFunc } from "netutils";
+import { delay } from "netutils";
 import {fetchFileContent3} from "./downloader.js";
 
 async function handleMessage(jsonString, port) {
@@ -33,14 +33,12 @@ async function handleMessage(jsonString, port) {
 }
 
 
-export function appConnector(window) {
-    const c1 = {
-        logger: ".log",
-        logLevel: 2,
-    };
+export function appConnector(window, settings, initLogger) {
 
-    const initLogger = loggerFunc(document, c1, 4, null, "initLogger");
-
+    if (["test_server", "test_client"].includes(settings.mode)) {
+        initLogger.log("Unsupported mode");
+        return;
+    }
     let portSender = null;
 
     const runWithDelay = async () => {
