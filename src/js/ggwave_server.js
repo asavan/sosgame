@@ -1,5 +1,8 @@
 import {GGWaveAudio} from "ggwave-js/web-audio";
 
+// https://github.com/ggerganov/wave-share
+// https://github.com/ggerganov/ggwave
+// https://github.com/themonnie/ggwave-js
 
 function addColons(cleanHash) {
     const pairs = [];
