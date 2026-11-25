@@ -29,7 +29,7 @@ async function connectWebSocketWithIosFix(port, path = "", { maxRetries = 5, ret
             console.warn(`Попытка ${attempt}/${maxRetries} не удалась:`, err.message);
 
             // Если исчерпали все попытки — пробрасываем ошибку наверх
-            if (attempt === maxRetries) {
+            if (attempt >= maxRetries) {
                 throw new Error(`Не удалось подключиться к ${wsUrl} после ${maxRetries} попыток`);
             }
 
