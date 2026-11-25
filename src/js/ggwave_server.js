@@ -1,4 +1,4 @@
-import { GGWaveAudio } from "ggwave-js/web-audio";
+import {GGWaveAudio} from "ggwave-js/web-audio";
 
 
 function addColons(cleanHash) {
@@ -11,10 +11,18 @@ function addColons(cleanHash) {
     return pairs.join(":");
 }
 
+function restoreIp(ipCompressed) {
+    if (ipCompressed.indexOf("-") >= 0) {
+        return ipCompressed + ".local";
+    }
+    return ipCompressed;
+}
+
 export function unpackSDP(packed, type) { // type: 'offer' или 'answer'
-    const [ip, port, ufrag, pwd, fpCompressed] = packed.split("|");
+    const [ipCompressed, port, ufrag, pwd, fpCompressed] = packed.split("|");
     const setup = type === "offer" ? "actpass" : "active";
     const fp = addColons(fpCompressed);
+    const ip = restoreIp(ipCompressed);
     return [
         "v=0",
         "o=- 0 0 IN IP4 127.0.0.1",
@@ -40,7 +48,7 @@ export async function unlockLocalNetworkIP(logger) {
         return;
     }
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({audio: true});
         // Микрофон нам здесь не нужен, сразу выключаем индикатор записи
         stream.getTracks().forEach(track => track.stop());
     } catch (e) {

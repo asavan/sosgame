@@ -18,6 +18,13 @@ function removeColons(hash) {
     return hash.replaceAll(":", "");
 }
 
+function removeSuffix(str, suffix) {
+    if (str.endsWith(suffix)) {
+        return str.slice(0, -suffix.length);
+    }
+    return str;
+}
+
 export function packSDP(sdp, logger) {
     const lines = sdp.split("\r\n");
     const ufrag = lines.find(l => l.startsWith("a=ice-ufrag:"))?.split(":")[1];
@@ -38,10 +45,11 @@ export function packSDP(sdp, logger) {
     }
     logger.log(bestCand);
     const candParts = bestCand.split(" ");
-    const ip = candParts[4];
+    let ip = candParts[4];
     const port = candParts[5];
     logger.log(ip);
     logger.log(port);
+    ip = removeSuffix(ip, ".local");
 
     // Поскольку мы точно знаем, что в одной сети используем 'host',
     // тип кандидата можно даже не передавать по звуку (экономим еще 5 байт!)
@@ -52,5 +60,5 @@ export function packSDP(sdp, logger) {
 export async function sendSound(data) {
     const audio = new GGWaveAudio();
     await audio.init();
-    await audio.send(data, { protocol: 1, volume: 25 });
+    await audio.send(data, { protocol: 2, volume: 25 });
 }
