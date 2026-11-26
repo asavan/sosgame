@@ -1,6 +1,5 @@
-import {loggerFunc, netObj, addLoggerBtn, addFullScreenBtn, createDataChannelV2} from "netutils";
+import {loggerFunc, netObj, addLoggerBtn, addFullScreenBtn, createDataChannelV2, addButton} from "netutils";
 import {packSDP, sendSound} from "../ggwave_client.js";
-import {addButton} from "netutils/src/js/views/buttons.js";
 
 export default async function test(window, document, settings) {
     addFullScreenBtn(window, document);
@@ -14,7 +13,7 @@ export default async function test(window, document, settings) {
     const dataToSend = await rtcC.processOffer(settings.webrtc);
     logger.log(JSON.stringify(dataToSend));
     const packedData = packSDP(dataToSend.sdp, mainLogger);
-    addButton(window, document, "v", "sound", async () => {
+    addButton(window, document, "🔊", "sound", async () => {
         mainLogger.log(packedData);
         await sendSound(packedData, mainLogger);
     });

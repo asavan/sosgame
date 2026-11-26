@@ -1,4 +1,4 @@
-import {loggerFunc, netObj, addLoggerBtn, addFullScreenBtn, createDataChannelV2} from "netutils";
+import {loggerFunc, netObj, addLoggerBtn, addFullScreenBtn, createDataChannelV2, addButton} from "netutils";
 import {qrHandler} from "../views/manual-qr.js";
 import JSONCrush from "jsoncrush";
 import {unpackSDP, waitForSound} from "../ggwave_server.js";
@@ -38,14 +38,16 @@ export default async function test(window, document, settings) {
     const strUrl = showQr(window, document, settings, dataToSend, logger);
     mainLogger.log("dataUrl " + strUrl);
     handle.set(strUrl);
-    const packedSdp = await waitForSound(mainLogger);
-    const sdp = unpackSDP(packedSdp, "answer");
-    const answer = {
-        sdp,
-        type: "answer",
-    };
-    logger.log(answer);
-    await rtcC.processAnswer(answer);
+    addButton(window, document, "🎙️", "sound", async () => {
+        const packedSdp = await waitForSound(mainLogger);
+        mainLogger.log(packedSdp);
+        const sdp = unpackSDP(packedSdp, "answer");
+        const answer = {
+            sdp,
+            type: "answer",
+        };
+        await rtcC.processAnswer(answer);
+    });
     await rtcC.ready();
     logger.log("send join " + myId);
 }
